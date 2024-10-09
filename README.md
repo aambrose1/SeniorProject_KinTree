@@ -8,11 +8,11 @@ The current KinTree project team as of Fall 2024 includes Owen Adams, Kennedi Ja
 
 # Install
 
-## Prerequisites
+### Prerequisites
 
 Node.js (install the correct version for your own OS [here](https://nodejs.org/en))
 
-## Setup
+### Setup
 
 To set up the KinTree codebase on your own machine, start by cloning the repository to your local file system.
 
@@ -22,7 +22,7 @@ From the command line, navigate to the project's main directory, then run the fo
 
 This command will install dependencies that are listed in the project's package.json file. Note that you must have npm (Node Package Manager) installed and working on your computer for this command to work. The npm command line interface should come with a standard Node.js installation.
 
-Once those dependencies are installed, navigate to the /SeniorProject_RelateMe/client directory, and run 'npm install' once more.
+Once those dependencies are installed, navigate to the /SeniorProject_RelateMe/client directory, and run `npm install` once more.
 
 Once all dependencies are installed, you can run the project (from the /SeniorProject_RelateMe/client directory) by running the following command:
 
@@ -32,5 +32,5 @@ This command runs the application in development mode. You can open http://local
 
 You can run the server/API by running the following command in the main directory (/SeniorProject_RelateMe):
 
-'node server.js'
+`node server.js`
 
