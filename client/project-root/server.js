@@ -2,11 +2,14 @@
 const express = require('express');
 const knex = require('knex');
 const dotenv = require('dotenv');
+const knexConfig = require('./knexfile');
+const userRoutes = require('./routes/auth');
+
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3306;
 
 const db = knex({
   client: 'mysql2',
@@ -27,6 +30,7 @@ app.listen(port, () => {
 });
 
 // Example route -- follow this template for other routes
+
 app.get('/api/items', async (req, res) => {
     try {
       const items = await db('items').select('*');
@@ -35,3 +39,6 @@ app.get('/api/items', async (req, res) => {
       res.status(500).json({ error: 'An error occurred' });
     }
   });
+
+app.use('/api/users', userRoutes);
+

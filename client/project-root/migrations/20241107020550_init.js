@@ -8,7 +8,7 @@ exports.up = function(knex) {
             table.increments('id').primary();
             table.string('username').unique().notNullable();
             table.string('password').notNullable();
-            table.string('email').notNullable();
+            table.string('email').unique().notNullable();
             table.timestamps(true,true);
         })
         .createTable('treeMembers',(table) => {
