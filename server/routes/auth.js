@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
-const db = require('../config/db')
+const db = require('../db/db')
 const {JWT_SECRET} = process.env;
 
 router.post('/register', async(req, res) => {
