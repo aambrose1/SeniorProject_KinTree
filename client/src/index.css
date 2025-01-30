@@ -18,3 +18,8 @@ code {
   font-family: 'Alata';
   src: local('Alata'), url(./fonts/Alata/Alata-Regular.ttf) format('truetype');
 }
+
+@font-face {
+  font-family: 'Aboreto';
+  src: local('Aboreto'), url(./fonts/Aboreto/Aboreto-Regular.ttf) format('truetype');
+}
