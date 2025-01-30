@@ -11,3 +11,9 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* adapted from https://stackoverflow.com/questions/41676054/how-to-add-fonts-to-create-react-app-based-projects */
+@font-face {
+  font-family: 'Alata';
+  src: local('Alata'), url(./fonts/Alata/Alata-Regular.ttf) format('truetype');
+}
