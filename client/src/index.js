@@ -3,13 +3,41 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Home from './pages/Home/Home';
+import Account from './pages/Account/Account';
+import Tree from './pages/Tree/Tree';
+import Login from './pages/Login/Login';
+
+// creates pages for different paths - buttons should be links to the paths and then the components will populate
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Home />,
+  },
+  {
+    path: '/account',
+    element: <Account />,
+  },
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/tree',
+    element: <Tree />,
+  }
+])
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router}>
+      <App />
+    </RouterProvider>
   </React.StrictMode>
 );
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

@@ -1,5 +1,6 @@
 import logo from './assets/kintreelogo-adobe.png';
 import './App.css';
+import { Outlet } from 'react-router-dom';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           Github Repository
         </a>
       </header>
+      <Outlet />
     </div>
   );
 }
