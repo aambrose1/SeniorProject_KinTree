@@ -4,7 +4,7 @@ This repository contains the codebase for the KinTree project. This project stem
 
 KinTree is an application that allows users to connect with family members and build virtual, visualized, and dynamic family trees collaboratively. This project began in the Fall of 2024 and is ongoing. KinTree will utilize React, Node.js, and MySQL.
 
-The current KinTree project team as of Fall 2024 includes Owen Adams, Kennedi James, Destiny Milsap, and Jade Thompson. The primary stakeholder for this project is Dr. Charan Gudla.
+The current KinTree project team as of Spring 2025 includes Owen Adams, Kennedi James, Destiny Milsap, and Jade Thompson. The primary stakeholder for this project is Dr. Charan Gudla.
 
 # Install
 
