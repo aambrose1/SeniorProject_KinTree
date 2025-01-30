@@ -4,5 +4,6 @@ export const Container = {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100vh',
-    backgroundColor: '#f5f5f5'
+    backgroundColor: '#f5f5f5',
+    fontFamily: 'Alata'
   };

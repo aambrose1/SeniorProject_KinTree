@@ -1,4 +1,5 @@
 export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    fontFamily: 'Alata'
 }
