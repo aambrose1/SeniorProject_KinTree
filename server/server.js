@@ -2,14 +2,16 @@
 const express = require('express');
 const knex = require('knex');
 const dotenv = require('dotenv');
+const cors = reqire('cors');
 const knexConfig = require('./knexfile');
-const userRoutes = require('./routes/auth');
-
+const authRoutes = require('./routes/authRoutes');
+const treeMemberRoutes = reqire('./routes/treeMemberRoute');
+const relationshipRoutes = reqire('./routes/relationshipRoute');
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3306;
+const port = process.env.PORT || 5000;
 
 const db = knex({
   client: 'mysql2',
@@ -22,8 +24,12 @@ const db = knex({
 });
 
 app.use(express.json());
+app.use(cors());
 
-// Define your routes here
+app.use('/api/family-members', treeMemberRoutes);
+app.use('/api/relationships', relationshipRoutes);
+app.use('/api/auth', authRoutes);
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
@@ -31,6 +37,7 @@ app.listen(port, () => {
 
 // Example route -- follow this template for other routes
 
+/*
 app.get('/api/items', async (req, res) => {
     try {
       const items = await db('items').select('*');
@@ -40,5 +47,6 @@ app.get('/api/items', async (req, res) => {
     }
   });
 
-app.use('/api/users', userRoutes);
+*/
+
 
