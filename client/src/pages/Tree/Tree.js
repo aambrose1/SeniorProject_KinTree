@@ -48,6 +48,7 @@ class FamilyTree extends React.Component {
   }
 
 // sample data for now, but TODO retrieve from API
+// can add "avatar" field and link under data object to show pfp on tree
 let treeData = [
     {
     "id": "0",
@@ -58,7 +59,8 @@ let treeData = [
     },
     "data": {
         "first name": "Ronald",
-        "last name": "Smith"
+        "last name": "Smith",
+        "avatar": "https://i.imgur.com/mfojszj.png"
     }
     },
     {
