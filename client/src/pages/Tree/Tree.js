@@ -53,6 +53,7 @@ let treeData = [
     "rels": {
         "father": "1",
         "mother": "2",
+        "children": ["5"]
     },
     "data": {
         "first name": "Ronald",
@@ -112,7 +113,17 @@ let treeData = [
             "first name": "Bob",
             "last name": "Smith"
         }
-    }
+    },
+    {
+        "id": "5",
+        "rels": {
+            "father": "0",
+        },
+        "data": {
+            "first name": "Tom",
+            "last name": "Smith"
+        }
+    },
 ];
 
 // builds the actual page
@@ -155,7 +166,7 @@ function Tree() {
 
             {/* family tree container */}
             {/* using a border fo</div>r now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
-            <div style={{ width: '80%', height: '70vh', borderStyle: 'double', maxWidth: '800px' }}> <FamilyTree/> </div>
+            <div style={{ width: '80%', height: '70vh', borderStyle: 'double', maxWidth: '800px', borderRadius: '30px' }}> <FamilyTree/> </div>
         </div>
     );   
 }
