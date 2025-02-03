@@ -21,6 +21,14 @@ function NavBar() {
                 </li>
                 <li>
                     <NavLink to="/tree" className="nav-item"> Tree </NavLink>
+                    <ul className="nested-nav-options-list">
+                        <li>
+                            <NavLink to="/tree/share_tree" className="nav-item-nested"> Share Tree </NavLink>
+                        </li>
+                        <li>
+                            <NavLink to="/tree/view_shared_trees" className="nav-item-nested"> View Shared Trees </NavLink>
+                        </li>
+                    </ul>
                 </li>
                 <li>
                     <NavLink to="/chat" className="nav-item"> Chat </NavLink>

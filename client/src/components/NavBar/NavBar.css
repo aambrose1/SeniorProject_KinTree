@@ -6,7 +6,16 @@
     justify-content: left;
 }
 
+.nested-nav-options-list {
+    height: 100%;
+    width: 180px;
+    background-color: #ebffec;
+    position: fixed;
+    
+}
+
 .nav-item {
+    color: black;
     background-color: #ccdfcd;
     text-align: center;
     font: Alata;
@@ -14,4 +23,15 @@
 
 .nav-item:hover {
     background-color: #ebffec;
+}
+
+.nav-item-nested {
+    color: black;
+    background-color: #ebffec;
+    text-align: center;
+    font: Alata;
+}
+
+.nav-item-nested:hover {
+    background-color: #f8fbf9;
 }
