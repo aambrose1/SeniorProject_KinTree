@@ -1,10 +1,12 @@
 import logo from './assets/kintreelogo-adobe.png';
 import './App.css';
 import { Outlet } from 'react-router-dom';
+import NavBar from './components/NavBar/NavBar';
 
 function App() {
   return (
     <div className={"App font-face-alata"}>
+      <NavBar/>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <div className="Container">
