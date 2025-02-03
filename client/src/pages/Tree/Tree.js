@@ -1,115 +1,138 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import * as styles from './styles';
-import { ReactComponent as TreeIcon } from '../../assets/background-tree.svg';
+// import { ReactComponent as TreeIcon } from '../../assets/background-tree.svg'; // background tree image from Figma; TODO configure overlay with tree svg
+import f3 from 'family-chart';
+import './tree.css'; // styling adapted from family-chart package sample code
 
-const calculateMaxRadius = (node, textRef) => {
-  let maxRadius = 20;
-  const traverse = (node) => {
-    if (textRef.current) {
-      const textWidth = textRef.current.getBBox().width;
-      maxRadius = Math.max(maxRadius, textWidth / 2 + 10);
+// FamilyTree class structure derived from family-chart package sample code
+// see https://github.com/donatso/family-chart/
+
+class FamilyTree extends React.Component {
+    cont = React.createRef();
+  
+    componentDidMount() {
+        if (!this.cont.current) return;
+        
+        create(treeData);
+
+        function create(data) {
+            const f3Chart = f3.createChart('#FamilyChart', data)
+                .setTransitionTime(0)
+                .setCardXSpacing(250)
+                .setCardYSpacing(150)
+                .setOrientationVertical()
+                .setSingleParentEmptyCard(true, {label: 'ADD'})
+            
+            const f3Card = f3Chart.setCard(f3.CardHtml)
+                // can edit displayed fields here
+                .setCardDisplay([["first name"],[]])
+                .setCardDim({"width":80,"height":80})
+                .setMiniTree(true)
+                .setStyle('imageCircle')
+                .setOnHoverPathToMain()
+            
+            // remove zooming transitions
+            f3Card.setOnCardClick((e, d) => {})
+            
+            f3Chart.updateTree({initial: true})
+        }
     }
-    if (node.children) {
-      node.children.forEach(traverse);
+  
+    render() {
+      return <div className="f3 f3-cont" id="FamilyChart" ref={this.cont}></div>;
     }
-  };
-  traverse(node);
-  console.log(maxRadius);
-  return maxRadius;
-};
-
-// TODO: add support for user children
-const TreeNode = ({ node, x, y, radius, level }) => {
-  const textRef = useRef(null);
-  const gap = 100;
-  const childY = y - gap;
-
-  return (
-    <g>
-      <a href={`/account/${node.id}`}>
-        <circle cx={x} cy={y} r={radius} style={styles.NodeStyle} />
-        {/* TODO: try to move text below node + add in person icon to node (or pfp) */}
-        <text ref={textRef} x={x} y={y} dy=".3em" textAnchor="middle" style={styles.TextStyle}>
-          {node.name}
-        </text>
-      </a>
-      {node.children && node.children.length > 0 && (
-        <g>
-          {node.children.map((child, index) => {
-            const childX = x + (index - (node.children.length - 1) / 2) * gap;
-            return (
-              <g key={index}>
-                <line
-                  x1={x}
-                  y1={y - radius}
-                  x2={childX}
-                  y2={childY + radius}
-                  style={styles.LineStyle}
-                />
-                <TreeNode node={child} x={childX} y={childY} radius={radius} level={level + 1} />
-              </g>
-            );
-          })}
-        </g>
-      )}
-    </g>
-  );
-};
+  }
 
 // sample data for now, but TODO retrieve from API
-const treeData = {
-  name: "Ronald",
-  id: "1",
-  children: [
+let treeData = [
     {
-      name: "John",
-      id: "2",
-      children: []
+    "id": "0",
+    "rels": {
+        "father": "1",
+        "mother": "2",
+    },
+    "data": {
+        "first name": "Ronald",
+        "last name": "Smith"
+    }
     },
     {
-      name: "Abby",
-      children: [
-        { name: "Bob", id: "3", children: [] },
-        { name: "Paula", id: "4", children: [] }
-      ]
+    "id": "1",
+    "rels": {
+        "father": "3",
+        "mother": "4",
+        "spouses": [
+            "2"
+        ],
+        "children": [
+            "0"
+        ]
+        },
+    "data": {
+        "first name": "John",
+        "last name": "Smith"
+        }
+    },
+    {
+        "id": "2",
+        "rels": {
+            "spouses": [
+                "1"
+            ],
+            "children": [
+                "0"
+            ]
+            },
+        "data": {
+            "first name": "Jane",
+            "last name": "Smith"
+            }
+    },
+    {
+        "id": "3",
+        "rels": {
+            "children": ["1"],
+            "spouses": ["4"]
+        },
+        "data": {
+            "first name": "Alice",
+            "last name": "Smith"
+        }
+    },
+    {
+        "id": "4",
+        "rels": {
+            "children": ["1"],
+            "spouses": ["3"]
+        },
+        "data": {
+            "first name": "Bob",
+            "last name": "Smith"
+        }
     }
-  ]
-};
+];
 
+// builds the actual page
 function Tree() {
-  const user_lastname = "Smith";
-  const user_familytree = treeData;
+    let user_lastname = "Smith";
+    return (
+        <div style={styles.DefaultStyle}>
+            {/* header content */}
+            <h1 style={{marginBottom: "0px"}}>Your Tree</h1>
+            <hr  style={{
+                color: '#000000',
+                backgroundColor: '#000000',
+                height: .1,
+                width: '40%',
+                borderColor : '#000000'
+            }}/>
+            <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2>
 
-  const width = 800;
-  const height = 600;
-  const rootX = width / 2;
-  const rootY = height - 50;
-
-  let maxRadius = calculateMaxRadius(user_familytree, useRef(null));
-
-  return (
-    <div style={styles.DefaultStyle}>
-      <h1 style={{marginBottom: "0px"}}>Your Tree</h1>
-      <hr  style={{
-          color: '#000000',
-          backgroundColor: '#000000',
-          height: .1,
-          width: '40%',
-          borderColor : '#000000'
-      }}/>
-      <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2>
-
-      <div style={styles.svgContainer}>
-        <div style={styles.svgWrapper}>
-          <svg width={'70vh'} height={'70vh'} style={styles.TreeStyle}>
-            <TreeNode node={user_familytree} x={rootX} y={rootY} radius={maxRadius} level={0} />
-          </svg>
+            {/* family tree container */}
+            {/* using a border for now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
+            <div style={{ width: '80%', height: '70vh', borderStyle: 'double', maxWidth: '800px' }}> <FamilyTree/> </div>
         </div>
-        <TreeIcon style={styles.BackgroundTreeStyle} />
-      </div>
-
-    </div>
-  );
+    );   
 }
 
 export default Tree;

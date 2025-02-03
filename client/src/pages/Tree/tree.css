@@ -1,0 +1,202 @@
+.f3 {
+    --background-color: none;
+  
+    font-family: 'Alata';
+  }
+  
+  .f3 * {
+    box-sizing: border-box;
+  }
+  
+  .f3 .cursor-pointer {
+    cursor: pointer;
+  }
+  .f3 svg.main_svg {
+    width: 100%;
+    height: 100%;
+  }
+  .f3 svg.main_svg text {
+    fill: currentColor;
+  }
+  .f3 .card_add .card-body-rect {
+    fill: #3b5560;
+    stroke-width: 4px;
+    stroke: #fff;
+    cursor: pointer;
+  }
+  .f3 g.card_add text {
+    fill: #fff;
+  }
+  .f3 .card-main-outline {
+    stroke: currentColor;
+    stroke-width: 3px;
+  }
+  .f3 .card_family_tree rect {
+    transition: 0.3s;
+  }
+  .f3 .card_family_tree:hover rect {
+    transform: scale(1.1);
+  }
+  .f3.f3-cont {
+    width:100%;
+    height:900px;
+    max-height:70vh;
+    background-color: var(--background-color);
+    color:#fff;
+  }
+  .f3 {
+    position: relative;
+    display: flex;
+  }
+  
+  /* card-html */
+  
+  .f3 div.card {
+    cursor: pointer;
+    color: #fff;
+    position: relative;
+    line-height: 1.2;
+  }
+  
+  .f3 div.card-image-circle {
+    border-radius: 50%;
+    padding: 5px;
+    width: 90px;
+    height: 90px;
+  }
+  
+  .f3 div.card-image-circle div.card-label {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    max-width: 150%;
+    min-height: 22px;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-radius: 3px;
+    padding: 0 5px;
+    color: black;
+    font-family: 'Alata';
+  }
+  
+  .f3 div.card-image-circle img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .f3 div.card-image-circle svg {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .f3 div.card-image-circle img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .f3 div.card-rect {
+    padding: 5px;
+    border-radius: 3px;
+    width: 120px;
+    min-height: 70px;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  
+  .f3 div.card-image-rect {
+    width: 200px;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+  }
+  
+  .f3 div.card-image-rect .person-icon {
+    height: 70px;
+    width: 70px;
+    object-fit: cover;
+    flex: 0 0 auto;
+    padding: 5px;
+    margin-right: 10px;
+  }
+  
+  .f3 div.card-image-rect img {
+    height: 70px;
+    width: 70px;
+    object-fit: cover;
+    flex: 0 0 auto;
+    padding: 5px;
+    margin-right: 10px;
+    border-radius: 8px;
+  }
+  
+  .f3 div.card-image-rect svg {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    border-radius: 7px;
+  }
+  
+  .f3 div.card-image-rect div.card-label {
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .f3 div.mini-tree {
+    text-align: right;
+    position: absolute;
+    top: -15px;
+    right: -2px;
+    z-index: -1;
+  }
+  .f3 div.mini-tree svg {
+    width: 55px;
+  } 
+  
+  .f3 .card-inner {
+    outline: 0px solid rgba(255, 255, 255, 1);
+    transition: outline 0.5s ease-in-out;
+  }
+
+  .f3 div.card-genderless .card-inner, .f3 div.card-genderless .person-icon svg {
+    background-color: #738856;
+  }
+  
+  .f3 div.card-new-rel .card-inner {
+    border-width: 1px;
+    border-style: dashed;
+    outline: 0px !important;
+  }
+  
+  .f3 div.card-inner.f3-path-to-main {
+    outline: 4px solid rgba(255, 255, 255, 1);
+  }
+  
+  /* branches between nodes */
+  .f3 .link {
+    transition: stroke-width 0.2s ease-in-out;
+    stroke: #76380C;
+    stroke-width: 4;
+  }
+  
+  .f3 .link.f3-path-to-main {
+    stroke-width: 4px;
+  }
