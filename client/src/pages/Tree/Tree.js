@@ -6,6 +6,7 @@ import './tree.css'; // styling adapted from family-chart package sample code
 import { ReactComponent as PlusSign } from '../../assets/plus-sign.svg';
 import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
 import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
+import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMember';
 
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/
@@ -133,7 +134,7 @@ function Tree() {
     return (
         <div style={styles.DefaultStyle}>
 
-            <div style={{ position: 'absolute', top: '-20px', right: '-20px' }}>
+            <div style={{ position: 'absolute', top: '-20px', right: '-20px', zIndex: '-1' }}>
                 <ArrowTR style={{ width: '370px', height: '370px', margin: '20px 20px' }} />
             </div>
 
@@ -158,9 +159,9 @@ function Tree() {
                     <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2> 
                 </div>
                 {/* add family member button */}
-                <div style={{ display: 'flex', alignItems: 'center'}}>
-                    <PlusSign style={{ width: '24px', height: '24px', margin: '60px 20px' }} />
-                </div> 
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px', margin: '60px 20px' }} />} />
+                </div>
             </div>
             
 
