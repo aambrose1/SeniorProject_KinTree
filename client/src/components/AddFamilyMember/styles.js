@@ -1,3 +1,5 @@
+import { drop } from "list";
+
 export const DefaultStyle = {
     fontFamily: 'Alata',
 };
@@ -32,6 +34,20 @@ export const ButtonStyle = {
     padding: '10px 30px',
     margin: '10px',
     cursor: 'pointer',
+}
+
+export const GrayButtonStyle = {
+    fontFamily: 'Alata',
+    backgroundColor: '#D9D9D9',
+    color: 'black',
+    borderRadius: '20px',
+    border: 'none',
+    padding: '10px 20px',
+    margin: '10px',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'row',
+    boxShadow: 'gray 0px 10px 10px -8px',
 }
 
 export const FormStyle = {
