@@ -3,6 +3,9 @@ import * as styles from './styles';
 // import { ReactComponent as TreeIcon } from '../../assets/background-tree.svg'; // background tree image from Figma; TODO configure overlay with tree svg
 import f3 from 'family-chart';
 import './tree.css'; // styling adapted from family-chart package sample code
+import { ReactComponent as PlusSign } from '../../assets/plus-sign.svg';
+import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
+import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
 
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/
@@ -115,21 +118,43 @@ let treeData = [
 // builds the actual page
 function Tree() {
     let user_lastname = "Smith";
+    document.body.style.overflow = 'hidden';
     return (
         <div style={styles.DefaultStyle}>
+
+            <div style={{ position: 'absolute', top: '-20px', right: '-20px' }}>
+                <ArrowTR style={{ width: '370px', height: '370px', margin: '20px 20px' }} />
+            </div>
+
+            <div style={{ position: 'absolute', bottom: '-100px', left: '0px' }}>
+                <ArrowBL style={{ width: '370px', height: '370px', margin: '20px 20px' }} />
+            </div>
+
             {/* header content */}
-            <h1 style={{marginBottom: "0px"}}>Your Tree</h1>
-            <hr  style={{
-                color: '#000000',
-                backgroundColor: '#000000',
-                height: .1,
-                width: '40%',
-                borderColor : '#000000'
-            }}/>
-            <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2>
+            <div style={{display: 'flex'}}>
+                {/* filler space to center header text on page */}
+                <div style={{ width: '64px' }}></div>
+                {/* titles */}
+                <div>
+                    <h1 style={{marginBottom: "0px"}}>Your Tree</h1>
+                    <hr  style={{
+                        color: '#000000',
+                        backgroundColor: '#000000',
+                        height: .1,
+                        width: '200px',
+                        borderColor : '#000000'
+                    }}/>
+                    <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2> 
+                </div>
+                {/* add family member button */}
+                <div style={{ display: 'flex', alignItems: 'center'}}>
+                    <PlusSign style={{ width: '24px', height: '24px', margin: '60px 20px' }} />
+                </div> 
+            </div>
+            
 
             {/* family tree container */}
-            {/* using a border for now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
+            {/* using a border fo</div>r now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
             <div style={{ width: '80%', height: '70vh', borderStyle: 'double', maxWidth: '800px' }}> <FamilyTree/> </div>
         </div>
     );   
