@@ -1,0 +1,17 @@
+.navbar {
+    height: 100%;
+    width: 200px;
+    background-color: #ccdfcd;
+    position: fixed;
+    justify-content: left;
+}
+
+.nav-item {
+    background-color: #ccdfcd;
+    text-align: center;
+    font: Alata;
+}
+
+.nav-item:hover {
+    background-color: #ebffec;
+}
