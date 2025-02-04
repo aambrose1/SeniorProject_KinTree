@@ -11,7 +11,7 @@
     width: 180px;
     background-color: #ebffec;
     position: fixed;
-    
+
 }
 
 .nav-item {
@@ -34,4 +34,13 @@
 
 .nav-item-nested:hover {
     background-color: #f8fbf9;
+}
+
+.settings-icon {
+    background-color: #ccdfcd;
+    align
+}
+
+.help-icon {
+    padding
 }

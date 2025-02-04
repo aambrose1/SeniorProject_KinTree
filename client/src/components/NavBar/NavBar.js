@@ -4,6 +4,7 @@ import { AiOutlineSetting, AiOutlineQuestion } from 'react-icons/ai'; //this is 
 import './NavBar.css';
 //import * as styles from './styles';
 
+//ToDo: Add mobile version of navbar (collapsible)
 function NavBar() {
     return (
         <nav className="navbar">
@@ -35,10 +36,10 @@ function NavBar() {
                 </li>
                 
             </ul>
-            <AiOutlineSetting>
+            <AiOutlineSetting className="settings-icon">
                 <NavLink to="/account_settings"></NavLink>
             </AiOutlineSetting>
-            <AiOutlineQuestion>
+            <AiOutlineQuestion className="help-icon">
                 <NavLink to="/help"></NavLink>
             </AiOutlineQuestion>
             

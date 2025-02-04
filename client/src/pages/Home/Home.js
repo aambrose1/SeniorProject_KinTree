@@ -7,9 +7,22 @@ import NavBar from '../../components/NavBar/NavBar';
 function Home() {
     return (
         <>
-            <div className="home-page">
-                <NavBar/>
-            </div>
+            <header className="App-header">
+                <img src={logo} className="App-logo" alt="logo" />
+                <div className="Container">
+                    <p>
+                        Welcome to KinTree! This is the client side of the application. It's in progress.
+                    </p>
+                </div>
+                <a
+                    className="App-link"
+                    href="https://github.com/OwenAdams2023/SeniorProject_KinTree"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Github Repository
+                </a>
+            </header>
 
         </>
         
