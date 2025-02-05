@@ -1,5 +1,3 @@
-import { drop } from "list";
-
 export const DefaultStyle = {
     fontFamily: 'Alata',
 };

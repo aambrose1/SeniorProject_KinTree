@@ -7,8 +7,8 @@ import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
 
-// TODO:
-// make sync contact button functional
+// TODO: make form clear when dismissed by clicking outside of modal
+//       make sync contact button functional
 
 function AddFamilyMemberPopup({ trigger }) {
   const { register, handleSubmit, reset } = useForm();

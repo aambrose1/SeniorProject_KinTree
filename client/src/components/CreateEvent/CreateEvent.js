@@ -7,6 +7,8 @@ import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as UploadIcon } from '../../assets/upload.svg';
 
+// TODO: make form clear when dismissed by clicking outside of modal
+
 function CreateEventPopup({ trigger }) {
   const { register, handleSubmit, reset } = useForm();
 
