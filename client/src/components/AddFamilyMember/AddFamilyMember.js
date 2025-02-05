@@ -8,7 +8,7 @@ import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
 
 // TODO:
-// make sync contact button functoinal
+// make sync contact button functional
 
 function AddFamilyMemberPopup({ trigger }) {
   const { register, handleSubmit, reset } = useForm();
@@ -30,7 +30,7 @@ function AddFamilyMemberPopup({ trigger }) {
                       <CloseIcon style={{ width: '40px', height: '40px', margin: '10px 10px 0px 10px' }} />
                     </button>
                   </div>
-                  {/* fill out info about family member */}
+          {/* fill out info about family member */}
           <form onSubmit={handleSubmit(data => onSubmit(data, close))} style={styles.FormStyle}>
             <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
               <h2 style={{ marginTop: '0px' }}>Add Family Member</h2>
