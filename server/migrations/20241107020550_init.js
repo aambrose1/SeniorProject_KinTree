@@ -12,15 +12,15 @@ exports.up = function(knex) {
             table.timestamps(true,true);
         })
         .createTable('treeMembers',(table) => {
-            table.increments('id').primary();
-            table.string('firstName').notNullable();
-            table.string('lastName').notNullable();
-            table.date('birthDate');
-            table.date('deathDate');
-            table.string('location');
-            table.string('phoneNumber');
-            table.timestamps(true,true);
-        })
+                table.increments('id').primary();
+                table.string('firstName').notNullable();
+                table.string('lastName').notNullable();
+                table.date('birthDate');
+                table.date('deathDate');
+                table.string('location');
+                table.string('phoneNumber');
+                table.timestamps(true, true);
+            })
         .createTable('relationships', (table) => {
             table.increments('id').primary();
             table

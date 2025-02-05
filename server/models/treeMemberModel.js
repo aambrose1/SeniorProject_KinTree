@@ -7,6 +7,15 @@ const treeMember = {
 
     getAllMembers:async () => {
         return db('treeMembers').select('*');
+    },
+
+    getMembeById: async (id) => {
+        return db('treeMembers').where({id}).first();
+    },
+
+    updateMemberInfo:  async (id, data) =>{
+        return db('treeMembers').where({id}).update(data,['id', 'firstName', 'lastName' , 'birthDate', 'location', 'phoneNumber']);
+        
     }
 };
 
