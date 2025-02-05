@@ -7,6 +7,7 @@ import { ReactComponent as PlusSign } from '../../assets/plus-sign.svg';
 import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
 import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
 import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMember';
+import { Link } from 'react-router-dom';
 
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/
@@ -135,6 +136,8 @@ function Tree() {
     document.body.style.overflow = 'hidden';
     return (
         <div style={styles.DefaultStyle}>
+
+            <Link to="/" style={{ position: 'absolute', top: '0px', left: '0px', margin: '10px' }}>Home</Link>
 
             <div style={{ position: 'absolute', top: '-20px', right: '-20px', zIndex: '-1' }}>
                 <ArrowTR style={{ width: '370px', height: '370px', margin: '20px 20px' }} />
