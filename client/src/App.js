@@ -2,6 +2,8 @@ import logo from './assets/kintreelogo-adobe.png';
 import './App.css';
 import { Router, Routes, Route, Outlet } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
+import Account from './pages/Account/Account';
+import Family from './pages/Family/Family';
 import Home from './pages/Home/Home';
 import Tree from './pages/Tree/Tree';
 import ShareTree from './pages/Tree/ShareTree/ShareTree';
