@@ -3,8 +3,8 @@ import * as styles from './styles';
 
 function Account() {
     return (
-        <div style={styles.DefaultStyle}>
-
+        <div className="account-page">
+            Account page yessuh.
         </div>
     )
 }
