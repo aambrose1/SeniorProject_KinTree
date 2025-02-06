@@ -1,6 +1,5 @@
 import logo from './assets/kintreelogo-adobe.png';
 import './App.css';
-import { Router, Routes, Route, Outlet } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
 import Account from './pages/Account/Account';
 import Family from './pages/Family/Family';
@@ -14,18 +13,7 @@ import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
 function App() {
   return (
     <div className={"App font-face-alata"}>
-      <Router>
-        <NavBar />
-          <Routes>
-            <Route path="/account" element={<Account />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/family" element={<Family />} />
-            <Route path="/tree" element={<Tree />}>
-              <Route path="share_tree" element={<ShareTree />} />
-              <Route path="view_shared_trees" element={<ViewSharedTrees />} />
-            </Route>
-          </Routes>
-      </Router>
+      <NavBar />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from './assets/kintreelogo-adobe.png';
+import logo from '../../assets/kintreelogo-adobe.png';
 import { Link } from 'react-router-dom';
 import * as styles from './styles';
 import NavBar from '../../components/NavBar/NavBar';
@@ -8,6 +8,7 @@ import NavBar from '../../components/NavBar/NavBar';
 function Home() {
     return (
         <>
+            <NavBar />
             <header className="App-header">
                 <img src={logo} className="App-logo" alt="logo" />
                 <div className="Container">
