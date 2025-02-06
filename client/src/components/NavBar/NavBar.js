@@ -5,12 +5,13 @@ import './NavBar.css';
 //import * as styles from './styles';
 
 //ToDo: Add mobile version of navbar (collapsible)
+//ToDo: Figure out importing of user profile image
 function NavBar() {
     return (
         <nav className="navbar">
             <ul className="nav-options-list">
                 <li>
-                    <NavLink to="/profile" className="profile-icon">
+                    <NavLink to="/account" className="profile-icon">
                         <img src=""></img>
                     </NavLink>
                 </li>
