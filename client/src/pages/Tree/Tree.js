@@ -134,45 +134,48 @@ let treeData = [
 function Tree() {
     let user_lastname = "Smith";
     document.body.style.overflow = 'hidden';
+    document.body.style.width = '100%'; 
     return (
         <div style={styles.DefaultStyle}>
 
-            <Link to="/" style={{ position: 'absolute', top: '0px', left: '0px', margin: '10px' }}>Home</Link>
+            <div style={{ display: 'flex', flexWrap: 'wrap', zIndex: '-1', position: 'relative', width: '100%', height: '100%' }}>
+                <div style={{flex: '50%'}}></div>
+                <ArrowTR style={{ width: '370px', height: '370px', margin: '20px 20px', flex: '50%', textAlign: 'right', paddingLeft: '70%' }} />
+                <ArrowBL style={{ width: '370px', height: '370px', margin: '20px 20px', flex: '50%', paddingRight: '70%' }} />
+                <div style={{flex: '50%', textAlign: 'right'}}></div>
+            </div> 
 
-            <div style={{ position: 'absolute', top: '-20px', right: '-20px', zIndex: '-1' }}>
-                <ArrowTR style={{ width: '370px', height: '370px', margin: '20px 20px' }} />
-            </div>
+            <div style={{width: '100%', height: '100%', position: 'absolute', top: '0', left: '0', zIndex: '10', overflow: 'hidden', alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column'}}>
+                <Link to="/" style={{ position: 'absolute', top: '0px', left: '0px', margin: '10px' }}>Home</Link>
+                
 
-            <div style={{ position: 'absolute', bottom: '-100px', left: '0px' }}>
-                <ArrowBL style={{ width: '370px', height: '370px', margin: '20px 20px' }} />
-            </div>
-
-            {/* header content */}
-            <div style={{display: 'flex'}}>
-                {/* filler space to center header text on page */}
-                <div style={{ width: '64px' }}></div>
-                {/* titles */}
-                <div>
-                    <h1 style={{marginBottom: "0px"}}>Your Tree</h1>
-                    <hr  style={{
-                        color: '#000000',
-                        backgroundColor: '#000000',
-                        height: .1,
-                        width: '200px',
-                        borderColor : '#000000'
-                    }}/>
-                    <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2> 
+                {/* header content */}
+                <div style={{display: 'flex'}}>
+                    {/* filler space to center header text on page */}
+                    <div style={{ width: '64px' }}></div>
+                    {/* titles */}
+                    <div>
+                        <h1 style={{marginBottom: "0px"}}>Your Tree</h1>
+                        <hr  style={{
+                            color: '#000000',
+                            backgroundColor: '#000000',
+                            height: .1,
+                            width: '200px',
+                            borderColor : '#000000'
+                        }}/>
+                        <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2> 
+                    </div>
+                    {/* add family member button */}
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px', margin: '60px 20px' }} />} />
+                    </div>
                 </div>
-                {/* add family member button */}
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px', margin: '60px 20px' }} />} />
-                </div>
-            </div>
-            
+                
 
-            {/* family tree container */}
-            {/* using a border fo</div>r now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
-            <div style={{ width: '80%', height: '70vh', borderStyle: 'double', maxWidth: '800px', borderRadius: '30px' }}> <FamilyTree/> </div>
+                {/* family tree container */}
+                {/* using a border fo</div>r now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
+                <div style={{ width: '80%', height: '70vh', borderStyle: 'double', maxWidth: '800px', borderRadius: '30px' }}> <FamilyTree/> </div>
+            </div>
         </div>
     );   
 }
