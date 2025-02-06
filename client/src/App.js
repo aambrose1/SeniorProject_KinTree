@@ -24,7 +24,6 @@ function App() {
             </Route>
           </Routes>
       </Router>
-      <Outlet />
     </div>
   );
 }
