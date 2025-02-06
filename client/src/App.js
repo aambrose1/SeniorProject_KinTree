@@ -14,6 +14,7 @@ function App() {
   return (
     <div className={"App font-face-alata"}>
       <NavBar />
+        <Home />
     </div>
   );
 }
