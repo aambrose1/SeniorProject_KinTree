@@ -29,16 +29,16 @@ const router = createBrowserRouter([
   {
     path: '/tree',
     element: <Tree />,
-    /* children: [
+    children: [
       {
-        path: '/viewsharedtrees',
+        path: 'viewsharedtrees',
         element: <ViewSharedTrees />
       },
       {
-        path: '/sharetree',
+        path: 'sharetree',
         element: <ShareTree />
       }
-    ] */
+    ]
   },
   {
     path: '/family',

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AiOutlineSetting, AiOutlineQuestion } from 'react-icons/ai'; //this is for the settings icon and help icon
 import './NavBar.css';
@@ -7,34 +8,34 @@ import './NavBar.css';
 //ToDo: Add mobile version of navbar (collapsible)
 //ToDo: Figure out importing of user profile image
 function NavBar() {
+//useState used here for showing nested nav within the tree option
+    const [showNestedNav, setShowNestedNav] = useState(false);
+
     return (
         <nav className="navbar">
             <ul className="nav-options-list">
-                <li>
-                    <NavLink to="/account" className="profile-icon">
-                        <img src=""></img>
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/" exact className="nav-item"> Home </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/family" className="nav-item"> Family </NavLink>
-                </li>
-                <li>
-                    <NavLink to="/tree" className="nav-item"> Tree </NavLink>
-                    <ul className="nested-nav-options-list">
-                        <li>
-                            <NavLink to="/tree/share_tree" className="nav-item-nested"> Share Tree </NavLink>
-                        </li>
-                        <li>
-                            <NavLink to="/tree/view_shared_trees" className="nav-item-nested"> View Shared Trees </NavLink>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <NavLink to="/chat" className="nav-item"> Chat </NavLink>
-                </li>
+                
+                <NavLink to="/account" className="nav-item"> Account </NavLink>
+                <br></br>
+                <NavLink to="/" exact className="nav-item"> Home </NavLink>
+                <br></br>
+                <NavLink to="/family" className="nav-item"> Family </NavLink>
+                <br></br>
+                {/* <NavLink to="/tree" className="nav-item"> Tree </NavLink> */}
+                <div className="nav-item" onMouseEnter={() => setShowNestedNav(true)} onMouseLeave={() => setShowNestedNav(false)}>
+                    <div className="tree-navlist">
+                        <span className="tree-option">Tree</span>
+                        {showNestedNav && (
+                            <div className="nested-nav-options-list">
+                                <NavLink to="/tree/sharetree" className="nav-item-nested"> Share Tree </NavLink>
+                                <br></br>
+                                <NavLink to="/tree/viewsharedtrees" className="nav-item-nested"> View Shared Trees </NavLink>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <NavLink to="/chat" className="nav-item"> Chat </NavLink>
+               
                 
             </ul>
             <AiOutlineSetting className="settings-icon">

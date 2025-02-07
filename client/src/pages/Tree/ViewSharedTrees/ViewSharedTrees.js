@@ -1,11 +1,15 @@
 import React from 'react';
 import * as styles from './styles';
+import NavBar from '../../../components/NavBar/NavBar';
 
 function ViewSharedTrees() {
     return (
-        <div style={styles.DefaultStyle}>
-            View shared trees here brethren.
-        </div>
+        <>
+            <NavBar />
+            <div>
+                View shared trees here brethren.
+            </div>
+        </>
     )
 }
 

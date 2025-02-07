@@ -10,7 +10,7 @@
     height: 100%;
     width: 180px;
     background-color: #ebffec;
-    position: fixed;
+    position: relative;
 
 }
 
@@ -25,6 +25,10 @@
     background-color: #ebffec;
 }
 
+.nav-item:active {
+    background-color: #ebffec;
+}
+
 .nav-item-nested {
     color: black;
     background-color: #ebffec;
@@ -34,6 +38,10 @@
 
 .nav-item-nested:hover {
     background-color: #f8fbf9;
+}
+
+.nav-item-nested:active {
+    background: #f8fbf9;
 }
 
 .settings-icon {
