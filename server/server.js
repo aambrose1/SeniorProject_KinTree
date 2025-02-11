@@ -2,11 +2,11 @@
 const express = require('express');
 const knex = require('knex');
 const dotenv = require('dotenv');
-const cors = reqire('cors');
+const cors = require('cors');
 const knexConfig = require('./knexfile');
 const authRoutes = require('./routes/authRoutes');
-const treeMemberRoutes = reqire('./routes/treeMemberRoute');
-const relationshipRoutes = reqire('./routes/relationshipRoute');
+const treeMemberRoutes = require('./routes/treeMemberRoute');  // Fixed typo
+const relationshipRoutes = require('./routes/relationshipRoutes');  // Fixed typo
 
 dotenv.config();
 
@@ -30,10 +30,10 @@ app.use('/api/family-members', treeMemberRoutes);
 app.use('/api/relationships', relationshipRoutes);
 app.use('/api/auth', authRoutes);
 
-
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
 
 // Example route -- follow this template for other routes
 

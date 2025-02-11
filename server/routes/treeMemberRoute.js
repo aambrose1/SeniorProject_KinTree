@@ -1,10 +1,12 @@
 const express = require('express');
-const {addFamilyMember} = require('../controllers/treeMemberController');
-const { updateMemberInfo } = require('../models/treeMemberModel');
-
 const router = express.Router();
 
-router.post('/', addFamilyMember);
-router.put('/', updateMemberInfo);
+// Import controllers
+const { addTreeMember, editTreeMember } = require('../controllers/treeMemberController');
+
+// Define routes
+router.post('/', addTreeMember);  // Add family member
+router.put('/:id', editTreeMember);  // Update member info (with id in params)
 
 module.exports = router;
+

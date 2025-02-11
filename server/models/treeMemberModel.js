@@ -5,17 +5,18 @@ const treeMember = {
         return db('treeMembers').insert(data, ['id']);
     },
 
-    getAllMembers:async () => {
+    getAllMembers: async () => {
         return db('treeMembers').select('*');
     },
 
-    getMembeById: async (id) => {
-        return db('treeMembers').where({id}).first();
+    getMemberById: async (id) => {  // Fixed the typo
+        return db('treeMembers').where({ id }).first();
     },
 
-    updateMemberInfo:  async (id, data) =>{
-        return db('treeMembers').where({id}).update(data,['id', 'firstName', 'lastName' , 'birthDate', 'location', 'phoneNumber']);
-        
+    updateMemberInfo: async (id, data) => {
+        await db('treeMembers').where({ id }).update(data);
+        const updatedRecord = await  db('treeMembers').where({ id }).first();  // Return updated record
+        return updatedRecord;
     }
 };
 

@@ -1,4 +1,6 @@
-const Relationship = {
+const db = require('../db/knex');
+
+const Relationships = {
     addRelationship: async (data) => {
         return db('relationships').insert(data);
     },

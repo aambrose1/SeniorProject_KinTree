@@ -20,27 +20,7 @@ exports.up = function(knex) {
                 table.string('location');
                 table.string('phoneNumber');
                 table.timestamps(true, true);
-            })
-        .createTable('relationships', (table) => {
-            table.increments('id').primary();
-            table
-                .integer('person1_id')
-                .unsigned()
-                .notNullable
-                .referencer('id')
-                .inTable('treeMembers')
-                .onDelete('CASCADE');
-            table
-                .integer('person2_id')
-                .unsigned()
-                .notNullable
-                .referencer('id')
-                .inTable('treeMembers')
-                .onDelete('CASCADE');
-            table.enu('relationshipType', ['parent', 'child', 'sibling', 'spouse', 'stepparent', 'stepchild', 'ex-spouse']).notNullable();
-            table.enu('relationshipStatus', ['active', 'inactive']);
-            table.timestamps(true,true);
-        });
+            });
 };
 
 /**
@@ -51,7 +31,6 @@ exports.down = function(knex) {
     return knex.schema
         .dropTableIfExists('treeMembers')
         .dropTableIfExists('users')
-        .dropTableIfExists('relationships');
 };
 
 //changes have not been migrated since MySQL was not connected on my local machine (drm528 11/6/2024)
