@@ -57,3 +57,11 @@ export const FormStyle = {
 export const ItemStyle = {
     margin: '10px 0px'
 }
+
+export const DateFieldStyle = {
+    borderRadius: '5px',
+    border: '1px solid #000000',
+    marginLeft: '10px',
+    width: '147px',
+    fontFamily: 'Alata'
+};

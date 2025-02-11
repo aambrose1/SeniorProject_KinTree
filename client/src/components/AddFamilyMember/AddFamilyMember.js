@@ -95,7 +95,7 @@ function AddFamilyMemberPopup({ trigger }) {
               <li style={styles.ItemStyle}>
                 <label>
                   Birth Date:
-                  <input {...register("birthday")} type="text" placeholder="" style={styles.FieldStyle} />
+                  <input {...register("birthday")} type="date" placeholder="" style={styles.DateFieldStyle} />
                 </label>
               </li>
               <li style={styles.ItemStyle}>
@@ -107,7 +107,7 @@ function AddFamilyMemberPopup({ trigger }) {
               <li style={styles.ItemStyle}>
                 <label>
                   Date of Death:
-                  <input {...register("deathdate")} type="text" placeholder="" style={styles.FieldStyle} />
+                  <input {...register("deathdate")} type="date" placeholder="" style={styles.DateFieldStyle} />
                 </label>
               </li>
             </ul>
