@@ -2,22 +2,28 @@
     height: 100%;
     width: 200px;
     background-color: #ccdfcd;
+    text-decoration: none;
     position: fixed;
     justify-content: left;
 }
 
-.nested-nav-options-list {
+.nested-navbar {
     height: 100%;
-    width: 180px;
+    width: 160px;
+    top: 0px;
     background-color: #ebffec;
-    position: relative;
-
+    position: absolute;
+    padding-left: 20px;
+    margin-left: 160px;
 }
 
 .nav-item {
     color: black;
     background-color: #ccdfcd;
-    text-align: center;
+    border-style: round;
+    border-color: black;
+    text-decoration: none;
+    text-align: left;
     font: Alata;
 }
 
@@ -25,13 +31,17 @@
     background-color: #ebffec;
 }
 
-.nav-item:active {
+.nav-item-active {
     background-color: #ebffec;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 .nav-item-nested {
     color: black;
     background-color: #ebffec;
+    text-decoration: none;
     text-align: center;
     font: Alata;
 }
@@ -40,7 +50,7 @@
     background-color: #f8fbf9;
 }
 
-.nav-item-nested:active {
+.nav-item-nested-active {
     background: #f8fbf9;
 }
 

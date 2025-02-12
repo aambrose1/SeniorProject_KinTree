@@ -5,35 +5,49 @@ import { AiOutlineSetting, AiOutlineQuestion } from 'react-icons/ai'; //this is 
 import './NavBar.css';
 //import * as styles from './styles';
 
+//onMouseEnter={() => setShowNestedNav(true)} onMouseLeave={() => setShowNestedNav(false)}  this is for the nested nav Tree
+
+/* function nestedNavBar() {
+    if (showNestedNav==false)
+    {
+
+    }
+} */
+
 //ToDo: Add mobile version of navbar (collapsible)
 //ToDo: Figure out importing of user profile image
 function NavBar() {
 //useState used here for showing nested nav within the tree option
     const [showNestedNav, setShowNestedNav] = useState(false);
+    const [nestedNavLink, setNestedNavLink] = useState(true);
 
     return (
         <nav className="navbar">
             <ul className="nav-options-list">
                 
-                <NavLink to="/account" className="nav-item"> Account </NavLink>
+                <NavLink to="/account" exact className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} onClick={() => setNestedNavLink(false)}> Account </NavLink>
                 <br></br>
-                <NavLink to="/" exact className="nav-item"> Home </NavLink>
+                <NavLink to="/" exact className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} onClick={() => setNestedNavLink(false)}> Home </NavLink>
                 <br></br>
-                <NavLink to="/family" className="nav-item"> Family </NavLink>
+                <NavLink to="/family" exact className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} onClick={() => setNestedNavLink(false)}> Family </NavLink>
                 <br></br>
                 {/* <NavLink to="/tree" className="nav-item"> Tree </NavLink> */}
-                <div className="nav-item" onMouseEnter={() => setShowNestedNav(true)} onMouseLeave={() => setShowNestedNav(false)}>
-                    <div className="tree-navlist">
-                        <span className="tree-option">Tree</span>
-                        {showNestedNav && (
-                            <div className="nested-nav-options-list">
-                                <NavLink to="/tree/sharetree" className="nav-item-nested"> Share Tree </NavLink>
-                                <br></br>
-                                <NavLink to="/tree/viewsharedtrees" className="nav-item-nested"> View Shared Trees </NavLink>
+                <NavLink to="" onMouseEnter={() => setShowNestedNav(true)} onMouseLeave={() => setShowNestedNav(false)}>
+                    <div className='nav-item'>
+                        Tree
+                        {showNestedNav && nestedNavLink && (
+                            <div className="nested-navbar">
+                                
+                                <div>
+                                    <NavLink to="/tree/sharetree" className="nav-item-nested" onClick={() => setNestedNavLink(true)}> Share Tree </NavLink>
+                                    <br></br>
+                                    <NavLink to="/tree/viewsharedtrees" className="nav-item-nested"> View Shared Trees </NavLink>
+                                </div>
+                               
                             </div>
                         )}
                     </div>
-                </div>
+                </NavLink>
                 <NavLink to="/chat" className="nav-item"> Chat </NavLink>
                
                 
