@@ -9,7 +9,9 @@ function createAccount() {
 
     return (
         <form onSubmit={handleRegister(onSubmit)}>
-            <h2 className='acc-form-header'>Create Account</h2>
+            <head className='acc-form-header'>
+                Create Account
+            </head>
             <label className='field'>
                 First Name
                 <input {...register("firstName")} type='text' />

@@ -8,7 +8,7 @@ function Family() {
     return (
         <>
             <NavBar/>
-            <div>
+            <div className='family-page'>
                 Family here.
             </div>
         </>

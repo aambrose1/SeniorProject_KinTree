@@ -6,7 +6,7 @@ function ShareTree() {
     return (
         <>
             <NavBar />
-            <div>
+            <div className='sharetree-page'>
                 Share tree here brethren.
             </div>
         </>

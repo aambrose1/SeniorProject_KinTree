@@ -7,7 +7,7 @@ function Account() {
     return (
         <>
             <NavBar />
-            <div>
+            <div className='acc-page'>
                 Account page yessuh.
             </div>
         </>

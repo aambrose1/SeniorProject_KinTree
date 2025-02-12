@@ -6,7 +6,7 @@ function ViewSharedTrees() {
     return (
         <>
             <NavBar />
-            <div>
+            <div className='viewshared-page'>
                 View shared trees here brethren.
             </div>
         </>
