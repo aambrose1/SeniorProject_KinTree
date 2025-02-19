@@ -8,6 +8,7 @@ import Home from './pages/Home/Home';
 import Account from './pages/Account/Account';
 import Tree from './pages/Tree/Tree';
 import Login from './pages/Login/Login';
+import Family from './pages/Family/Family';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
   {
     path: '/tree',
     element: <Tree />,
+  },
+  {
+    path: '/family',
+    element: <Family />,
   }
 ])
 
