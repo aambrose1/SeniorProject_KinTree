@@ -9,13 +9,7 @@ const defaultAvatar = require('../../assets/default-avatar.png');
 function Family() {
     const sortOptionsRef = useRef(null);
 
-    function uncheckAll() {
-        setMaternal(false);
-        setPaternal(false);
-    }
-
-    const [maternalFilter, setMaternal] = useState(false);
-    const [paternalFilter, setPaternal] = useState(false);
+    const [filterSelection, setFilter] = useState("");
     const [sortSelection, setSort] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredData, setFilteredData] = useState([]);
@@ -51,7 +45,8 @@ function Family() {
             },
         "data": {
             "first name": "John",
-            "last name": "Smith"
+            "last name": "Smith",
+            "flag": "paternal"
             }
         },
         {
@@ -66,7 +61,8 @@ function Family() {
                 },
             "data": {
                 "first name": "Jane",
-                "last name": "Smith"
+                "last name": "Smith",
+                "flag": "maternal"
                 }
         },
         {
@@ -77,7 +73,8 @@ function Family() {
             },
             "data": {
                 "first name": "Alice",
-                "last name": "Smith"
+                "last name": "Smith",
+                "flag": "paternal"
             }
         },
         {
@@ -88,7 +85,8 @@ function Family() {
             },
             "data": {
                 "first name": "Bob",
-                "last name": "Smith"
+                "last name": "Smith",
+                "flag": "paternal"
             }
         },
         {
@@ -104,15 +102,21 @@ function Family() {
     ], []);
 
     useEffect(() => {
-        if (searchTerm === "") {
-            setFilteredData(familyData);
-        } else {
-            setFilteredData(familyData.filter(member =>
+        let filtered = familyData;
+
+        if (searchTerm !== "") {
+            filtered = filtered.filter(member =>
                 member.data["first name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
                 member.data["last name"].toLowerCase().includes(searchTerm.toLowerCase())
-            ));
+            );
         }
-    }, [searchTerm, familyData]);
+
+        if (filterSelection !== "") {
+            filtered = filtered.filter(member => member.data["flag"] === filterSelection);
+        }
+
+        setFilteredData(filtered);
+    }, [searchTerm, filterSelection, familyData]);
 
     return (
         <div style={styles.DefaultStyle}>
@@ -152,20 +156,19 @@ function Family() {
                             position="bottom left"
                             contentStyle={styles.DropdownSelectorStyle}
                             >
-                                {/* TODO check the passing of checkbox values to variable */}
                                 <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', fontFamily: 'Alata' }}>
                                     <label>
-                                       <input type="checkbox" onChange={e => {
-                                        setMaternal(e.target.checked);
-                                       }} checked={maternalFilter}/> Maternal
+                                       <input type="radio" name="filter" onChange={e => {
+                                        setFilter("maternal");
+                                       }} checked={filterSelection === "maternal"}/> Maternal
                                     </label>
                                     <label>
-                                       <input type="checkbox" onChange={e => {
-                                        setPaternal(e.target.checked);
-                                       }} checked={paternalFilter}/> Paternal
+                                       <input type="radio" name="filter" onChange={e => {
+                                        setFilter("paternal");
+                                       }} checked={filterSelection === "paternal"}/> Paternal
                                     </label>
                                     
-                                    <button style={{ width: 'fit-content', fontFamily: 'Alata', marginTop: '10px'}} onClick={() => { uncheckAll(); }}>Clear</button>
+                                    <button style={{ width: 'fit-content', fontFamily: 'Alata', marginTop: '10px'}} onClick={() => { setFilter("") }}>Clear</button>
                                 </div>
                         </Popup>
 

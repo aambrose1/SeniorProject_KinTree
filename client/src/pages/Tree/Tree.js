@@ -78,7 +78,8 @@ let treeData = [
         },
     "data": {
         "first name": "John",
-        "last name": "Smith"
+        "last name": "Smith",
+        "flag": "paternal"
         }
     },
     {
@@ -93,7 +94,8 @@ let treeData = [
             },
         "data": {
             "first name": "Jane",
-            "last name": "Smith"
+            "last name": "Smith",
+            "flag": "maternal"
             }
     },
     {
@@ -104,7 +106,8 @@ let treeData = [
         },
         "data": {
             "first name": "Alice",
-            "last name": "Smith"
+            "last name": "Smith",
+            "flag": "paternal"
         }
     },
     {
@@ -115,7 +118,8 @@ let treeData = [
         },
         "data": {
             "first name": "Bob",
-            "last name": "Smith"
+            "last name": "Smith",
+            "flag": "paternal"
         }
     },
     {
