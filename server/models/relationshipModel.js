@@ -5,8 +5,12 @@ const Relationships = {
         return db('relationships').insert(data);
     },
 
-    getRelationships:async () => {
-        return db('relationships').where('person_id', personId).onWhere('person2_id', personId);
+    getRelationships:async (personId) => {
+        return db('relationships').where('person1_id', personId).orWhere('person2_id', personId);
+    },
+
+    filterBySide: async(personId, side) => {
+        return db('relationships').where('person1_id', personId).andWhere('side',side);
     }
 };
 
