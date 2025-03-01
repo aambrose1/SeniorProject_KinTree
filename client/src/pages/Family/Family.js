@@ -16,6 +16,9 @@ function Family() {
 
     let user_lastname = "Smith";
 
+    document.body.style.overflow = 'hidden';
+    document.body.style.width = '100%'; 
+
     // TODO replace with API retrieval
     const familyData = useMemo(() => [
         {
@@ -115,8 +118,20 @@ function Family() {
             filtered = filtered.filter(member => member.data["flag"] === filterSelection);
         }
 
+        if (sortSelection !== "") {
+            filtered = filtered.sort((a, b) => {
+                if(sortSelection === "firstName") {
+                    return a.data["first name"].localeCompare(b.data["first name"]);
+                }
+                else if(sortSelection === "lastName") {
+                    return a.data["last name"].localeCompare(b.data["last name"]);
+                }
+                return 0;
+            });
+        }
+
         setFilteredData(filtered);
-    }, [searchTerm, filterSelection, familyData]);
+    }, [searchTerm, filterSelection, familyData, sortSelection]);
 
     return (
         <div style={styles.DefaultStyle}>
@@ -189,7 +204,7 @@ function Family() {
                                 <select id="sortOptions" name="sortOptions" style={{fontFamily: 'Alata'}} ref={sortOptionsRef} onChange={e =>{
                                     setSort(e.target.value)
                                 }} value={sortSelection}>
-                                    <option value="" disabled hidden>Select...</option>
+                                    <option value="">None</option>
                                     <option value="firstName">First Name (A-Z)</option>
                                     <option value="lastName">Last Name (A-Z)</option>
                                 </select>

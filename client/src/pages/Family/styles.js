@@ -4,7 +4,6 @@ export const DefaultStyle = {
     padding: '10px',
     fontFamily: 'Alata',
     alignItems: 'center',
-    width: '100%'
 }
 
 export const SubtitleContainerStyle = {
