@@ -4,7 +4,8 @@
     background-color: #ccdfcd;
     text-decoration: none;
     position: fixed;
-    justify-content: left;
+    justify-content: center;
+    
 }
 
 .nested-navbar {
@@ -13,25 +14,32 @@
     top: 0px;
     background-color: #ebffec;
     position: absolute;
-    padding-left: 20px;
+    padding-left: 30px;
     margin-left: 160px;
 }
 
 .nav-item {
+    display: block;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
     color: black;
     background-color: #ccdfcd;
-    border-style: round;
-    border-color: black;
     text-decoration: none;
-    text-align: left;
     font: Alata;
 }
 
 .nav-item:hover {
-    background-color: #ebffec;
+    background-color: #ebffec; 
 }
 
 .nav-item-active {
+    display: block;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
     background-color: #ebffec;
     color: black;
     text-decoration: none;
@@ -41,17 +49,20 @@
 .nav-item-nested {
     color: black;
     background-color: #ebffec;
+    font-weight: normal;
     text-decoration: none;
-    text-align: center;
     font: Alata;
 }
 
 .nav-item-nested:hover {
-    background-color: #f8fbf9;
+    background-color: #ffffff;
 }
 
 .nav-item-nested-active {
-    background: #f8fbf9;
+    background: #ffffff;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .settings-icon {
