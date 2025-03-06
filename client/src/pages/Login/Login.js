@@ -5,13 +5,12 @@ import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 
 function Login() {
-    const { register, handleSubmit, reset } = useForm();
+    const { register, handleSubmit } = useForm();
     
     // TODO: connect to backend
-    const onSubmit = (data, close) => {
-        console.log(data);
-        reset();
-        close();
+    const onSubmit = (data) => {
+        // TODO auth loop
+        window.location.href='/'
     };
 
     document.body.style.overflow = 'hidden';
@@ -34,7 +33,7 @@ function Login() {
                             <label>
                                 Password:
                             </label>
-                            <input {...register("password", { required: true })} type="password" placeholder="" style={styles.FieldStyle} required />
+                            <input {...register("password", { required: true })} type="password" autoComplete='current-password' placeholder="" style={styles.FieldStyle} required />
                         </li>
                     </ul>
 
@@ -43,7 +42,7 @@ function Login() {
                         <button type="submit" style={styles.ButtonStyle}><h3 style={styles.Header}>Login</h3></button>
                         <div style={{width: '40%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                             <p style={styles.TextStyle}>Don't have an account?</p>
-                            <button style={styles.WhiteButtonStyle}><h3 style={styles.Header}><a style={styles.LinkStyle} href="/register">Register</a></h3></button>
+                            <button type="button" onClick={()=>{window.location.href='/register'}} style={styles.WhiteButtonStyle}><h3 style={styles.Header}><a style={styles.LinkStyle} href="/register">Register</a></h3></button>
                         </div>
                     </div>
 
