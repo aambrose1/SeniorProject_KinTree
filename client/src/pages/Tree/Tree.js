@@ -142,21 +142,20 @@ function Tree() {
     return (
         <div style={styles.DefaultStyle}>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', zIndex: '-1', position: 'relative', width: '100%', height: '100%' }}>
+            {/* TODO make these work again, removed them for now so I could work with the header placement; might want to integrate these with actual background somehow */}
+            {/* <div style={styles.ArrowContainerStyle}>
                 <div style={{flex: '50%'}}></div>
-                <ArrowTR style={{ width: '370px', height: '370px', margin: '20px 20px', flex: '50%', textAlign: 'right', paddingLeft: '70%' }} />
-                <ArrowBL style={{ width: '370px', height: '370px', margin: '20px 20px', flex: '50%', paddingRight: '70%' }} />
+                <ArrowTR style={styles.TopRightArrowStyle} />
+                <ArrowBL style={styles.BottomLeftArrowStyle} />
                 <div style={{flex: '50%', textAlign: 'right'}}></div>
-            </div> 
+            </div>  */}
 
-            <div style={{width: '100%', height: '100%', position: 'absolute', top: '0', left: '0', zIndex: '10', overflow: 'hidden', alignItems: 'center', justifyContent: 'center', display: 'flex', flexDirection: 'column'}}>
-                <Link to="/" style={{ position: 'absolute', top: '0px', left: '0px', margin: '10px' }}>Home</Link>
+            <div style={styles.MainContainerStyle} className="main-container">
+                {/* <Link to="/" style={{ position: 'absolute', top: '0px', left: '0px', margin: '10px' }}>Home</Link> */}
                 
 
                 {/* header content */}
-                <div style={{display: 'flex'}}>
-                    {/* filler space to center header text on page */}
-                    <div style={{ width: '64px' }}></div>
+                <div style={styles.HeaderStyle}>
                     {/* titles */}
                     <div>
                         <h1 style={{marginBottom: "0px"}}>Your Tree</h1>
@@ -171,14 +170,14 @@ function Tree() {
                     </div>
                     {/* add family member button */}
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px', margin: '60px 20px' }} />} />
+                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px'}} />} />
                     </div>
                 </div>
                 
 
                 {/* family tree container */}
                 {/* using a border fo</div>r now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
-                <div style={{ width: '80%', height: '70vh', borderStyle: 'double', maxWidth: '800px', borderRadius: '30px' }}> <FamilyTree/> </div>
+                <div style={styles.FamilyTreeContainerStyle}> <FamilyTree/> </div>
             </div>
         </div>
     );   

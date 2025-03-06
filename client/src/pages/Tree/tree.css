@@ -200,3 +200,9 @@
   .f3 .link.f3-path-to-main {
     stroke-width: 4px;
   }
+
+  .main-container {
+    @media screen and (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
