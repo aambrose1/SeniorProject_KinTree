@@ -65,3 +65,35 @@ export const DateFieldStyle = {
     width: '147px',
     fontFamily: 'Alata'
 };
+
+
+export const MainContainerStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '2vw',
+    paddingTop: '0px',
+    alignItems: 'center',
+    minWidth: '360px',
+    minHeight: '150px',
+    justifyContent: 'space-between',
+}
+
+export const AddOptionsStyle = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    width: '90%',
+    padding: '10px',
+    fontFamily: 'Alata',
+    // border: '1px solid gray',
+    // borderRadius: '5px',
+    marginTop: '10px',
+    height: '200px',
+    overflow: 'scroll'
+}
+
+export const ListingStyle = {
+    padding: '10px', 
+    border: '1px solid gray', 
+    width: '90%'
+}
