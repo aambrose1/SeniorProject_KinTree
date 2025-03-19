@@ -3,17 +3,8 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AiOutlineSetting, AiOutlineQuestion } from 'react-icons/ai'; //this is for the settings icon and help icon
 import './NavBar.css';
-//import * as styles from './styles';
 
-//onMouseEnter={() => setShowNestedNav(true)} onMouseLeave={() => setShowNestedNav(false)}  this is for the nested nav Tree
-
-/* function nestedNavBar() {
-    if (showNestedNav==false)
-    {
-
-    }
-} */
-
+//ToDO: import * as styles from './styles';
 //ToDo: Add mobile version of navbar (collapsible)
 //ToDo: Figure out importing of user profile image
 function NavBar() {

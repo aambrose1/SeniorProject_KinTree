@@ -44,9 +44,10 @@ const CreateAccount = () => {
 
     return (
         <>
-            <head style={styles.Header}>
+            <h1 style={styles.Header}>
                 Create Account
-            </head>
+            </h1>
+            <br></br>
             <div style={styles.Container}>
                 <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
                 <div style={styles.ListStyle}>

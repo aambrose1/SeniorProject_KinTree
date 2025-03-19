@@ -1,6 +1,7 @@
 import React from 'react';
 import * as styles from './styles';
 import NavBar from '../../components/NavBar/NavBar';
+import CreateAccount from '../CreateAccount/CreateAccount';
 import './Account.css';
 
 function Account() {
@@ -8,7 +9,7 @@ function Account() {
         <>
             <NavBar />
             <div className="acc-page">
-                Account page yessuh.
+                <CreateAccount />
             </div>
         </>
     )

@@ -13,7 +13,7 @@
     justifyContent: 'flex-start',
     minWidth: '290px',
     width: '40%',
-    height: '80vh',
+    height: '100vh',
     borderRadius: '30px',
     backgroundColor: '#faf9f6',
     padding: '20px 5vw',
@@ -74,7 +74,7 @@
     padding: '10px 20px',
     margin: '10px',
     cursor: 'pointer',
-    width: '40%',
+    width: '60%',
     height: '45px'
   };
   
