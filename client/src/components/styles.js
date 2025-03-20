@@ -1,3 +1,5 @@
+import Dashboard from "./UserActivityDash";
+
 export const DefaultStyle = {
     display: 'flex',
     flexDirection: 'column',
@@ -65,19 +67,6 @@ export const DefaultStyle = {
     margin: '0'
   };
   
-  export const ButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#3a5a40',
-    color: 'white',
-    borderRadius: '10px',
-    border: 'none',
-    padding: '10px 20px',
-    margin: '10px',
-    cursor: 'pointer',
-    width: '40%',
-    height: '45px'
-  };
-  
   export const WhiteButtonStyle = {
     fontFamily: 'Alata',
     backgroundColor: 'white',
@@ -95,7 +84,7 @@ export const DefaultStyle = {
     fontFamily: 'Alata',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    alignItems: 'flex-end'
   };
   
   export const TextStyle = {

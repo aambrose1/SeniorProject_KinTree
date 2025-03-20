@@ -24,6 +24,7 @@ function Home() {
                 >
                     Github Repository
                 </a>
+                <Link to='/useractivitydash'>Family Events</Link>
             </header>
 
         </>
