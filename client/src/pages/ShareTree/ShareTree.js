@@ -40,7 +40,6 @@ function ShareTree() {
 
     return (
         <div style={styles.DefaultStyle}>
-            <div style={{ height: '5vh' }}></div>
             <div style={styles.ContainerStyle}>
                 {/* title */}
                 <h1 style={{ margin: '0px' }}>Share Tree</h1>

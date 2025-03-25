@@ -18,6 +18,7 @@ export const DefaultStyle = {
     backgroundColor: '#faf9f6',
     padding: '20px',
     boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+    marginTop: '5vh'
 }
 
 export const ItemStyle = {
@@ -26,7 +27,7 @@ export const ItemStyle = {
     display: 'flex',
     flexDirection: 'column',
     border: '1px solid rgb(87, 87, 87)',
-    padding: '10px',
+    padding: '10px 20px',
     alignItems: 'center',
 };
 
