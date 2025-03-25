@@ -89,7 +89,7 @@ export const AddOptionsStyle = {
     // borderRadius: '5px',
     marginTop: '10px',
     height: '200px',
-    overflow: 'scroll'
+    overflow: 'auto'
 }
 
 export const ListingStyle = {

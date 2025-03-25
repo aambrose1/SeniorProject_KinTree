@@ -8,7 +8,7 @@ function Login() {
     const { register, handleSubmit } = useForm();
     
     // TODO: connect to backend
-    const onSubmit = (data) => {
+    const onSubmit = () => {
         // TODO auth loop
         window.location.href='/'
     };
@@ -21,7 +21,7 @@ function Login() {
             <div style={styles.Container}>
                 <img src={logo} alt="KinTree Logo" style={styles.Logo} />
                 <h1 style={styles.Header}>Sign In</h1>
-                <form onSubmit={handleSubmit(data => onSubmit(data))} style={styles.FormStyle}>
+                <form onSubmit={handleSubmit(data => onSubmit())} style={styles.FormStyle}>
                     <ul style={styles.ListStyle}>
                         <li style={styles.ItemStyle}>
                             <label>
