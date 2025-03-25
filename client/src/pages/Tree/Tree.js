@@ -61,7 +61,8 @@ let treeData = [
     "data": {
         "first name": "Ronald",
         "last name": "Smith",
-        "avatar": "https://i.imgur.com/mfojszj.png"
+        "avatar": "https://i.imgur.com/mfojszj.png",
+        "email": "ronald@gmail.com"
     }
     },
     {
