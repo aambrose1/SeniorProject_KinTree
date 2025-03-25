@@ -11,6 +11,7 @@ import Login from './pages/Login/Login';
 import Family from './pages/Family/Family';
 import Register from './pages/Register/Register';
 import Reset from './pages/Reset/Reset';
+import ShareTree from './pages/ShareTree/ShareTree';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
@@ -45,6 +46,10 @@ const router = createBrowserRouter([
   {
     path: '/reset',
     element: <Reset />,
+  },
+  {
+    path: '/sharetree',
+    element: <ShareTree />,
   },
   {
     path: '*',
