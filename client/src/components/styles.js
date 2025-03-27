@@ -1,11 +1,14 @@
-import Dashboard from "./UserActivityDash";
-
-export const DefaultStyle = {
+/* export const DefaultStyle = {
     display: 'flex',
     flexDirection: 'column',
     padding: '10px',
     fontFamily: 'Alata',
     alignItems: 'center',
+  }; */
+
+  export const CenterOfPage = {
+    display: 'flex',
+    flexDirection: 'column'
   };
   
   export const Container = {
@@ -15,8 +18,37 @@ export const DefaultStyle = {
     justifyContent: 'flex-start',
     minWidth: '290px',
     width: '40%',
-    height: '80vh',
     borderRadius: '30px',
+    backgroundColor: '#faf9f6',
+    padding: '20px 5vw',
+    marginLeft: '30%',
+    boxShadow: 'gray 0px 10px 10px -8px',
+    border: '0.5px solid #000000'
+  };
+
+  export const InvisibleContainer = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    minWidth: '400px',
+    width: '40%',
+    borderRadius: '30px',
+    //backgroundColor: '#faf9f6',
+    padding: '20px 5vw',
+    marginLeft: '30%',
+    boxShadow: 'gray 0px 10px 10px -8px',
+    border: '0.5px solid #000000'
+  };
+
+  export const CardContainer = {
+    display: 'flex',
+    flexDirection: 'column',
+    textAlign: 'center',
+    minWidth: '290px',
+    width: '100%',
+    height: '80vh',
+    borderRadius: '20px',
     backgroundColor: '#faf9f6',
     padding: '20px 5vw',
     marginTop: '2%',
@@ -27,6 +59,15 @@ export const DefaultStyle = {
   export const Logo = {
     width: '150px',
     height: '150px'
+  };
+
+  export const SearchBar = {
+    width: '50%',
+    padding: '10px',
+    margin: '20px 0',
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    fontSize: '16px'
   };
   
   export const ListStyle = {
@@ -64,7 +105,12 @@ export const DefaultStyle = {
   };
   
   export const Header = {
-    margin: '0'
+    fontSize: 'xx-large',
+    display: 'flex',
+    flexDirection: 'row',
+    alignContent: 'center',
+    justifyContent: 'center',
+    padding: '0px 200px 0px 0px'
   };
   
   export const WhiteButtonStyle = {
@@ -82,9 +128,10 @@ export const DefaultStyle = {
   
   export const ButtonDivStyle = {
     fontFamily: 'Alata',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end'
+    alignContent: 'center',
+    /* justifyContent: 'space-between', */
+    marginLeft: 'inherit',
+    marginRight: 'inherit'
   };
   
   export const TextStyle = {
