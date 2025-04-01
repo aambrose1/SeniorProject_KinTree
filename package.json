@@ -1,25 +1,5 @@
 {
-  "name": "seniorproject_relateme",
-  "version": "1.0.0",
-  "description": "This repository contains the codebase for the KinTree project. This project stems from the CSE 3213/3223 Software Engineering Senior Project I/II course sequence at Mississippi State University.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "jsonwebtoken": "^9.0.2",
-    "knex": "^3.1.0",
-    "mysql2": "^3.11.5",
-    "nodemon": "^3.1.7"
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "dotenv": "^16.4.7"
   }
 }
