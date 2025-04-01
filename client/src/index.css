@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #E7F2D8;
 }
 
 code {
@@ -16,4 +17,9 @@ code {
 @font-face {
   font-family: 'Alata';
   src: local('Alata'), url(./fonts/Alata/Alata-Regular.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Aboreto';
+  src: local('Aboreto'), url(./fonts/Aboreto/Aboreto-Regular.ttf) format('truetype');
 }

@@ -1,6 +1,5 @@
 .App {
   text-align: center;
-  font: Alata;
 }
 
 .App-logo {
@@ -52,4 +51,8 @@
 
 .font-face-alata {
   font-family: "Alata";
+}
+
+.font-face-aboreto {
+  font-family: "Aboreto";
 }

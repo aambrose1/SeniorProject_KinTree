@@ -25,7 +25,6 @@ const db = knex({
 
 app.use(express.json());
 app.use(cors());
-
 app.use('/api/family-members', treeMemberRoutes);
 app.use('/api/relationships', relationshipRoutes);
 app.use('/api/auth', authRoutes);

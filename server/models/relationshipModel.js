@@ -4,7 +4,7 @@ const Relationships = {
     addRelationship: async (data) => {
         return db('relationships').insert(data);
     },
-
+  
     getRelationships:async (personId) => {
         return db('relationships').where('person1_id', personId).orWhere('person2_id', personId);
     },
