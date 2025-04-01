@@ -30,7 +30,7 @@ const addSharedTree = async (req, res) => {
 
     }
     catch (error){
-        console.error(erro);
+        console.error(error);
         res.status(500).json({
             error: "Error adding shared tree."
     });
@@ -92,12 +92,10 @@ const shareTree = async (req,res) => {
             return res.status(400).json({
                 error: "Invalid side. Use 'paternal' or 'maternal'."
             });
-
-            const relatives = await sharedTrees.shareTree(id, side);
-            res.json(relatives);
-
         }
 
+        const relatives = await sharedTrees.shareTree(id, side);
+        res.json(relatives);
     }
     catch(error){
         console.error(error);
@@ -123,7 +121,7 @@ const getMemberstoMerge = async( req,res) => {
 const assignNewMemberRelationship = async (req, res) => {
     try{
         const { recieverID, memberId, relationshipType} = req.body;
-        await shareTree.assignNewMemberRelationship(recieverID,memberId,relationshipType);
+        await sharedTrees.assignNewMemberRelationship(recieverID,memberId,relationshipType);
         res.json({message: 'Relationshi[ assigning successful.'})
 
     }
@@ -144,7 +142,15 @@ const mergeTree = async (req,res) => {
                 error: "No relatives selected to merge"
             });
         }
-        const result = await sharedTrees.mergeTree(id, selectedRelatives);
+        for (const relative of selectedRelatives){
+            const exists = await db('treeMembers')
+            .where({owner: id, name: relative.name})
+            .first();
+        }
+        if(!exists){
+            const result = await sharedTrees.mergeTree(id, selectedRelatives);
+
+        }
           res.json(result);
     }
     catch(error){
@@ -155,3 +161,4 @@ const mergeTree = async (req,res) => {
     };
 };
 
+module.exports = {addSharedTree, getSharedTreeById, getSharedTreeBySender, getSharedTreebyReciever,shareTree, assignNewMemberRelationship, mergeTree }
