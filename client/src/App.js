@@ -7,6 +7,7 @@ function App() {
     <div className={"App font-face-alata"}>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
+        {/* sample web page, doesn't show anymore bc of router */}
         <div className="Container">
           <p>
             Welcome to KinTree! This is the client side of the application. It's in progress.

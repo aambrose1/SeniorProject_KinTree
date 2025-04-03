@@ -41,7 +41,6 @@ const addTreeMember = async (req, res) => {
         });
     }
 };
-
 const editTreeMember = async (req, res) => {
     try {
         const { id } = req.params;
@@ -86,4 +85,3 @@ const editTreeMember = async (req, res) => {
 };
 
 module.exports = { addTreeMember, editTreeMember };  // Export both methods
-

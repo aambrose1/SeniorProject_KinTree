@@ -1,0 +1,7 @@
+.popup-content {
+    border-radius: 30px;
+    max-width: 80vw;
+    height: auto;
+    min-width: 0px;   
+    /* padding: 20px; */
+}
