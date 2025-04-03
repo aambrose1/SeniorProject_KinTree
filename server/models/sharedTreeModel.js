@@ -3,23 +3,28 @@ const Relationships = require('./relationshipModel');
 
 const sharedTrees ={
     addSharedTree: async(data) => {
-        return db('sharedTrees').insert(data, ['id']);
+        return db('sharedTrees').insert(data, ['id', 'token'])
     },
 
     getALLSharedTree: async () => {
         return db('sharedTrees').select('*');
     },
+    
 
     getSharedTreeById: async(id) =>{
-        return db('sharedTrees').where({id}).first();
+        return db('sharedTrees').where('sharedTreeID',id).first();
     },
 
     getSharedTreebySender: async(id) => {
-        return db('sharedTrees').where('senderId', senderID);
+        return db('sharedTrees').where('senderId', id);
     },
 
     getSharedTreebyReciever: async(id) => {
-        return db('sharedTrees').where('recieverId', recieverID);
+        return db('sharedTrees').where('recieverId', id);
+    },
+
+    getSharedTreeByToken: async (token) => {
+        return db('sharedTrees').where('token', token).first();
     },
 
     shareTree: async(data) => {
@@ -40,10 +45,6 @@ const sharedTrees ={
 
     getMemberstoMerge: async(senderId, recieverId) => {
         return db('sharedTrees').where(senderId, senderId).select('*');
-    },
-
-    assignNewMemberRelationship: async (recieverId, getMemberById, relationshipType) => {
-        return db('treeMembers').where({person1_id: recieverId, person2_id: recieverId}).update({relationshipType: relationshipType})
     }
 
 

@@ -7,6 +7,10 @@ const User = {
 
     findByEmail: async (email) => {
         return db('users').where({email}).first();
+    },
+
+    findById: async (id) => {
+        return db('users').where({id}).first();
     }
 };
 

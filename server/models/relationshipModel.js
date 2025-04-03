@@ -11,7 +11,12 @@ const Relationships = {
 
     filterBySide: async(personId, side) => {
         return db('relationships').where('person1_id', personId).andWhere('side',side);
+    },
+
+    getRelationshipbyId: async (personId) => {
+        return db('relationships').where('person1_id', personId).andWhere('person2_id', personId);
     }
+
 };
 
 module.exports = Relationships;
