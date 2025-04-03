@@ -8,7 +8,7 @@ const backup = {
         return db('backups').where({id});
     },
     getLatestBackup: async (id) => {
-        return db('backups').where({id}).orderBy('createdAt', 'desc').first();
+        return db('backups').where('backupId', id).orderBy('createdAt', 'desc').first();
     }
 };
 

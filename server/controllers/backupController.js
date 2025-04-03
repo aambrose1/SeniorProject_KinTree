@@ -4,24 +4,26 @@ const treeMember = require('../models/treeMemberModel');
 const relationship = require('../models/relationshipModel');
 const sharedTrees = require('../models/sharedTreeModel');
 const backupInfo = require('../models/backupModel');
-const backupUser = async (id) => {
+
+const backupUser = async (req, res) => {
     try{
-        const user = await db('users').where({id: id}).first();
+        const { id } = req.params;
+        const user = await userInfo.findById(id);
         if(!user) {
             return { error: "User not found"};
         }
-        const tree = await db('treeMembers').where({id});
-        const relationships = await db('relationships').where({person1_id: id});
-        const sharedTrees = await db('sharedTrees').where({senderId: id}).orWhere({recieverId: id});
+        const tree = await treeMember.getAllMembersbyId(id);
+        const relationships = await relationship.getRelationships(id);
+        const sharedTree = await sharedTrees.getSharedTreebySender(id);
 
         const data = {
             user, 
             tree,
             relationships,
-            sharedTrees
+            sharedTree
         };
 
-        backupInfo.addBackup(id, data);
+        await backupInfo.addBackup(id, JSON.stringify(data));
         res.json({
             message: 'Backup completed'
         });
@@ -34,12 +36,9 @@ const backupUser = async (id) => {
     }
 };
 
-const restoreUser = async (req,res) => {
+const restoreUser = async (req, res) => {
     try{
         const {id} = req.params;
-
-        const backupData = JSON.parse(backup.backupData);
-
         const existingUser = await userInfo.findById(id);
         if(!existingUser){
             return res.status(404).json({
@@ -53,9 +52,11 @@ const restoreUser = async (req,res) => {
                 error: "No backup available"
             })
         }
+        
+        const backupData = backup.backupData
 
-        for( const member of backupData.treeMember) {
-            const exists= await treeMember.getMemberById(id)
+        for( const member of backupData.tree) {
+            const exists= await treeMember.getMemberById(member.id)
             if (!exists){
                 await treeMember.addMember(member);
             }
@@ -68,7 +69,7 @@ const restoreUser = async (req,res) => {
             }
         }
 
-        for (const tree of backupData.sharedTrees) {
+        for (const tree of backupData.sharedTree) {
             const exists = await sharedTrees.getSharedTreeById(tree.id);
             if (!exists){
                 await sharedTrees.addSharedTree(tree);

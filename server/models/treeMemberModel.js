@@ -9,14 +9,26 @@ const treeMember = {
         return db('treeMembers').select('*');
     },
 
+    
+    getAllMembersbyId: async (id) => {
+        return db('treeMembers').where({id}).select('*');
+    },
+
     getMemberById: async (id) => {  // Fixed the typo
         return db('treeMembers').where({ id }).first();
     },
 
+    getMemberByUser: async (userId) => {
+        return db('treeMembers').where({userId}).select('*');
+    },
+    
     updateMemberInfo: async (id, data) => {
         await db('treeMembers').where({ id }).update(data);
         const updatedRecord = await  db('treeMembers').where({ id }).first();  // Return updated record
         return updatedRecord;
+    },
+    assignNewMemberRelationship: async (recieverId, getMemberById, relationshipType) => {
+        return db('treeMembers').where({person1_id: recieverId, person2_id: recieverId}).update({relationshipType: relationshipType})
     }
 };
 
