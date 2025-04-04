@@ -12,6 +12,7 @@ import Family from './pages/Family/Family';
 import ShareTree from './pages/Tree/ShareTree/ShareTree';
 import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
 import Dashboard from './components/UserActivityDash';
+import WebsiteSettings from './pages/WebsiteSettings/WebsiteSettings';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
@@ -47,7 +48,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/useractivitydash',
-    element: <Dashboard/>
+    element: <Dashboard />
+  },
+  {
+    path: '/websitesettings',
+    element: <WebsiteSettings />
   }
   
 ]) 

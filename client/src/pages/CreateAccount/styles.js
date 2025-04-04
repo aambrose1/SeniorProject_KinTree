@@ -1,9 +1,11 @@
   export const DefaultStyle = {
     display: 'flex',
     flexDirection: 'column',
-    padding: '10px',
     fontFamily: 'Alata',
     alignItems: 'center',
+    backgroundColor: '#e7f2d8',
+    paddingLeft: '5%',
+    width: '100%'
   };
   
   export const Container = {
@@ -12,12 +14,16 @@
     alignItems: 'center',
     justifyContent: 'flex-start',
     minWidth: '290px',
-    width: '40%',
+    width: '50%',
     height: '100vh',
     borderRadius: '30px',
+    borderRight: '0.5px solid #ccc',
+    borderLeft: '0.5px solid #ccc',
+    borderTop: '0.5px solid #ccc',
+    borderBottom: '0.5px solid #ccc',
     backgroundColor: '#faf9f6',
-    padding: '20px 5vw',
-    marginTop: '2%',
+    padding: '20px',
+    marginTop: '100px',
     boxShadow: 'gray 0px 10px 10px -8px',
     border: '0.5px solid #000000'
   };
@@ -62,7 +68,16 @@
   };
   
   export const Header = {
-    margin: '0'
+    textAlign: 'center',
+    display: 'block',
+    fontWeight: 'bold',
+    fontSize: '32pt',
+    borderBottom: '3px solid black',
+    paddingTop: '10px',
+    paddingBottom: '20px',
+    paddingLeft: '10px',
+    paddingRight: '10px',
+    marginTop: '40px'
   };
   
   export const ButtonStyle = {
@@ -95,7 +110,7 @@
     fontFamily: 'Alata',
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    alignItems: 'center',
   };
   
   export const TextStyle = {

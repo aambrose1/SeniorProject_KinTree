@@ -15,22 +15,45 @@ function NavBar() {
         <nav className="navbar">
             <ul className="nav-options-list">
                 
-                <NavLink to="/account" exact className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} onClick={() => setShowNestedNav(false)}> Account </NavLink>
+                <NavLink to="/account" exact 
+                    className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} 
+                    onClick={() => setShowNestedNav(false)}> 
+                    Account 
+                </NavLink>
                 <br></br>
-                <NavLink to="/" exact className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} onClick={() => setShowNestedNav(false)}> Home </NavLink>
+                <NavLink to="/" exact 
+                    className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} 
+                    onClick={() => setShowNestedNav(false)}> 
+                    Home 
+                </NavLink>
                 <br></br>
-                <NavLink to="/family" exact className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} onClick={() => setShowNestedNav(false)}> Family </NavLink>
+                <NavLink to="/family" exact 
+                    className={({isActive}) => isActive ? "nav-item-active" : "nav-item"}  
+                    onClick={() => setShowNestedNav(false)}> 
+                    Family 
+                </NavLink>
                 <br></br>
                 {/* <NavLink to="/tree" className="nav-item"> Tree </NavLink> */}
-                <NavLink to="/tree" exact className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} onClick={() => setShowNestedNav(true)}>
+                <NavLink to="/tree" exact 
+                    className={({isActive}) => isActive ? "nav-item-active" : "nav-item"}
+                    onMouseEnter={() => setShowNestedNav(true)} onMouseLeave={() => setShowNestedNav(false)}
+                    onClick={() => setShowNestedNav(true)}>
                         Tree
                         {showNestedNav && (
                             <div className="nested-navbar">
                                     
                                 <div>
-                                    <NavLink to="/tree/sharetree" className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} onClick={() => setShowNestedNav(true)}> Share Tree </NavLink>
+                                    <NavLink to="/tree/sharetree" 
+                                        className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} 
+                                        onClick={() => setShowNestedNav(true)}> 
+                                        Share Tree
+                                    </NavLink>
                                     <br></br>
-                                    <NavLink to="/tree/viewsharedtrees" className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} onClick={() => setShowNestedNav(true)}> View Shared Trees </NavLink>
+                                    <NavLink to="/tree/viewsharedtrees" 
+                                        className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} 
+                                        onClick={() => setShowNestedNav(true)}> 
+                                        View Shared Trees 
+                                    </NavLink>
                                 </div>
                                 
                             </div>
@@ -40,16 +63,16 @@ function NavBar() {
                 </NavLink>
                 <br/>
                 <NavLink to="/chat" className="nav-item"> Chat </NavLink>
-               
                 
             </ul>
-            <AiOutlineSetting className="settings-icon">
-                <NavLink to="/account_settings"></NavLink>
-            </AiOutlineSetting>
-            <AiOutlineQuestion className="help-icon">
-                <NavLink to="/help"></NavLink>
-            </AiOutlineQuestion>
-            
+            <div className="settings-and-help">
+                <NavLink to="/websitesettings" >
+                    <AiOutlineSetting className="settings-icon"></AiOutlineSetting>
+                </NavLink>
+                <NavLink to="/help">
+                    <AiOutlineQuestion className="help-icon"></AiOutlineQuestion>
+                </NavLink>
+            </div>
 
         </nav>
     );

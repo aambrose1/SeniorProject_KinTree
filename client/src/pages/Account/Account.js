@@ -8,7 +8,7 @@ function Account() {
     return (
         <>
             <NavBar />
-            <div className="acc-page">
+            <div>
                 <CreateAccount />
             </div>
         </>

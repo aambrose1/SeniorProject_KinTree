@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
@@ -36,18 +37,34 @@ const yupValidation = yup.object().shape(
 
 const CreateAccount = () => {
     const {register, handleSubmit, formState: {errors}} = useForm({resolver: yupResolver(yupValidation)});
-
+    const [isHovering, setIsHovering] = useState(false);
     //ToDo: code linkage to backend
     const onSubmit = (data) => {
         console.log(data);
     };
 
+    const ButtonStyle = {
+        fontFamily: 'Alata',
+        backgroundColor: isHovering ? '#3a5a40' : '#a2d59f',
+        color: isHovering ? 'white' : 'black',
+        transition: 'all .5s', 
+        borderRadius: '10px',
+        border: 'none',
+        paddingLeft: '15%',
+        paddingRight: '15%',
+        paddingBottom: '5%',
+        paddingTop: '4%',
+        cursor: 'pointer',
+        width: '100%',
+        minWidth: '150px',
+        height: '45px'
+    };
+
     return (
-        <>
-            <h1 style={styles.Header}>
+        <div style={styles.DefaultStyle}>
+            <div style={styles.Header}>
                 Create Account
-            </h1>
-            <br></br>
+            </div>
             <div style={styles.Container}>
                 <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
                 <div style={styles.ListStyle}>
@@ -109,12 +126,15 @@ const CreateAccount = () => {
                     <br />
                 </div>
                 <div style={styles.ButtonDivStyle}>
-                    <button type="submit" style={styles.ButtonStyle}><h3 style={styles.Header}>Create Account</h3></button>
+                    <button type="submit" style={ButtonStyle}
+                    onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
+                        Create Account
+                    </button>
                 </div>
                 
                 </form>
             </div>
-        </>
+        </div>
        
     );
 };
