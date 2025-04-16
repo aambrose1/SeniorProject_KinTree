@@ -15,6 +15,20 @@ const getRelationships = async (req, res) => {
     }
 };
 
+const getRelationshipsByUser = async (req,res) => {
+    try {
+        const {userId} = req.params;
+        const relationships = await Relationship.getRelationshipByUser(userId);
+        res.status(200).json(relationships);
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).json({
+            error: 'Error fetching relationships'
+        });
+    }
+};
+
 const addRelationship = async (req,res) =>{
 
     //need to add functionality to refuse a relationship if it already exists 
@@ -65,4 +79,4 @@ const filterBySide = async (req,res) => {
 
 
 
-module.exports = {getRelationships, addRelationship, filterBySide};
+module.exports = {getRelationships,getRelationshipsByUser, addRelationship, filterBySide};

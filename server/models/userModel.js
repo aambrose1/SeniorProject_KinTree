@@ -11,6 +11,10 @@ const User = {
 
     findById: async (id) => {
         return db('users').where({id}).first();
+    },
+
+    updateUserInfo: async(id, userData) => {
+        return db('users').insert(userData, '').where({id}).first().insert(userData, []);
     }
 };
 

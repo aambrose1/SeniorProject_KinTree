@@ -15,6 +15,10 @@ const Relationships = {
 
     getRelationshipbyId: async (personId) => {
         return db('relationships').where('person1_id', personId).andWhere('person2_id', personId);
+    },
+
+    getRelationshipByUser: async (userId) => {
+        return db('relationship').where('userId', userId).select('*');
     }
 
 };

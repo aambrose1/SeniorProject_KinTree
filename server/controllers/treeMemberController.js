@@ -84,4 +84,19 @@ const editTreeMember = async (req, res) => {
     }
 };
 
-module.exports = { addTreeMember, editTreeMember };  // Export both methods
+const getMembersByUser = async (req,res) =>{
+    try{
+        const { userId} = req.params;
+        const members = treeMember.getMemberByUser(userId)
+        res.status(200).json(members);
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).json({
+            error: 'Error fetching members'
+        });
+        
+    }
+}
+
+module.exports = { addTreeMember, editTreeMember, getMembersByUser };  // Export both methods
