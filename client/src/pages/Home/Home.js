@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../../assets/kintreelogo-adobe.png';
 import { Link } from 'react-router-dom';
 import * as styles from './styles';
 import { ReactComponent as CalendarIcon } from '../../assets/calendar.svg';

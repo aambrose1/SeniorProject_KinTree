@@ -1,0 +1,121 @@
+.navbar {
+    height: 100%;
+    width: 200px;
+    background-color: #ccdfcd;
+    text-decoration: none;
+    position: fixed;
+    justify-content: center;
+    font-family: Alata;
+}
+
+.nested-navbar {
+    height: 100%;
+    width: 160px;
+    top: 0px;
+    background-color: #ebffec;
+    position: absolute;
+    padding-left: 30px;
+    margin-left: 150px;
+}
+
+.nav-item {
+    display: block;
+    border-radius: 4px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    color: black;
+    background-color: #ccdfcd;
+    text-decoration: none;
+    font: Alata;
+    font-size: 16pt;
+    transition: all .5s;
+}
+
+.nav-item:hover {
+    background-color: #ebffec; 
+}
+
+.nav-item-active {
+    display: block;
+    border-radius: 4px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    background-color: #ebffec;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16pt;
+}
+
+.nav-item-nested {
+    display: block;
+    border-radius: 4px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    color: black;
+    background-color: #ebffec;
+    font-weight: normal;
+    text-decoration: none;
+    font: Alata;
+    font-size: 16pt;
+}
+
+.nav-item-nested:hover {
+    background-color: #ffffff;
+}
+
+.nav-item-nested-active {
+    display: block;
+    border-radius: 4px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    background: #ffffff;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 16pt;
+}
+
+.settings-and-help {
+    display: flex;
+    margin-top: 500px;
+    gap: 50px;
+    align-items: center;
+}
+
+.settings-icon {
+    display: flex;
+    background-color: #ccdfcd;
+    margin-left: 40px;
+    height: 30px;
+    width: 30px;
+    color: black;
+}
+
+.settings-icon:hover {
+    color: #ebffec;
+}
+
+.help-icon {
+    color: black;
+    background-color: #ccdfcd;
+    height: 35px;
+    width: 30px
+}
+
+.help-icon:hover {
+    color: #ebffec;
+}
+
+.divider {
+    border-bottom-width: flex;
+    border-bottom-color: #ccc;
+}

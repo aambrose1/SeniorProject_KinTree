@@ -141,6 +141,8 @@ function Tree() {
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
     return (
+        <>
+        <NavBar />
         <div style={styles.DefaultStyle}>
 
             {/* TODO make these work again, removed them for now so I could work with the header placement; might want to integrate these with actual background somehow */}
