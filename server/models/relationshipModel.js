@@ -19,7 +19,17 @@ const Relationships = {
 
     getRelationshipByUser: async (userId) => {
         return db('relationship').where('userId', userId).select('*');
+    },
+
+    getRelationshipByOtherUser: async (userId) => {
+        return db('relationship').whereNot('userId', userId).select('*');
+    },
+
+    deleteByUser: async (userId) => {
+        return db('relationship').where({userId}).del();
     }
+
+
 
 };
 

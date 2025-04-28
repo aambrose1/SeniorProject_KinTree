@@ -15,6 +15,10 @@ const User = {
 
     updateUserInfo: async(id, userData) => {
         return db('users').insert(userData, '').where({id}).first().insert(userData, []);
+    },
+
+    deleteUser: async (id) => {
+        return db('users').where({id}).del();
     }
 };
 

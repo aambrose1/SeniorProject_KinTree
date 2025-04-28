@@ -28,6 +28,19 @@ const getRelationshipsByUser = async (req,res) => {
         });
     }
 };
+const getRelationshipsByOtherUser = async (req,res) => {
+    try {
+        const {userId} = req.params;
+        const relationships = await Relationship.getRelationshipByOtherUser(userId);
+        res.status(200).json(relationships);
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).json({
+            error: 'Error fetching relationships'
+        });
+    }
+};
 
 const addRelationship = async (req,res) =>{
 
@@ -74,9 +87,27 @@ const filterBySide = async (req,res) => {
         });
         
     }
+};
+
+const deleteByUser =  async (req, res) => {
+    const {userId} = req.params;
+
+    try{
+        await Relationship.deleteByUser(userId);
+    
+        res.json({ 
+          message: "Relationship deleted successfullyS"
+        })
+    
+      }
+      catch (error){
+        console.error(error);
+        res.status(500);json({error:"Error deleting relationship"})
+      }
+
 }
 
 
 
 
-module.exports = {getRelationships,getRelationshipsByUser, addRelationship, filterBySide};
+module.exports = {getRelationships,getRelationshipsByUser,getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser};

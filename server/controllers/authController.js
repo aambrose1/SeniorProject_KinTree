@@ -69,6 +69,23 @@ const login = async(req,res) => {
     });
 
   }
+};
+
+const deleteByUser = async (req,res) => {
+  const { id } = req.params;
+
+  try{
+    await User.deleteUser(id);
+
+    res.json({ 
+      message: "User deleted successfullyS"
+    })
+
+  }
+  catch (error){
+    console.error(error);
+    res.status(500);json({error:"Error deleting user"})
+  }
 }
 
-module.exports = { register,login };
+module.exports = { register,login, deleteByUser};
