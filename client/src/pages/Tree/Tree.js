@@ -4,10 +4,10 @@ import * as styles from './styles';
 import f3 from 'family-chart';
 import './tree.css'; // styling adapted from family-chart package sample code
 import { ReactComponent as PlusSign } from '../../assets/plus-sign.svg';
-import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
-import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
+// import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
+// import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
 import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMember';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/
@@ -16,9 +16,11 @@ class FamilyTree extends React.Component {
     cont = React.createRef();
   
     componentDidMount() {
-        if (!this.cont.current) return;
-        
-        create(treeData);
+        if (!this.cont.current) {
+            console.log("failure");
+            return;
+        }
+        console.log("success");
 
         function create(data) {
             const f3Chart = f3.createChart('#FamilyChart', data)
@@ -26,21 +28,46 @@ class FamilyTree extends React.Component {
                 .setCardXSpacing(250)
                 .setCardYSpacing(150)
                 .setOrientationVertical()
-                .setSingleParentEmptyCard(true, {label: 'ADD'})
+                .setSingleParentEmptyCard(false)
             
             const f3Card = f3Chart.setCard(f3.CardHtml)
                 // can edit displayed fields here
                 .setCardDisplay([["first name"],[]])
                 .setCardDim({"width":80,"height":80})
-                .setMiniTree(true)
+                .setMiniTree(false)
                 .setStyle('imageCircle')
                 .setOnHoverPathToMain()
             
             // remove zooming transitions
             f3Card.setOnCardClick((e, d) => {})
             
+            f3Chart.updateMainId("21");
             f3Chart.updateTree({initial: true})
         }
+
+        let getRequestOptions = {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        };
+
+        fetch(`http://localhost:5000/api/tree-info/16`, getRequestOptions) // need to fix DB to retrieve by user ID
+            .then(async(response) => {
+                if (response.ok) {
+                    let treeData = await response.json();
+                    console.log(treeData.object);
+                    parsedData = treeData.object;
+                    console.log(parsedData);
+                    // make all visible
+                    // for (let i = 0; i < parsedData.length; i++) {
+                    //     parsedData[i].main = true;
+                    // }
+                    create(parsedData);
+                }
+                else {
+                    // print message in return body
+                    console.error('Error:', response);
+                }
+            });
     }
   
     render() {
@@ -48,96 +75,13 @@ class FamilyTree extends React.Component {
     }
   }
 
-// sample data for now, but TODO retrieve from API
-// can add "avatar" field and link under data object to show pfp on tree
-let treeData = [
-    {
-    "id": "0",
-    "rels": {
-        "father": "1",
-        "mother": "2",
-        "children": ["5"]
-    },
-    "data": {
-        "first name": "Ronald",
-        "last name": "Smith",
-        "avatar": "https://i.imgur.com/mfojszj.png",
-        "email": "ronald@gmail.com"
-    }
-    },
-    {
-    "id": "1",
-    "rels": {
-        "father": "3",
-        "mother": "4",
-        "spouses": [
-            "2"
-        ],
-        "children": [
-            "0"
-        ]
-        },
-    "data": {
-        "first name": "John",
-        "last name": "Smith",
-        "flag": "paternal"
-        }
-    },
-    {
-        "id": "2",
-        "rels": {
-            "spouses": [
-                "1"
-            ],
-            "children": [
-                "0"
-            ]
-            },
-        "data": {
-            "first name": "Jane",
-            "last name": "Smith",
-            "flag": "maternal"
-            }
-    },
-    {
-        "id": "3",
-        "rels": {
-            "children": ["1"],
-            "spouses": ["4"]
-        },
-        "data": {
-            "first name": "Alice",
-            "last name": "Smith",
-            "flag": "paternal"
-        }
-    },
-    {
-        "id": "4",
-        "rels": {
-            "children": ["1"],
-            "spouses": ["3"]
-        },
-        "data": {
-            "first name": "Bob",
-            "last name": "Smith",
-            "flag": "paternal"
-        }
-    },
-    {
-        "id": "5",
-        "rels": {
-            "father": "0",
-        },
-        "data": {
-            "first name": "Tom",
-            "last name": "Smith"
-        }
-    },
-];
+let parsedData = [];
+
+var userId = 23; // todo will retrieve this from a service or something
 
 // builds the actual page
 function Tree() {
-    let user_lastname = "Smith";
+    let user_lastname = "Smith"; // TODO get this from a service
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
     return (
@@ -171,7 +115,8 @@ function Tree() {
                     </div>
                     {/* add family member button */}
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px'}} />} />
+                        {/* TODO: fix hard coding of passed user ID (service?) */}
+                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px'}}/>} userid={3}/>
                     </div>
                 </div>
                 
