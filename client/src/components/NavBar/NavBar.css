@@ -1,11 +1,17 @@
 .navbar {
     height: 100%;
-    width: 200px;
+    width: 150px;
     background-color: #ccdfcd;
     text-decoration: none;
-    position: fixed;
+    /* position: fixed; */
     justify-content: center;
     font-family: Alata;
+}
+
+@media screen and (max-width: 768px) {
+    .navbar {
+        display: none;
+    }
 }
 
 .nested-navbar {
@@ -14,8 +20,9 @@
     top: 0px;
     background-color: #ebffec;
     position: absolute;
-    padding-left: 30px;
-    margin-left: 150px;
+    padding-top: 30px;
+    margin-left: 85px;
+    z-index: 100;
 }
 
 .nav-item {
@@ -86,15 +93,16 @@
 
 .settings-and-help {
     display: flex;
-    margin-top: 500px;
-    gap: 50px;
+    margin-top: 50vh;
+    margin-bottom: 5vh;
+    gap: 26%;
     align-items: center;
 }
 
 .settings-icon {
     display: flex;
     background-color: #ccdfcd;
-    margin-left: 40px;
+    margin-left: 2%;
     height: 30px;
     width: 30px;
     color: black;

@@ -13,6 +13,7 @@ import ShareTree from './pages/Tree/ShareTree/ShareTree';
 import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
 import Dashboard from './components/UserActivityDash';
 import WebsiteSettings from './pages/WebsiteSettings/WebsiteSettings';
+import Register from './pages/Register/Register';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
@@ -41,11 +42,11 @@ const router = createBrowserRouter([
     element: <Tree />,
     children: [
       {
-        path: 'viewsharedtrees',
+        path: '/tree/viewsharedtrees',
         element: <ViewSharedTrees />
       },
       {
-        path: 'sharetree',
+        path: '/tree/sharetree',
         element: <ShareTree />
       }
     ]
@@ -61,6 +62,14 @@ const router = createBrowserRouter([
   {
     path: '/websitesettings',
     element: <WebsiteSettings />
+  },
+  {
+    path: '*',
+    element: <Home />,
+    loader: () => {
+      window.location.pathname = '/';
+      return null;
+    },
   }
   
 ]) 

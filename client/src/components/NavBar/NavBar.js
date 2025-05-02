@@ -63,16 +63,17 @@ function NavBar() {
                 </NavLink>
                 <br/>
                 <NavLink to="/chat" className="nav-item"> Chat </NavLink>
+
+                <div className="settings-and-help">
+                    <NavLink to="/websitesettings" >
+                        <AiOutlineSetting className="settings-icon"></AiOutlineSetting>
+                    </NavLink>
+                    <NavLink to="/help">
+                        <AiOutlineQuestion className="help-icon"></AiOutlineQuestion>
+                    </NavLink>
+                </div>
                 
             </ul>
-            <div className="settings-and-help">
-                <NavLink to="/websitesettings" >
-                    <AiOutlineSetting className="settings-icon"></AiOutlineSetting>
-                </NavLink>
-                <NavLink to="/help">
-                    <AiOutlineQuestion className="help-icon"></AiOutlineQuestion>
-                </NavLink>
-            </div>
 
         </nav>
     );

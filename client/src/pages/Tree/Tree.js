@@ -8,6 +8,8 @@ import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
 import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
 import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMember';
 import { Link } from 'react-router-dom';
+import NavBar from '../../components/NavBar/NavBar';
+import { useLocation, Outlet } from 'react-router-dom';
 
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/
@@ -137,14 +139,14 @@ let treeData = [
 
 // builds the actual page
 function Tree() {
+    const location = useLocation();
+    const isTreePage = location.pathname === '/tree';
     let user_lastname = "Smith";
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
     return (
-        <>
-        <NavBar />
         <div style={styles.DefaultStyle}>
-
+            <NavBar />
             {/* TODO make these work again, removed them for now so I could work with the header placement; might want to integrate these with actual background somehow */}
             {/* <div style={styles.ArrowContainerStyle}>
                 <div style={{flex: '50%'}}></div>
@@ -152,6 +154,7 @@ function Tree() {
                 <ArrowBL style={styles.BottomLeftArrowStyle} />
                 <div style={{flex: '50%', textAlign: 'right'}}></div>
             </div>  */}
+            {isTreePage ? (
 
             <div style={styles.MainContainerStyle} className="main-container">
                 {/* <Link to="/" style={{ position: 'absolute', top: '0px', left: '0px', margin: '10px' }}>Home</Link> */}
@@ -182,8 +185,11 @@ function Tree() {
                 {/* using a border fo</div>r now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
                 <div style={styles.FamilyTreeContainerStyle}> <FamilyTree/> </div>
             </div>
+            ) : (
+            <Outlet />
+            )}
         </div>
-    );   
+    )
 }
 
 export default Tree;

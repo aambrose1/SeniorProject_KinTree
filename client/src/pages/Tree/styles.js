@@ -1,8 +1,7 @@
 export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     textAlign: 'center',
-    alignItems: 'center',
     fontFamily: 'Alata'
 }
 
@@ -49,15 +48,16 @@ export const BottomLeftArrowStyle = {
 export const HeaderStyle = {
     display: 'flex',
     width: '20%', 
-    marginLeft: '5%',
-    marginRight: '5%',
+    marginLeft: '15%',
+    marginRight: '10%',
     marginBottom: '5%',
     flexDirection: 'column',
     alignItems: 'center',
+    zIndex: '-1'
 }
 
 export const FamilyTreeContainerStyle = { 
-    width: '60%', 
+    width: '80%', 
     height: '90vh', 
     borderStyle: 'double', 
     // maxWidth: '800px', 

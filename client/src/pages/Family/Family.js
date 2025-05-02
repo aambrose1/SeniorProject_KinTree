@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import * as styles from './styles';
 import Popup from 'reactjs-popup';
 import { ReactComponent as DropdownIcon } from '../../assets/dropdown-arrow.svg';
+import NavBar from '../../components/NavBar/NavBar';
 
 const defaultAvatar = require('../../assets/default-avatar.png');
 
@@ -135,6 +136,7 @@ function Family() {
 
     return (
         <div style={styles.DefaultStyle}>
+            <NavBar />
             {/* main container */}
             <div style={styles.ContainerStyle}>
                 {/* header */}
