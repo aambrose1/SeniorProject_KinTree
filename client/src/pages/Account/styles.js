@@ -1,6 +1,7 @@
 export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'column',
+    textAlign: 'center',
+    flexDirection: 'row',
     padding: '10px',
     fontFamily: 'Alata',
     alignItems: 'center'

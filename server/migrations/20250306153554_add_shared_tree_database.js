@@ -6,7 +6,7 @@ exports.up = function(knex) {
     return knex.schema
     .createTable('sharedTrees', (table) =>{
         table.increments('sharedTreeID').primary();
-        table.integer('senderID').references('id').inTable('users');
+        table.integer('senderID').unsigned().notNullable().references('id').inTable('users');
         table.integer('recieverID');
         table.enu('perms', ['view', 'edit']);
         table.enu('parentalSide', ['paternal', 'maternal', 'both']);

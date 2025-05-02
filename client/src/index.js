@@ -9,11 +9,11 @@ import Account from './pages/Account/Account';
 import Tree from './pages/Tree/Tree';
 import Login from './pages/Login/Login';
 import Family from './pages/Family/Family';
+import ShareTree from './pages/Tree/ShareTree/ShareTree';
+import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
+import Dashboard from './components/UserActivityDash';
+import WebsiteSettings from './pages/WebsiteSettings/WebsiteSettings';
 import Register from './pages/Register/Register';
-import Reset from './pages/Reset/Reset';
-import ShareTree from './pages/ShareTree/ShareTree';
-import SharedTrees from './pages/SharedTrees/SharedTrees';
-import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
@@ -40,26 +40,28 @@ const router = createBrowserRouter([
   {
     path: '/tree',
     element: <Tree />,
+    children: [
+      {
+        path: '/tree/viewsharedtrees',
+        element: <ViewSharedTrees />
+      },
+      {
+        path: '/tree/sharetree',
+        element: <ShareTree />
+      }
+    ]
   },
   {
     path: '/family',
-    element: <Family />,
+    element: <Family />
   },
   {
-    path: '/reset',
-    element: <Reset />,
+    path: '/useractivitydash',
+    element: <Dashboard />
   },
   {
-    path: '/sharetree',
-    element: <ShareTree />,
-  },
-  {
-    path: '/sharedtrees',
-    element: <SharedTrees />,
-  },
-  {
-    path: 'sharedtree/:id',
-    element: <ViewSharedTree />,
+    path: '/websitesettings',
+    element: <WebsiteSettings />
   },
   {
     path: '*',
@@ -69,7 +71,9 @@ const router = createBrowserRouter([
       return null;
     },
   }
-])
+  
+]) 
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -79,6 +83,9 @@ root.render(
     </RouterProvider>
   </React.StrictMode>
 );
+
+
+
 
 
 // If you want to start measuring performance in your app, pass a function

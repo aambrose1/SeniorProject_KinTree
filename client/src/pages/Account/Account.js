@@ -1,6 +1,7 @@
 import { React, useEffect } from 'react';
 import * as styles from './styles';
 import { Link, useParams } from 'react-router-dom';
+import NavBar from '../../components/NavBar/NavBar';
 import AddToTreePopup from '../../components/AddToTree/AddToTree';
 import { useCurrentUser } from '../../CurrentUserProvider';
 
@@ -101,6 +102,7 @@ function Account() {
 
     return (
         <div style={styles.DefaultStyle}>
+            <NavBar />
             <div style={{display: 'flex', justifyContent: 'flex-start', width: '100%'}}>
                 <Link to="/tree" >Back to Tree</Link>
             </div>

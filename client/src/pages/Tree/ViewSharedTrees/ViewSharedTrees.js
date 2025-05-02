@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import * as styles from './styles';
 import { Link } from 'react-router-dom';
 
-const defaultAvatar = require('../../assets/default-avatar.png');
+const defaultAvatar = require('../../../assets/default-avatar.png');
 
-function SharedTrees() {
+function ViewSharedTrees() {
     const [trees, setTrees] = useState([]);
 
     // simulate API call for shared trees
@@ -59,4 +59,4 @@ function SharedTrees() {
     )
 }
 
-export default SharedTrees;
+export default ViewSharedTrees;
