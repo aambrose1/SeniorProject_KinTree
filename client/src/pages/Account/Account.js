@@ -1,4 +1,4 @@
-import React from 'react';
+import { React, useEffect } from 'react';
 import * as styles from './styles';
 import { Link, useParams } from 'react-router-dom';
 import AddToTreePopup from '../../components/AddToTree/AddToTree';
