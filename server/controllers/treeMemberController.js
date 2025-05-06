@@ -3,7 +3,7 @@ const relationship = require('../models/relationshipModel');
 
 const addTreeMember = async (req, res) => {
     try {
-        const { firstName, lastName, birthDate, deathDate, location, phoneNumber, relationships, userId } = req.body;
+        const { firstName, lastName, birthDate, deathDate, location, phoneNumber, relationships, userId, memberUserId } = req.body;
 
         // Ensure all necessary fields are passed in the request body
         const [newMember] = await treeMember.addMember({
@@ -13,8 +13,8 @@ const addTreeMember = async (req, res) => {
             deathDate,
             location,
             phoneNumber,
-            userId
-
+            userId,
+            memberUserId
         });
         /// need to fix that a value can be left empty (deathDate)
 

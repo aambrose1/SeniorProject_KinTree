@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form'
+import { set, useForm } from 'react-hook-form'
 import { React, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -23,13 +23,13 @@ const yupValidation = yup.object().shape(
         country: yup.string().required("Country of residence is a required field."),
         phonenum: yup.string()
             .matches(
-                "/^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/"
+                /^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
                 , "Invalid phone number format."
             ),
         zipcode: yup.string().matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
         password: yup.string().required("Password is a required field.")
             .matches(
-                "/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/"
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
                 , "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
             )
 
@@ -39,9 +39,67 @@ const yupValidation = yup.object().shape(
 const CreateAccount = () => {
     const {register, handleSubmit, formState: {errors}} = useForm({resolver: yupResolver(yupValidation)});
     const [isHovering, setIsHovering] = useState(false);
+    const [formData, setFormData] = useState({});
     //ToDo: code linkage to backend
     const onSubmit = (data) => {
         console.log(data);
+    
+        // Register account
+        fetch(`http://localhost:5000/api/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: data.firstname + " " + data.lastname,
+                email: data.email,
+                password: data.password,
+            }),
+        })
+            .then(async (response) => {
+                if (response.ok) {
+                    const responseData = await response.json();
+                    console.log(responseData);
+    
+                    // Use responseData.user directly
+                    const accountID = responseData.user;
+    
+                    // Initialize user's tree by adding themself
+                    return fetch(`http://localhost:5000/api/family-members/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            firstName: data.firstname,
+                            lastName: data.lastname,
+                            birthdate: data.birthdate,
+                            email: data.email,
+                            location: `${data.address}, ${data.city}, ${data.state} ${data.zipcode}, ${data.country}`,
+                            phoneNumber: data.phonenum,
+                            userId: accountID, // Use accountID directly
+                            memberUserId: accountID, // Use accountID directly
+                        }),
+                    });
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error registering account:', errorData);
+                    throw new Error('Account registration failed');
+                }
+            })
+            .then(async (response) => {
+                if (response.ok) {
+                    const responseData = await response.json();
+                    console.log(responseData);
+                    window.location.href = '/';
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error initializing family member:', errorData);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     };
 
     const ButtonStyle = {
