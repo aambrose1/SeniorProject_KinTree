@@ -16,8 +16,7 @@ function Home() {
         <div style={styles.DefaultStyle}>
             <NavBar />
             <Link to="/tree" >View Tree Page</Link>
-            <CreateEventPopup trigger={<CalendarIcon style={styles.CalendarButton} />} />
-            <CreateMemoryPopup trigger={<PlusIcon style={styles.PlusButton} />} />
+            
         </div>
     )
 }

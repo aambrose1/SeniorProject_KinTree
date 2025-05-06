@@ -20,12 +20,12 @@ export const MainContainerStyle = {
     // position: 'absolute', // needed for arrows to work, temporarily removed to make header work properly to left of tree
     top: '0', 
     left: '0', 
-    zIndex: '10', 
+    zIndex: '1', 
     overflow: 'hidden', 
     alignItems: 'center', 
     justifyContent: 'flex-start', 
     display: 'flex', 
-    margin: '50px'
+    margin: '3% 14%',
 }
 
 export const TopRightArrowStyle = {
@@ -48,7 +48,7 @@ export const BottomLeftArrowStyle = {
 export const HeaderStyle = {
     display: 'flex',
     width: '20%', 
-    marginLeft: '15%',
+    marginLeft: '9%',
     marginRight: '10%',
     marginBottom: '5%',
     flexDirection: 'column',
