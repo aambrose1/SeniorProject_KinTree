@@ -20,7 +20,7 @@ function NavBar() {
                 
                 <NavLink to="/account" 
                     className={({isActive}) => 
-                        isActive && id === currentUserID ? "nav-item-active" : "nav-item"} 
+                        isActive && Number(id) === Number(currentUserID) ? "nav-item-active" : "nav-item"} 
                     onClick={() => setShowNestedNav(false)}> 
                     Account 
                 </NavLink>
