@@ -1,4 +1,5 @@
 const db = require('../db/knex');
+const { get } = require('../routes/treeMemberRoute');
 
 const User = {
     register: async (userData) => {
@@ -11,7 +12,15 @@ const User = {
 
     findById: async (id) => {
         return db('users').where({id}).first();
-    }
+    },
+
+    updateUserInfo: async(id, userData) => {
+        return db('users').insert(userData, '').where({id}).first().insert(userData, []);
+    },
+
+    getAllUsers: async () => {
+        return db('users').select('*');
+    },
 };
 
 module.exports = User;

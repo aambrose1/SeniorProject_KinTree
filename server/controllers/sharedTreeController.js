@@ -77,7 +77,7 @@ const getSharedTreebyReciever = async (req, res) => {
 
 const shareTree = async (req,res) => {
     try{
-        const {senderID, perms, parentalSide, recieverEmail} = req.body;
+        const {senderID, perms, parentalSide, recieverEmail, treeInfo} = req.body;
 
         if (!["maternal", "paternal", "both"].includes(parentalSide)){
             return res.status(400).json({
@@ -94,21 +94,21 @@ const shareTree = async (req,res) => {
             });
 
         }
-        const treeMembers = await Promise.all(
-            relationships.map(async (relationship) => {
-                // For each relationship, fetch the details of the tree members (person1 and person2)
-                const person1Details = await treeMember.getMemberById(relationship.person1_id);
-                const person2Details = await treeMember.getMemberById(relationship.person2_id);
+        // const treeMembers = await Promise.all(
+        //     relationships.map(async (relationship) => {
+        //         // For each relationship, fetch the details of the tree members (person1 and person2)
+        //         const person1Details = await treeMember.getMemberById(relationship.person1_id);
+        //         const person2Details = await treeMember.getMemberById(relationship.person2_id);
         
         
-                // Return the relationship along with both person details
-                return {
-                    ...relationship,
-                    person1Details,
-                    person2Details
-                };
-            })
-        );
+        //         // Return the relationship along with both person details
+        //         return {
+        //             ...relationship,
+        //             person1Details,
+        //             person2Details
+        //         };
+        //     })
+        // );
         
 
         if(reciever) {
@@ -117,7 +117,7 @@ const shareTree = async (req,res) => {
                 recieverID: reciever.id,
                 perms,
                 parentalSide,
-                treeInfo: JSON.stringify(treeMembers),
+                treeInfo,
                 token
             });
 
