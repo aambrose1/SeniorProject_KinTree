@@ -8,7 +8,7 @@ import { useCurrentUser } from '../../CurrentUserProvider';
 function Login() {
     const { register, handleSubmit } = useForm();
     const [ errorMessage, setErrorMessage ] = useState("");
-    const { setCurrentUserID } = useCurrentUser();
+    const { setCurrentAccountID, fetchCurrentUserID, fetchCurrentAccountID } = useCurrentUser();
     
     // TODO: connect to backend
     const onSubmit = (data) => {
@@ -20,12 +20,17 @@ function Login() {
         fetch('http://localhost:5000/api/auth/login', requestOptions)
             .then(async(response) => {
                 if (response.ok) {
-                    window.location.href='/'
-                    fetch(`http://localhost:5000/api/auth/users/${data.email}`, requestOptions)
+                    fetch(`http://localhost:5000/api/auth/user/email/${data.email}`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
                     .then(async(response) => {
                         if (response.ok) {
                             let userData = await response.json();
-                            setCurrentUserID(userData.id); // Set the current user ID in context
+                            await setCurrentAccountID(userData.id); // set the current user ID in context
+                            console.log("set currentAccountID to: ", userData.id);
+                            await fetchCurrentUserID();
+                            window.location.href='/'
                         }
                     })
                     return response.json();

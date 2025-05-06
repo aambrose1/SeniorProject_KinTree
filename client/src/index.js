@@ -19,20 +19,33 @@ import Help from './pages/Help/Help';
 import Chat from './pages/Chat/Chat';
 import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
 import CreateAccount from './pages/CreateAccount/CreateAccount';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/account',
-    element: <Account />,
+    element: (
+      <ProtectedRoute>
+        <Account />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/account/:id',
-    element: <Account />,
+    element: (
+      <ProtectedRoute>
+        <Account />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/login',
@@ -44,41 +57,77 @@ const router = createBrowserRouter([
   },
   {
     path: '/tree',
-    element: <Tree />,
+    element: (
+      <ProtectedRoute>
+        <Tree />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: '/tree/viewsharedtrees',
-        element: <ViewSharedTrees />
+        element: (
+          <ProtectedRoute>
+            <ViewSharedTrees />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/tree/sharetree',
-        element: <ShareTree />
+        element: (
+          <ProtectedRoute>
+            <ShareTree />
+          </ProtectedRoute>
+        ),
       }
     ]
   },
   {
     path: '/family',
-    element: <Family />
+    element: (
+      <ProtectedRoute>
+        <Family />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/useractivitydash',
-    element: <Dashboard />
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/websitesettings',
-    element: <WebsiteSettings />
+    element: (
+      <ProtectedRoute>
+        <WebsiteSettings />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/help',
-    element: <Help />
+    element: (
+      <ProtectedRoute>
+        <Help />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/chat',
-    element: <Chat />
+    element: (
+      <ProtectedRoute>
+        <Chat />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/sharedtree/:id',
-    element: <ViewSharedTree />,
+    element: (
+      <ProtectedRoute>
+        <ViewSharedTree />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '*',
