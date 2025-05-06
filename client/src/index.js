@@ -18,6 +18,7 @@ import { CurrentUserProvider } from './CurrentUserProvider';
 import Help from './pages/Help/Help';
 import Chat from './pages/Chat/Chat';
 import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
+import CreateAccount from './pages/CreateAccount/CreateAccount';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
@@ -39,7 +40,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/register',
-    element: <Register />,
+    element: <CreateAccount />,
   },
   {
     path: '/tree',
