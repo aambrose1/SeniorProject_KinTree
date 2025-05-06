@@ -2,9 +2,14 @@ export const DefaultStyle = {
     display: 'flex',
     textAlign: 'center',
     flexDirection: 'row',
-    padding: '10px',
     fontFamily: 'Alata',
-    alignItems: 'center'
+    alignItems: 'flex-start'
+}
+
+export const RightSide = {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'center'
 }
 
 export const ContainerStyle = {
