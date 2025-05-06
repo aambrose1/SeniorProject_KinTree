@@ -3,7 +3,7 @@ export const DefaultStyle = {
     flexDirection: 'row',
     fontFamily: 'Alata',
     alignItems: 'flex-start',
-    overflow: 'hidden',
+    // overflow: 'hidden',
     textAlign: 'center',
   };
 

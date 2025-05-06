@@ -137,7 +137,7 @@ function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelations
   console.log(updatedTreeData);
 
   let requestOptions = {
-    method: 'PUT', // TODO change this back to PUT
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedTreeData)
   };

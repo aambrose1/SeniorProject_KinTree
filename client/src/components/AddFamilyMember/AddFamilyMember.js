@@ -298,7 +298,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                           <input
                             type="radio"
                             value={result.id}
-                            {...register("selectedMember", { required: true })} // TODO make work
+                            {...register("selectedMember", { required: true })}
                           />
                           <Link to={`/account/${result.id}`} style={{ marginLeft: '10px' }}>
                             {result.username}
