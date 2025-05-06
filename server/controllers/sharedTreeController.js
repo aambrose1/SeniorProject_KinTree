@@ -8,8 +8,8 @@ const crypto = require('crypto');
 const getSharedTreeById = async (req, res) => {
     try{
         const { id} = req.params;
-        const relationships = await sharedTrees.getSharedTreeById(id);
-        res.status(200).json(sharedTrees);
+        const trees = await sharedTrees.getSharedTreeById(id);
+        res.status(200).json(trees);
     }
     catch(error){
         console.error(error);
@@ -62,9 +62,9 @@ const getSharedTreeBySender = async (req, res) => {
 
 const getSharedTreebyReciever = async (req, res) => {
     try{
-        const { id} = req.params;
-        const relationships = await sharedTrees.getSharedTreebyReciever(id);
-        res.status(200).json(sharedTrees);
+        const { id } = req.params;
+        const trees = await sharedTrees.getSharedTreebyReciever(id);
+        res.status(200).json(trees);
     }
     catch(error){
         console.error(error);
@@ -77,7 +77,7 @@ const getSharedTreebyReciever = async (req, res) => {
 
 const shareTree = async (req,res) => {
     try{
-        const {senderID, perms, parentalSide, recieverEmail, treeInfo} = req.body;
+        const {senderID, recieverID, perms, parentalSide, recieverEmail, treeInfo} = req.body;
 
         if (!["maternal", "paternal", "both"].includes(parentalSide)){
             return res.status(400).json({
@@ -85,15 +85,15 @@ const shareTree = async (req,res) => {
             });
         }
         const token = crypto.randomBytes(16).toString('hex');
-        const reciever = await users.findByEmail(recieverEmail)
-        const relationships = await relationship.filterBySide(senderID,parentalSide);
+        // const receiver = await users.findByEmail(recieverEmail)
+        // const relationships = await relationship.filterBySide(senderID,parentalSide);
 
-        if(relationships.length === 0 ){
-            return res.status(400).json({
-                message: "No members found for the '${parentalSide}' side."
-            });
+        // if(relationships.length === 0 ){
+        //     return res.status(400).json({
+        //         message: `No members found for the ${parentalSide} side.`
+        //     });
 
-        }
+        // }
         // const treeMembers = await Promise.all(
         //     relationships.map(async (relationship) => {
         //         // For each relationship, fetch the details of the tree members (person1 and person2)
@@ -111,29 +111,29 @@ const shareTree = async (req,res) => {
         // );
         
 
-        if(reciever) {
+        // if(receiver) {
+        //     // const [newSharedTree] = await sharedTrees.addSharedTree({
+        //     //     senderID,
+        //     //     recieverID: receiver.id,
+        //     //     perms,
+        //     //     parentalSide,
+        //     //     treeInfo,
+        //     //     // token
+        //     // });
+
+        //     // return res.status(201).json({
+        //     //     message: "Shared tree added",
+        //     //     token: newSharedTree.token
+        //     // })
+        // }
+        if(1){
             const [newSharedTree] = await sharedTrees.addSharedTree({
                 senderID,
-                recieverID: reciever.id,
+                recieverID,
                 perms,
                 parentalSide,
                 treeInfo,
-                token
-            });
-
-            return res.status(201).json({
-                message: "Shared tree added",
-                token: newSharedTree.token
-            })
-        }
-        else{
-            const [newSharedTree] = await sharedTrees.addSharedTree({
-                senderID,
-                recieverID: null,
-                perms,
-                parentalSide,
-                treeInfo: JSON.stringify(treeMembers),
-                token
+                // token
             });
             return res.status(201).json({
                 message: "Shared tree added. Reciever will be prompted to register/log in if needed.",
