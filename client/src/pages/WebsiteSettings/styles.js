@@ -1,10 +1,21 @@
+export const DefaultStyle = {
+  fontFamily: 'Alata',
+  textAlign: 'left',
+}
+
+export const RightSide = {
+  display: 'flex',
+  padding: '2%'
+}
+
 export const SettingsContainer = {
   width: '60%',
   margin: 'auto',
   padding: '20px',
   background:' #f9f9f9',
   borderRadius: '10px',
-  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)'
+  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+  fontFamily: 'Alata',
 };
 
 export const Section = {
@@ -14,8 +25,10 @@ export const Section = {
 };
 
 export const Title = {
-  textAlign: 'center',
-  color: '#333'
+  textAlign: 'left',
+  color: '#333',
+  fontFamily: 'Aboreto',
+  marginLeft: '10px',
 };
 
 export const SubTitle = {
@@ -24,23 +37,24 @@ export const SubTitle = {
 };
 
 export const Button = {
-  padding: '10px 15px',
-  backgroundColor: ' #007bff',
+  fontFamily: 'Alata',
+  backgroundColor: '#3a5a40',
   color: 'white',
+  borderRadius: '10px',
   border: 'none',
-  borderRadius: '5px',
+  padding: '10px 20px',
+  margin: '10px 10px 10px 0px',
   cursor: 'pointer',
-  marginTop: '10px'
-
-  //&:hover {
-  //  background-color: #0056b3;
-  //}
+  width: '20%',
+  minWidth: '145px',
+  height: '45px'
 };
 
 export const Input = {
-  width: '100%',
+  width: '70%',
   padding: '8px',
   marginTop: '5px',
+  marginLeft: '10px',
   border: '1px solid #ccc',
   borderRadius: '5px'
 };

@@ -11,15 +11,19 @@ import Login from './pages/Login/Login';
 import Family from './pages/Family/Family';
 import ShareTree from './pages/Tree/ShareTree/ShareTree';
 import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
-import Dashboard from './components/UserActivityDash';
+import Dashboard from './components/UserActivityDashboard/UserActivityDash';
 import WebsiteSettings from './pages/WebsiteSettings/WebsiteSettings';
 import Register from './pages/Register/Register';
+import { CurrentUserProvider } from './CurrentUserProvider';
+import Help from './pages/Help/Help';
+import Chat from './pages/Chat/Chat';
+import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
+    element: <Dashboard />,
   },
   {
     path: '/account',
@@ -64,6 +68,18 @@ const router = createBrowserRouter([
     element: <WebsiteSettings />
   },
   {
+    path: '/help',
+    element: <Help />
+  },
+  {
+    path: '/chat',
+    element: <Chat />
+  },
+  {
+    path: '/sharedtree/:id',
+    element: <ViewSharedTree />,
+  },
+  {
     path: '*',
     element: <Home />,
     loader: () => {
@@ -77,11 +93,13 @@ const router = createBrowserRouter([
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  <CurrentUserProvider>
   <React.StrictMode>
     <RouterProvider router={router}>
       <App />
     </RouterProvider>
   </React.StrictMode>
+  </CurrentUserProvider>
 );
 
 
