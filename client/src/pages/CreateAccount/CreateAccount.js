@@ -1,9 +1,10 @@
 import { useForm } from 'react-hook-form'
-import { useState } from 'react'
+import { React, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import * as styles from './styles'
+import logo from '../../assets/kintreelogo-adobe.png';
 
 //validation functionality
 const yupValidation = yup.object().shape(
@@ -45,27 +46,23 @@ const CreateAccount = () => {
 
     const ButtonStyle = {
         fontFamily: 'Alata',
-        backgroundColor: isHovering ? '#3a5a40' : '#a2d59f',
-        color: isHovering ? 'white' : 'black',
-        transition: 'all .5s', 
+        backgroundColor: '#3a5a40',
+        color: 'white',
         borderRadius: '10px',
         border: 'none',
-        paddingLeft: '15%',
-        paddingRight: '15%',
-        paddingBottom: '5%',
-        paddingTop: '4%',
+        padding: '10px 20px',
+        margin: '10px',
         cursor: 'pointer',
-        width: '100%',
-        minWidth: '150px',
+        width: '60%',
         height: '45px'
     };
 
     return (
         <div style={styles.DefaultStyle}>
-            <div style={styles.Header}>
-                Create Account
-            </div>
+            
             <div style={styles.Container}>
+                <img src={logo} alt="KinTree Logo" style={styles.Logo} />
+                <h1 style={styles.Header}>Create Account</h1>
                 <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
                 <div style={styles.ListStyle}>
                     <div style={styles.ItemStyle}>

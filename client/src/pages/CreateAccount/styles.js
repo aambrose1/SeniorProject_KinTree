@@ -4,7 +4,6 @@
     fontFamily: 'Alata',
     alignItems: 'center',
     backgroundColor: '#e7f2d8',
-    paddingLeft: '5%',
     width: '100%'
   };
   
@@ -14,18 +13,14 @@
     alignItems: 'center',
     justifyContent: 'flex-start',
     minWidth: '290px',
-    width: '50%',
-    height: '100vh',
+    width: '40%',
+    height: '80vh',
     borderRadius: '30px',
-    borderRight: '0.5px solid #ccc',
-    borderLeft: '0.5px solid #ccc',
-    borderTop: '0.5px solid #ccc',
-    borderBottom: '0.5px solid #ccc',
     backgroundColor: '#faf9f6',
-    padding: '20px',
-    marginTop: '100px',
+    padding: '20px 5vw',
+    marginTop: '2%',
     boxShadow: 'gray 0px 10px 10px -8px',
-    border: '0.5px solid #000000'
+    border: '0.5px solid #000000',
   };
   
   export const Logo = {
@@ -40,7 +35,7 @@
     flexDirection: 'column',
     alignItems: 'center',
     width: 'auto',
-    padding: '0'
+    padding: '0',
   };
   
   export const FormStyle = {
@@ -48,7 +43,8 @@
     paddingTop: '0px',
     width: '60%',
     minWidth: '260px',
-    alignItems: 'center'
+    alignItems: 'center',
+    overflowY: 'scroll'
   };
   
   export const ItemStyle = {
@@ -68,16 +64,7 @@
   };
   
   export const Header = {
-    textAlign: 'center',
-    display: 'block',
-    fontWeight: 'bold',
-    fontSize: '32pt',
-    borderBottom: '3px solid black',
-    paddingTop: '10px',
-    paddingBottom: '20px',
-    paddingLeft: '10px',
-    paddingRight: '10px',
-    marginTop: '40px'
+    margin: '0',
   };
   
   export const ButtonStyle = {
@@ -109,7 +96,7 @@
   export const ButtonDivStyle = {
     fontFamily: 'Alata',
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
   };
   
