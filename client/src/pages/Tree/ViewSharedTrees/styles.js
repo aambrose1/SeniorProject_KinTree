@@ -1,6 +1,6 @@
 export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     padding: '10px',
     fontFamily: 'Alata',
     alignItems: 'center',
@@ -41,3 +41,11 @@ export const ListStyle = {
     width: '80%',
     padding: '0'
   };
+
+export const RightSide = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+};

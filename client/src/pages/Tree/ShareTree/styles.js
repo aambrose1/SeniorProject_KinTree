@@ -1,6 +1,6 @@
 export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     padding: '10px',
     fontFamily: 'Alata',
     alignItems: 'center',
@@ -92,3 +92,11 @@ export const AddOptionsStyle = {
     height: '200px',
     overflow: 'auto'
 }
+
+export const RightSide = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+};
