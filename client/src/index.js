@@ -13,7 +13,7 @@ import ShareTree from './pages/Tree/ShareTree/ShareTree';
 import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
 import Dashboard from './components/UserActivityDashboard/UserActivityDash';
 import WebsiteSettings from './pages/WebsiteSettings/WebsiteSettings';
-import Register from './pages/Register/Register';
+// import Register from './pages/Register/Register';
 import { CurrentUserProvider } from './CurrentUserProvider';
 import Help from './pages/Help/Help';
 import Chat from './pages/Chat/Chat';
