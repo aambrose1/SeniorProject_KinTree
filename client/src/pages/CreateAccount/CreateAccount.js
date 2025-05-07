@@ -40,7 +40,7 @@ const CreateAccount = () => {
     const {register, handleSubmit, formState: {errors}} = useForm({resolver: yupResolver(yupValidation)});
     const [isHovering, setIsHovering] = useState(false);
     const [formData, setFormData] = useState({});
-    //ToDo: code linkage to backend
+
     const onSubmit = (data) => {
         console.log(data);
     
@@ -80,12 +80,37 @@ const CreateAccount = () => {
                             userId: accountID, // Use accountID directly
                             memberUserId: accountID, // Use accountID directly
                         }),
-                    });
-                } else {
-                    const errorData = await response.json();
-                    console.error('Error registering account:', errorData);
-                    throw new Error('Account registration failed');
-                }
+                    }).then(async (response) => {
+                        if (response.ok) {
+                            const familyMemberResponse = await response.json();
+                            console.log(familyMemberResponse);
+                            return fetch(`http://localhost:5000/api/tree-info/`, { // TEST THIS!!!!
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    object: [{
+                                        "id": familyMemberResponse.member,
+                                        "data": {
+                                            "first name": data.firstname,
+                                            "last name": data.lastname,
+                                        },
+                                        "rels": {
+                                            "children": [],
+                                            "spouses": [],
+                                        }
+                                    }],
+                                    userId: accountID, 
+                                }),
+                            });
+                        }})
+                    }
+                    else {
+                        const errorData = await response.json();
+                        console.error('Error registering account:', errorData);
+                        throw new Error('Account registration failed');
+                    }
             })
             .then(async (response) => {
                 if (response.ok) {

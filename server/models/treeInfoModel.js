@@ -6,13 +6,13 @@ const treeInfo = {
     },
 
     updateObject: async (id, data) => {
-        await db('treeInfo').where({ id }).update(data);
+        await db('treeInfo').where({ userId: id }).update(data);
         const updatedObject = await db('treeInfo').where({ id }).first();
         return updatedObject;
     },
 
     getObject: async (id) => {
-        return db('treeInfo').where({ id }).first();
+        return db('treeInfo').where({ userId: id }).first();
     },
 };
 

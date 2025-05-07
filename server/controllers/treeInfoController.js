@@ -2,11 +2,12 @@ const treeInfo = require('../models/treeInfoModel');
 
 const addObject = async (req, res) => {
     try {
-        const { object } = req.body;
+        const { object, userId } = req.body;
 
         // Ensure all necessary fields are passed in the request body
         const [newObject] = await treeInfo.addObject({
-            object: JSON.stringify(object)
+            object: JSON.stringify(object),
+            userId: userId
         });
 
         res.status(201).json({
