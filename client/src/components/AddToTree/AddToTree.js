@@ -6,18 +6,17 @@ import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { Link } from 'react-router-dom';
-
-var treeData = [];
+import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
 
 //                                 john              jane            parent                  jane is john's mom
-function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelationship, accountUserName) {
+function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelationship, accountUserName, treeData, results, currentAccountID) {
   const treeIndex = Object.fromEntries(treeData.map(person => [person.id, person]));
 
   // maybe - check if account user is already in tree, return error if they are (user will need to delete them and re-add)
 
   console.log("relative " + relativeUserId);
   console.log("account " + accountUserId);
-  console.log(allResults.find(result => Number(result.id) === Number(accountUserId)))
+  console.log(results.current.find(result => Number(result.id) === Number(accountUserId)))
 
   // intialize user in tree
   treeIndex[`${accountUserId}`] = {
@@ -29,7 +28,7 @@ function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelations
       "data": {
         "first name": `${accountUserName.split(" ")[0]}`,
         "last name": `${accountUserName.split(" ")[1]}`,
-        "gender": `${allResults.find(result => Number(result.id) === Number(accountUserId))["gender"]}`
+        "gender": `${results.current.find(result => Number(result.id) === Number(accountUserId))["gender"]}`
       }
     }
 
@@ -138,11 +137,11 @@ function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelations
   console.log(updatedTreeData);
 
   let requestOptions = {
-    method: 'PUT', // TODO change this back to PUT
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedTreeData)
   };
-  fetch(`http://localhost:5000/api/tree-info/16`, requestOptions)
+  fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, requestOptions)
     .then(async(response) => {
         if (response.ok) {
           console.log("Tree object updated successfully");
@@ -153,30 +152,58 @@ function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelations
     });
 }
 
-// for convenience - will retrieve TODO
-var allResults = [{ id: 20, firstName: "John", lastName: "Smith", gender: "M" },
-  { id: 19, firstName: "Jane", lastName: "Smith", gender: "F" },
-  { id: 21, firstName: "Alice", lastName: "Smith", gender: "F" },
-  { id: 22, firstName: "Bob", lastName: "Smith", gender: "M" },
-  { id: 18, firstName: "Tom", lastName: "Smith", gender: "M" },
-  { id: 17, firstName: "Jessie", lastName: "Smith", gender: "F"}];
-
 function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAccountRelationshipType, userId }) {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    var results = useRef([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  var results = useRef([]);
+  var filteredResults = useRef([]);
+  const { currentAccountID } = useCurrentUser();
+  const [treeData, setTreeData] = useState([]);
     
-    // fetch(`http://localhost:5000/api/tree-info/3`, {
-    //   method: 'GET',
-    //   headers: { 'Content-Type': 'application/json' }
-    // }).then(async(response) => {
-    //     if (response.ok) {
-    //       console.log(response);
-    //     }
-    //     else {
-    //       // print message in return body
-    //       console.error('Error:', response);
-    //     }});
+  // retrieve a list of all family members that are within the tree object
+  useEffect(() => {
+    const fetchResults = async () => {
+      fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`)
+        .then(async(response) => {
+          if (response.ok) {
+            results.current = await response.json();
+            console.log(results.current);
+          }
+          else {
+            console.log('Error:', response);
+          }
+        })
+        .then(() => {
+        // grab tree object
+        fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`)
+          .then(async(response) => {
+            if (response.ok) {
+              let responseData = await response.json();
+              console.log(responseData.object);
+              setTreeData(responseData.object);
+            }
+            else {
+              console.error('Error:', response);
+            }
+          });
+      })
+    }
+    fetchResults();
+  }, [currentAccountID]);
+
+  useEffect(() => {
+    if (!treeData || !results.current.length) {
+        console.log("treeData or results.current is empty");
+        return;
+    }
+
+    // populate filteredResults
+    filteredResults.current = results.current.filter((result) =>
+      treeData.map((person) => Number(person.id)).includes(Number(result.id))
+    );
+
+    console.log("Filtered Results:", filteredResults.current);
+  }, [treeData, results.current]);
 
     // form
     const {
@@ -193,7 +220,7 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
         reset();
         close();
         // Wait for the API request to complete
-        const response = await fetch(`http://localhost:5000/api/tree-info/3`, {
+        const response = await fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -201,11 +228,11 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
         if (response.ok) {
           // Parse the response and update `treeData`
           const treeResponse = await response.json();
-          treeData = treeResponse.object;
+          setTreeData(treeResponse.object);
           console.log(treeData);
 
           // Call AddTreeMember after the API request is complete
-          return AddTreeMember(userId, accountUserId, data.selectedMember, data.memberRelationshipType, accountUserName);
+          return AddTreeMember(userId, accountUserId, data.selectedMember, data.memberRelationshipType, accountUserName, treeData, results, currentAccountID);
         } 
         else {
             // Handle errors from the API
@@ -222,20 +249,14 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
           return;
         }
     
-        // simulate an API call
-        const fetchResults = async () => {
-          // TODO: replace with actual API call
-          results.current = [
-            { id: 20, firstName: "John", lastName: "Smith", gender: "M" },
-            { id: 19, firstName: "Jane", lastName: "Smith", gender: "F" },
-            { id: 21, firstName: "Alice", lastName: "Smith", gender: "F" },
-            { id: 22, firstName: "Bob", lastName: "Smith", gender: "M" },
-            { id: 18, firstName: "Tom", lastName: "Smith", gender: "M" },
-            { id: 17, firstName: "Jessie", lastName: "Smith", gender: "F"}
-          ].filter(member => ((member.firstName.toLowerCase().includes(searchTerm.toLowerCase() || member.lastName.toLowerCase().includes(searchTerm.toLowerCase())) && Number(member.id) !== Number(accountUserId))));
-          setSearchResults(results.current);
-          console.log(selectedMember);
-        };
+        const fetchResults = () => {
+          const filtered = filteredResults.current.filter(member => 
+              member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+              member.lastName.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          setSearchResults(filtered); // update searchResults with the filtered array
+          // console.log("Filtered Search Results:", filtered);
+      };
     
         fetchResults();
       }, [searchTerm, reset, selectedMember, accountUserId]);

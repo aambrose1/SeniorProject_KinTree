@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as styles from './styles';
 // import { ReactComponent as TreeIcon } from '../../assets/background-tree.svg'; // background tree image from Figma; TODO configure overlay with tree svg
 import f3 from 'family-chart';
@@ -10,15 +10,17 @@ import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMemb
 import { Link } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
 import { useLocation, Outlet } from 'react-router-dom';
+import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
 
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/
 
-class FamilyTree extends React.Component {
-    cont = React.createRef();
-  
-    componentDidMount() {
-        if (!this.cont.current) {
+function FamilyTree() {
+    const contRef = useRef(null); // Use a ref for the container
+    const { currentAccountID } = useCurrentUser(); // Use the hook in the function component
+
+    useEffect(() => {
+        if (!contRef.current) {
             console.log("failure");
             return;
         }
@@ -30,62 +32,51 @@ class FamilyTree extends React.Component {
                 .setCardXSpacing(250)
                 .setCardYSpacing(150)
                 .setOrientationVertical()
-                .setSingleParentEmptyCard(false)
-            
+                .setSingleParentEmptyCard(false);
+
             const f3Card = f3Chart.setCard(f3.CardHtml)
-                // can edit displayed fields here
-                .setCardDisplay([["first name"],[]])
-                .setCardDim({"width":80,"height":80})
+                .setCardDisplay([["first name"], []])
+                .setCardDim({ width: 80, height: 80 })
                 .setMiniTree(false)
                 .setStyle('imageCircle')
-                .setOnHoverPathToMain()
-            
-            // remove zooming transitions
-            f3Card.setOnCardClick((e, d) => {})
-            
+                .setOnHoverPathToMain();
+
+            f3Card.setOnCardClick((e, d) => {}); // Remove zooming transitions
+
             f3Chart.updateMainId("21");
-            f3Chart.updateTree({initial: true})
+            f3Chart.updateTree({ initial: true });
         }
 
         let getRequestOptions = {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
         };
 
-        fetch(`http://localhost:5000/api/tree-info/16`, getRequestOptions) // need to fix DB to retrieve by user ID
-            .then(async(response) => {
+        fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, getRequestOptions)
+            .then(async (response) => {
                 if (response.ok) {
                     let treeData = await response.json();
                     console.log(treeData.object);
-                    parsedData = treeData.object;
+                    const parsedData = treeData.object;
                     console.log(parsedData);
-                    // make all visible
-                    // for (let i = 0; i < parsedData.length; i++) {
-                    //     parsedData[i].main = true;
-                    // }
                     create(parsedData);
-                }
-                else {
-                    // print message in return body
+                } else {
                     console.error('Error:', response);
                 }
             });
-    }
-  
-    render() {
-      return <div className="f3 f3-cont" id="FamilyChart" ref={this.cont}></div>;
-    }
-  }
+    }, [currentAccountID]);
+
+    return <div className="f3 f3-cont" id="FamilyChart" ref={contRef}></div>;
+}
 
 let parsedData = [];
 
-var userId = 23; // todo will retrieve this from a service or something
-
 // builds the actual page
 function Tree() {
+    const { currentAccountID, currentUserName, fetchCurrentUserID } = useCurrentUser(); // Use the hook in the function component
+    fetchCurrentUserID();
     const location = useLocation();
     const isTreePage = location.pathname === '/tree';
-    let user_lastname = "Smith";
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
     return (
@@ -116,12 +107,12 @@ function Tree() {
                             width: '200px',
                             borderColor : '#000000'
                         }}/>
-                        <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2> 
+                        <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {currentUserName?.split(" ")[1]} Family</h2> 
                     </div>
                     {/* add family member button */}
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         {/* TODO: fix hard coding of passed user ID (service?) */}
-                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px'}}/>} userid={3}/>
+                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px'}}/>} userid={currentAccountID}/>
                     </div>
                 </div>
                 

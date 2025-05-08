@@ -11,23 +11,41 @@ import Login from './pages/Login/Login';
 import Family from './pages/Family/Family';
 import ShareTree from './pages/Tree/ShareTree/ShareTree';
 import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
-import Dashboard from './components/UserActivityDash';
+import Dashboard from './components/UserActivityDashboard/UserActivityDash';
 import WebsiteSettings from './pages/WebsiteSettings/WebsiteSettings';
-import Register from './pages/Register/Register';
+// import Register from './pages/Register/Register';
+import { CurrentUserProvider } from './CurrentUserProvider';
+import Help from './pages/Help/Help';
+import Chat from './pages/Chat/Chat';
+import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
+import CreateAccount from './pages/CreateAccount/CreateAccount';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/account',
-    element: <Account />,
+    element: (
+      <ProtectedRoute>
+        <Account />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/account/:id',
-    element: <Account />,
+    element: (
+      <ProtectedRoute>
+        <Account />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/login',
@@ -35,33 +53,81 @@ const router = createBrowserRouter([
   },
   {
     path: '/register',
-    element: <Register />,
+    element: <CreateAccount />,
   },
   {
     path: '/tree',
-    element: <Tree />,
+    element: (
+      <ProtectedRoute>
+        <Tree />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: '/tree/viewsharedtrees',
-        element: <ViewSharedTrees />
+        element: (
+          <ProtectedRoute>
+            <ViewSharedTrees />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/tree/sharetree',
-        element: <ShareTree />
+        element: (
+          <ProtectedRoute>
+            <ShareTree />
+          </ProtectedRoute>
+        ),
       }
     ]
   },
   {
     path: '/family',
-    element: <Family />
+    element: (
+      <ProtectedRoute>
+        <Family />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/useractivitydash',
-    element: <Dashboard />
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/websitesettings',
-    element: <WebsiteSettings />
+    element: (
+      <ProtectedRoute>
+        <WebsiteSettings />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/help',
+    element: (
+      <ProtectedRoute>
+        <Help />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/chat',
+    element: (
+      <ProtectedRoute>
+        <Chat />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/sharedtree/:id',
+    element: (
+      <ProtectedRoute>
+        <ViewSharedTree />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '*',
@@ -77,11 +143,13 @@ const router = createBrowserRouter([
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  <CurrentUserProvider>
   <React.StrictMode>
     <RouterProvider router={router}>
       <App />
     </RouterProvider>
   </React.StrictMode>
+  </CurrentUserProvider>
 );
 
 

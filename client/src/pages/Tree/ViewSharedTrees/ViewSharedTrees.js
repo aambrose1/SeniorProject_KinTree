@@ -1,32 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import * as styles from './styles';
 import { Link } from 'react-router-dom';
+import { useCurrentUser } from '../../../CurrentUserProvider';
 
-const defaultAvatar = require('../../../assets/default-avatar.png');
+// const defaultAvatar = require('../../../assets/default-avatar.png');
 
 function ViewSharedTrees() {
     const [trees, setTrees] = useState([]);
-
-    // simulate API call for shared trees
-    const fetchResults = async () => {
-        return [
-            { "id": "1", "data": {"first name": "John", "last name": "Doe", "avatar": "https://i.imgur.com/mfojszj.png"}, email: "john@gmail.com" },
-            { "id": "2", "data": {"first name": "Jane", "last name": "Smith"}},
-            { "id": "3", "data": {"first name": "Alice", "last name": "Johnson"}}
-        ];
-    };
+    const [userData, setUserData] = useState([]);
+    const { currentUserID, currentAccountID } = useCurrentUser();
 
     useEffect(() => {
-        // Fetch results and update state
+        async function fetchResults() {
+            const response = await fetch(`http://localhost:5000/api/share-trees/receiver/${currentUserID}`)
+            if (response.ok) {
+                let responseData = await response.json();
+                console.log(responseData);
+                return responseData;
+            } 
+            else {
+                console.log('Error:', response);
+            }
+        }
+    
+        // Fetch user data by senderID
+        async function fetchUserData() {
+            const response = await fetch(`http://localhost:5000/api/auth/users/`);
+            if (response.ok) {
+                const userData = await response.json();
+                return userData; // Assuming this contains the user data
+            } 
+            else {
+                console.error(`Error fetching user data`);
+                return null;
+            }
+        }
+
+        // fetch results and update state
         const fetchData = async () => {
             const results = await fetchResults();
             setTrees(results);
+            const userData = await fetchUserData();
+            setUserData(userData);
         };
         fetchData();
-    }, []); // no dependencies
+    }, [currentUserID]); // no dependencies
 
     return (
         <div style={styles.DefaultStyle}>
+            <div style={{width: '150px'}}></div>
+            <div style={styles.RightSide}>
             <div style={styles.ContainerStyle}>
                 {/* title */}
                 <h1 style={{ margin: '0px' }}>Shared Trees</h1>
@@ -34,26 +57,21 @@ function ViewSharedTrees() {
 
                 {/* dynamic list of results */}
                 <ul style={styles.ListStyle}>
-                    {trees.map(tree => (
-                        <li key={tree.id} style={styles.ItemStyle}>
+                    {trees?.map(tree => (
+                        <li key={tree.sharedTreeID} style={styles.ItemStyle}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    {/* avatar */}
-                                    <img
-                                        src={tree.data?.avatar || defaultAvatar}
-                                        alt="Avatar"
-                                        style={{ width: '50px', height: '50px', borderRadius: '50%', marginRight: '10px' }}
-                                    />
                                     {/* name */}
-                                    <span>{`${tree["data"]["first name"]} ${tree["data"]["last name"]}`}</span>
+                                    <span>{userData.find(user => user.id === tree.senderID)?.username}</span>
                                 </div>
-                                <Link to={`/sharedtree/${tree.id}`} style={{ color: '#000' }}>
+                                <Link to={`/sharedtree/${tree.sharedTreeID}`} style={{ color: '#000' }}>
                                     View Tree
                                 </Link>
                             </div>
                         </li>
                     ))}
                 </ul>
+            </div>
             </div>
         </div>
     )

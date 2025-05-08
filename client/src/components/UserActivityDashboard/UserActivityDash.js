@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 //import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import {ReactComponent as DropDown} from "../assets/dropdown-arrow.svg";
-import {ReactComponent as Plus} from "../assets/plus-icon.svg";
-import {ReactComponent as MemberAdd} from "../assets/person-crop-circle-fill-badge-plus-svgrepo-com.svg";
-import {ReactComponent as MemberRm} from "../assets/person-crop-circle-fill-badge-xmark-svgrepo-com.svg";
-import {ReactComponent as EventAdd} from "../assets/calendar-new-svgrepo-com.svg";
-import NavBar from "./NavBar/NavBar";
+import {ReactComponent as DropDown} from "../../assets/dropdown-arrow.svg";
+import {ReactComponent as Plus} from "../../assets/plus-icon.svg";
+import {ReactComponent as MemberAdd} from "../../assets/person-crop-circle-fill-badge-plus-svgrepo-com.svg";
+import {ReactComponent as MemberRm} from "../../assets/person-crop-circle-fill-badge-xmark-svgrepo-com.svg";
+import {ReactComponent as EventAdd} from "../../assets/calendar-new-svgrepo-com.svg";
+import NavBar from "../NavBar/NavBar";
 import * as styles from "./styles";
+
+import CreateEventPopup from "../CreateEvent/CreateEvent";
+import CreateMemoryPopup from "../CreateMemory/CreateMemory";
+import { ReactComponent as CalendarIcon } from "../../assets/calendar.svg";
+import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
 
 //temporary events; need to replace with data retrieval through API
 const mockEvents = [
@@ -18,6 +23,9 @@ const mockEvents = [
 //the filterDate value is false for filtering oldest first, and then true for filtering newest first
 function Dashboard() {
 
+  // document.body.style.overflow = 'hidden';
+  document.body.style.width = '100%'; 
+
   let data = mockEvents;
   const [events, setEvents] = useState(data);
   const [searchItem, setSearchItem] = useState("");
@@ -28,7 +36,7 @@ function Dashboard() {
 
   const ButtonStyle = {
     fontFamily: 'Alata',
-    backgroundColor: isHovering ? '#3a5a40' : '#a2d59f',
+    backgroundColor: isHovering ? '#3a5a40' : '#ccdecc',
     color: isHovering ? 'white' : 'black',
     borderRadius: '10px',
     border: 'none',
@@ -75,8 +83,10 @@ function Dashboard() {
   }, [searchItem, sortDate]);
 
   return (
-    <>
+    <div style={styles.DefaultStyle}>
       <NavBar />
+      <div style={{width: '150px'}}></div>
+      <div style={styles.RightSide}>
       <div style={styles.Container}>
         <h1 style={styles.Header}>Family Events</h1>
         <input style={styles.SearchBar} type="text" placeholder="Search by title or date..." value={searchItem} onChange={(e) => setSearchItem(e.target.value)} />
@@ -100,7 +110,10 @@ function Dashboard() {
             ))}
         </div>
       </div>
-    </>
+      <CreateEventPopup trigger={<CalendarIcon style={styles.CalendarButton} />} />
+      <CreateMemoryPopup trigger={<PlusIcon style={styles.PlusButton} />} />
+      </div>
+    </div>
   );
 };
 

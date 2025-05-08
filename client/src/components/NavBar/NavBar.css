@@ -6,6 +6,10 @@
     /* position: fixed; */
     justify-content: center;
     font-family: Alata;
+    position: fixed;
+    /* top: 0; */
+    z-index: 10;
+    text-align: center;
 }
 
 @media screen and (max-width: 768px) {

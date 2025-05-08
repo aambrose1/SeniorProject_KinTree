@@ -7,6 +7,7 @@ import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
+import { useCurrentUser } from '../../CurrentUserProvider';
 
 // TODO: make form clear when dismissed by clicking outside of modal
 //       make sync contact button functional
@@ -15,6 +16,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   const [manual, setManual] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const { currentUserID, currentAccountID } = useCurrentUser();
 
   var family = useRef([]);
   var users = useRef([]);
@@ -69,60 +71,33 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         headers: { 'Content-Type': 'application/json' },
       }
 
-      // fetch existing family members (TODO: this endpoint does not exist yet)
-      fetch(`http://localhost:5000/api/family-members/${userid}`, requestOptionsMembers) // will fail
+      fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`, requestOptionsMembers) // gets all family members
         .then(async(response) => {
           if (response.ok) {
             const responseData = await response.json();
-            console.log(responseData.message);
-            // results.current = responseData.data;
-            family.current = [ // HARD CODED
-              { id: 1, firstName: "John", lastName: "Doe", userId: "0", memberId: 14}, // the one existing member
-              { id: 2, firstName: "Jane", lastName: "Smith", userId: "0", memberId: 24},
-              { id: 3, firstName: "Alice", lastName: "Johnson", userId: "0", memberId: 34},
-            ]
+            console.log(responseData);
+            family.current = responseData;
           }
           else {
             // print message in return body
             console.error('Error:', response);
-            family.current = [ // HARD CODED
-              { id: 1, firstName: "John", lastName: "Doe", userId: "0", memberId: 14}, // the one existing member
-              { id: 2, firstName: "Jane", lastName: "Smith", userId: "0", memberId: 24},
-              { id: 3, firstName: "Alice", lastName: "Johnson", userId: "0", memberId: 34},
-            ]
           }
         })
         // fetch all users (this is totally scalable)
-        .then(fetch(`http://localhost:5000/api/users`, requestOptionsUsers)
+        .then(fetch(`http://localhost:5000/api/auth/users`, requestOptionsUsers)
           .then(async(response) => {
             if (response.ok) {
               const responseData = await response.json();
-              console.log(responseData.message);
-              // users.current = responseData.data;
-              users.current = [
-                { id: 14, username: "John Doe" }, // already a family member
-                { id: 145, username: "Frank Doe" },
-                { id: 245, username: "Jessie Smith" },
-                { id: 345, username: "Anna Johnson" }
-                ].filter(user => 
+              console.log(responseData);
+              users.current = responseData.filter(user => 
                 user.username.toLowerCase().includes(searchTerm.toLowerCase()) && 
-                !family.current.some(member => member.memberId === user.id)
+                !family.current.some(member => member.memberUserId === user.id)
               );
               setSearchResults(users.current);
             } 
             else {
               // print message in return body
               console.error('Error:', response);
-              users.current = [
-                { id: 14, username: "John Doe" }, // already a family member
-                { id: 145, username: "Frank Doe" },
-                { id: 245, username: "Jessie Smith" },
-                { id: 345, username: "Anna Johnson" }
-                ].filter(user => 
-                user.username.toLowerCase().includes(searchTerm.toLowerCase()) && 
-                !family.current.some(member => member.memberId === user.id)
-              );
-              setSearchResults(users.current);
             }
           })
         )
@@ -130,7 +105,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
     // go fetch!
     fetchResults();
-  }, [searchTerm, userid]);
+  }, [searchTerm, currentAccountID]);
 
 
 
@@ -157,14 +132,14 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         "location": null,
         "phoneNumber": null,
         "userId": userid,
+        "memberUserId": users.current.find(user => user.id === Number(memberId)).id
       })
     };
 
     let nextRequestOptions = {}; // will populate later
 
-    // TODO: endpoint does not exist yet
-    let treeUserId = 23;
-    let treeMemberId = 17;
+    let treeUserId = currentUserID;
+    let treeMemberId;
 
     // add user to family members table
     fetch(`http://localhost:5000/api/family-members/`, requestOptions) // add new family member
@@ -173,7 +148,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         const responseData = await response.json();
         console.log(responseData);
         console.log(responseData.message);
-        // treeMemberId = responseData.member;
+        treeMemberId = responseData.member;
         nextRequestOptions = {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -184,6 +159,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
             relationshipStatus: "active",
             side: data.matPat || null,
             userId: userid,
+            memberUserId: null
           })
         };
         return fetch(`http://localhost:5000/api/relationships/`, nextRequestOptions);
@@ -240,16 +216,15 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       })
     };
 
-    // TODO: endpoint does not exist yet, will retrieve
-    let treeUserId = 23;
-    let treeMemberId = 17;
+    let treeUserId = currentUserID; // TODO: will retrieve this from a service or something
+    let treeMemberId;
 
     fetch(`http://localhost:5000/api/family-members/`, requestOptions) // add new family member
     .then(async(response) => {
         if (response.ok) {
           const responseData = await response.json();
           console.log(responseData.message);
-          // treeMemberId = responseData.member;
+          treeMemberId = responseData.member;
         }
         else {
           // print message in return body
@@ -323,7 +298,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                           <input
                             type="radio"
                             value={result.id}
-                            {...register("selectedMember", { required: true })} // TODO make work
+                            {...register("selectedMember", { required: true })}
                           />
                           <Link to={`/account/${result.id}`} style={{ marginLeft: '10px' }}>
                             {result.username}

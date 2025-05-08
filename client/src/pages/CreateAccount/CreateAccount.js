@@ -1,9 +1,10 @@
-import { useForm } from 'react-hook-form'
-import { useState } from 'react'
+import { set, useForm } from 'react-hook-form'
+import { React, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import * as styles from './styles'
+import logo from '../../assets/kintreelogo-adobe.png';
 
 //validation functionality
 const yupValidation = yup.object().shape(
@@ -22,13 +23,13 @@ const yupValidation = yup.object().shape(
         country: yup.string().required("Country of residence is a required field."),
         phonenum: yup.string()
             .matches(
-                "/^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/"
+                /^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
                 , "Invalid phone number format."
             ),
         zipcode: yup.string().matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
         password: yup.string().required("Password is a required field.")
             .matches(
-                "/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/"
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
                 , "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
             )
 
@@ -38,34 +39,113 @@ const yupValidation = yup.object().shape(
 const CreateAccount = () => {
     const {register, handleSubmit, formState: {errors}} = useForm({resolver: yupResolver(yupValidation)});
     const [isHovering, setIsHovering] = useState(false);
-    //ToDo: code linkage to backend
+    const [formData, setFormData] = useState({});
+
     const onSubmit = (data) => {
         console.log(data);
+    
+        // Register account
+        fetch(`http://localhost:5000/api/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                username: data.firstname + " " + data.lastname,
+                email: data.email,
+                password: data.password,
+            }),
+        })
+            .then(async (response) => {
+                if (response.ok) {
+                    const responseData = await response.json();
+                    console.log(responseData);
+    
+                    // Use responseData.user directly
+                    const accountID = responseData.user;
+    
+                    // Initialize user's tree by adding themself
+                    return fetch(`http://localhost:5000/api/family-members/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            firstName: data.firstname,
+                            lastName: data.lastname,
+                            birthdate: data.birthdate,
+                            email: data.email,
+                            location: `${data.address}, ${data.city}, ${data.state} ${data.zipcode}, ${data.country}`,
+                            phoneNumber: data.phonenum,
+                            userId: accountID, // Use accountID directly
+                            memberUserId: accountID, // Use accountID directly
+                        }),
+                    }).then(async (response) => {
+                        if (response.ok) {
+                            const familyMemberResponse = await response.json();
+                            console.log(familyMemberResponse);
+                            return fetch(`http://localhost:5000/api/tree-info/`, { // TEST THIS!!!!
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    object: [{
+                                        "id": familyMemberResponse.member,
+                                        "data": {
+                                            "first name": data.firstname,
+                                            "last name": data.lastname,
+                                        },
+                                        "rels": {
+                                            "children": [],
+                                            "spouses": [],
+                                        }
+                                    }],
+                                    userId: accountID, 
+                                }),
+                            });
+                        }})
+                    }
+                    else {
+                        const errorData = await response.json();
+                        console.error('Error registering account:', errorData);
+                        throw new Error('Account registration failed');
+                    }
+            })
+            .then(async (response) => {
+                if (response.ok) {
+                    const responseData = await response.json();
+                    console.log(responseData);
+                    window.location.href = '/';
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error initializing family member:', errorData);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
     };
 
     const ButtonStyle = {
         fontFamily: 'Alata',
-        backgroundColor: isHovering ? '#3a5a40' : '#a2d59f',
-        color: isHovering ? 'white' : 'black',
-        transition: 'all .5s', 
+        backgroundColor: '#3a5a40',
+        color: 'white',
         borderRadius: '10px',
         border: 'none',
-        paddingLeft: '15%',
-        paddingRight: '15%',
-        paddingBottom: '5%',
-        paddingTop: '4%',
+        padding: '10px 20px',
+        margin: '10px',
         cursor: 'pointer',
-        width: '100%',
-        minWidth: '150px',
+        width: '60%',
         height: '45px'
     };
 
     return (
         <div style={styles.DefaultStyle}>
-            <div style={styles.Header}>
-                Create Account
-            </div>
+            
             <div style={styles.Container}>
+                <img src={logo} alt="KinTree Logo" style={styles.Logo} />
+                <h1 style={styles.Header}>Create Account</h1>
                 <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
                 <div style={styles.ListStyle}>
                     <div style={styles.ItemStyle}>

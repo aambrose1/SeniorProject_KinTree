@@ -1,6 +1,6 @@
 export const DefaultStyle = {
     fontFamily: 'Alata',
-    textAlign: 'left',
+    textAlign: 'center',
     display: 'flex',
 }
 

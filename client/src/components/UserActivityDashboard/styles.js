@@ -1,10 +1,17 @@
-/* export const DefaultStyle = {
+export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'column',
-    padding: '10px',
+    flexDirection: 'row',
     fontFamily: 'Alata',
-    alignItems: 'center',
-  }; */
+    alignItems: 'flex-start',
+    // overflow: 'hidden',
+    textAlign: 'center',
+  };
+
+export const RightSide = {  
+    display: 'flex',
+    overflow: 'auto',
+    width: '100%',
+}
 
   export const CenterOfPage = {
     display: 'flex',
@@ -17,13 +24,14 @@
     alignItems: 'center',
     justifyContent: 'flex-start',
     minWidth: '290px',
-    width: '40%',
+    width: '100%',
     borderRadius: '30px',
     backgroundColor: '#faf9f6',
     padding: '20px 5vw',
-    marginLeft: '30%',
+    margin: '5% 20%',
     boxShadow: 'gray 0px 10px 10px -8px',
-    border: '0.5px solid #000000'
+    border: '0.5px solid #000000',
+    // overflow: 'auto's
   };
 
   export const InvisibleContainer = {
@@ -46,7 +54,7 @@
     flexDirection: 'column',
     textAlign: 'center',
     minWidth: '290px',
-    width: '100%',
+    // width: '100%',
     height: '80vh',
     borderRadius: '20px',
     backgroundColor: '#faf9f6',
@@ -110,7 +118,7 @@
     flexDirection: 'row',
     alignContent: 'center',
     justifyContent: 'center',
-    padding: '0px 200px 0px 0px'
+    // padding: '0px 200px 0px 0px'
   };
   
   export const WhiteButtonStyle = {
@@ -130,8 +138,11 @@
     fontFamily: 'Alata',
     alignContent: 'center',
     /* justifyContent: 'space-between', */
-    marginLeft: 'inherit',
-    marginRight: 'inherit'
+    // marginLeft: 'inherit',
+    // marginRight: 'inherit'
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   };
   
   export const TextStyle = {
@@ -144,3 +155,23 @@
     color: 'black',
     textDecoration: 'none'
   };
+
+  export const CalendarButton = {
+    width: '40px',
+    height: '40px',
+    margin: '10px',
+    cursor: 'pointer',
+    position: 'absolute',
+    right: '0px',
+    bottom: '0px'
+}
+
+export const PlusButton = {
+    width: '40px',
+    height: '40px',
+    margin: '10px',
+    cursor: 'pointer',
+    position: 'absolute',
+    right: '0px',
+    bottom: '60px'
+}
