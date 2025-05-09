@@ -140,14 +140,14 @@ function Family() {
                 }
     
                 const responseData = await response.json(); // [{...}, {...}, ...]
-                setFamilyData(responseData); // Set the resolved data
+                setFamilyData(responseData);
                 console.log('Family data:', responseData);
             } catch (error) {
                 console.error('Error fetching family data:', error);
             }
         };
     
-        fetchFamilyData(); // Call the async function
+        fetchFamilyData();
     }, [currentAccountID]);
 
     useEffect(() => {

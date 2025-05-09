@@ -8,7 +8,6 @@ import CreateEventPopup from '../../components/CreateEvent/CreateEvent';
 import CreateMemoryPopup from '../../components/CreateMemory/CreateMemory';
 import NavBar from '../../components/NavBar/NavBar';
 
-// TODO: need to implement auth check for this page (and others), redirect to login if not authenticated
 function Home() {
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 

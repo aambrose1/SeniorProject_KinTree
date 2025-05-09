@@ -151,7 +151,7 @@ const shareTree = async (req,res) => {
 };
 const mergeMembers = async (req, res) => {
     try {
-        const { sharedTreeId } = req.params; // Get the shared tree ID
+        const { sharedTreeId } = req.params; // get the shared tree ID
         console.log('Request Body:', req.body);
         const { selectedMembers, receiverId } = req.body;
         console.log('Receiver ID:', receiverId);
@@ -161,40 +161,37 @@ const mergeMembers = async (req, res) => {
             return res.status(400).json({ error: 'No members selected to merge' });
         }
 
-        // Fetch the shared tree from the database
+        // fetch the shared tree from the database
         const sharedTree = await sharedTrees.getSharedTreeById(sharedTreeId);
         if (!sharedTree) {
             return res.status(404).json({ error: 'Shared tree not found' });
         }
         const formatDateForMySQL = (dateString) => {
-            if (!dateString) return null; // If no date, return null
+            if (!dateString) return null; // if no date, return null
             const date = new Date(dateString);
-            return date.toISOString().split('T')[0]; // Extract YYYY-MM-DD
+            return date.toISOString().split('T')[0]; // extract YYYY-MM-DD
         };
 
-        // Log treeInfo to check its format
         console.log('treeInfo:', sharedTree.treeInfo);
 
-        // Check if treeInfo exists and is an array
+        // check if treeInfo exists and is an array
         if (!sharedTree.treeInfo || !Array.isArray(sharedTree.treeInfo)) {
             return res.status(400).json({ error: 'Tree information is missing or invalid' });
         }
 
-        let treeInfo = sharedTree.treeInfo; // This should be an array of members
+        let treeInfo = sharedTree.treeInfo; // should be an array of members
 
-        // Loop through the selected members and add them to the tree
+        // loop through the selected members and add them to the tree
         for (const memberId of selectedMembers) {
-            // Find the relationship that includes the selected member
             const relationship = treeInfo.find(rel => 
                 rel.person1_id == memberId || rel.person2_id == memberId
             );
 
             if (!relationship) {
                 console.log(`Member with ID ${memberId} not found in treeInfo.`);
-                continue; // Skip to the next member
+                continue;
             }
 
-            // Determine which person's details to add
             const memberDetails = relationship.person1_id == memberId 
                 ? relationship.person1Details 
                 : relationship.person2Details;
@@ -218,7 +215,6 @@ const mergeMembers = async (req, res) => {
             });
             console.log(`Added member ${memberDetails.firstName} ${memberDetails.lastName} for receiverId ${receiverId}`);
 
-        // Return success message
         res.status(200).json({ message: 'Members merged successfully' });
     }} catch (error) {
         console.error(error);

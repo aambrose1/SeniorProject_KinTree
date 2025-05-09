@@ -44,7 +44,7 @@ const CreateAccount = () => {
     const onSubmit = (data) => {
         console.log(data);
     
-        // Register account
+        // register account
         fetch(`http://localhost:5000/api/auth/register`, {
             method: 'POST',
             headers: {
@@ -77,14 +77,14 @@ const CreateAccount = () => {
                             email: data.email,
                             location: `${data.address}, ${data.city}, ${data.state} ${data.zipcode}, ${data.country}`,
                             phoneNumber: data.phonenum,
-                            userId: accountID, // Use accountID directly
-                            memberUserId: accountID, // Use accountID directly
+                            userId: accountID,
+                            memberUserId: accountID,
                         }),
                     }).then(async (response) => {
                         if (response.ok) {
                             const familyMemberResponse = await response.json();
                             console.log(familyMemberResponse);
-                            return fetch(`http://localhost:5000/api/tree-info/`, { // TEST THIS!!!!
+                            return fetch(`http://localhost:5000/api/tree-info/`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',

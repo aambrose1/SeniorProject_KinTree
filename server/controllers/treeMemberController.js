@@ -5,7 +5,7 @@ const addTreeMember = async (req, res) => {
     try {
         const { firstName, lastName, birthDate, deathDate, location, phoneNumber, relationships, userId, memberUserId } = req.body;
 
-        // Ensure all necessary fields are passed in the request body
+        // ensure all necessary fields are passed in the request body
         const [newMember] = await treeMember.addMember({
             firstName,
             lastName,
@@ -18,7 +18,7 @@ const addTreeMember = async (req, res) => {
         });
         /// need to fix that a value can be left empty (deathDate)
 
-        // If there are relationships, add them to the database
+        // if there are relationships, add them to the database
         if (relationships && relationships.length > 0) {
             for (const rel of relationships) {
                 await relationship.addRelationship({
@@ -46,7 +46,7 @@ const editTreeMember = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
-        // Check if the family member exists
+        // check if the family member exists
         const existingMember = await treeMember.getMemberById(id);  // Fixed typo here
 
         if (!existingMember) {
@@ -56,7 +56,7 @@ const editTreeMember = async (req, res) => {
             //this works 
         }
 
-        // Delete empty or undefined fields from updateData
+        // delete empty or undefined fields from updateData
         for (let key in updateData) {
             if (updateData[key] === '' || updateData[key] === undefined) {
                 delete updateData[key];
@@ -70,7 +70,6 @@ const editTreeMember = async (req, res) => {
             //this works 
         }
 
-        // Update the family member info
         const updatedMember = await treeMember.updateMemberInfo(id, updateData);
         res.status(200).json({  // Changed to 200 status code
             message: 'Family member updated successfully',

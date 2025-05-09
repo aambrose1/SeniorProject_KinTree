@@ -10,7 +10,6 @@ function Login() {
     const [ errorMessage, setErrorMessage ] = useState("");
     const { setCurrentAccountID, fetchCurrentUserID, fetchCurrentAccountID } = useCurrentUser();
     
-    // TODO: connect to backend
     const onSubmit = (data) => {
         const requestOptions = {
             method: 'POST',
@@ -38,7 +37,7 @@ function Login() {
                 else {
                     const errorData = await response.json();
                     console.error('Error:', errorData.message);
-                    setErrorMessage(errorData.message); // Set the error message in state
+                    setErrorMessage(errorData.message);
                     throw new Error('Network response was not ok');
                 }
             })

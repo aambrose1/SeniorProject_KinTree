@@ -4,7 +4,6 @@ const addObject = async (req, res) => {
     try {
         const { object, userId } = req.body;
 
-        // Ensure all necessary fields are passed in the request body
         const [newObject] = await treeInfo.addObject({
             object: JSON.stringify(object),
             userId: userId
@@ -26,7 +25,7 @@ const updateObject = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
-        // Check if the family member exists
+        // check if the family member exists
         const existingObject = await treeInfo.getObject(id);
 
         if (!existingObject) {
@@ -35,7 +34,7 @@ const updateObject = async (req, res) => {
             });
         }
 
-        // Delete empty or undefined fields from updateData
+        // delete empty or undefined fields from updateData
         // for (let key in updateData) {
         //     if (updateData[key] === '' || updateData[key] === undefined) {
         //         delete updateData[key];
@@ -48,7 +47,6 @@ const updateObject = async (req, res) => {
             });
         }
 
-        // Update the family member info
         const updatedObject = await treeInfo.updateObject(id, {object : JSON.stringify(updateData)});
         res.status(200).json({  // Changed to 200 status code
             message: 'Object updated successfully',
@@ -72,7 +70,7 @@ const getObject = async (req, res) => {
                 error: 'Object not found'
             });
         }
-        console.log("Data sent from backend:", retrievedObject.object); // Log the data
+        console.log("Data sent from backend:", retrievedObject.object);
         
         res.status(200).json(retrievedObject);
     } catch (error) {

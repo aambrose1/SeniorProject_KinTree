@@ -82,7 +82,7 @@ export const CurrentUserProvider = ({ children }) => {
 
 export const useCurrentUser = () => {
   const context = useContext(currentContext);
-  // console.log('CurrentUserContext:', context); // Debugging
+  // console.log('CurrentUserContext:', context);
   if (!context) {
     throw new Error("useCurrentUser must be used within a CurrentUserProvider");
   }

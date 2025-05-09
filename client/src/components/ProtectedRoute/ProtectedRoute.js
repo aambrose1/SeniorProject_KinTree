@@ -6,7 +6,7 @@ function ProtectedRoute({ children }) {
     const { currentAccountID, loading } = useCurrentUser();
 
     if (loading) {
-        return <div>Loading...</div>; // You can replace this with a loading spinner or placeholder
+        return <div>Loading...</div>;
     }
 
     // redirect to login

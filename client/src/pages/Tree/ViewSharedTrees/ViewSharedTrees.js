@@ -23,12 +23,11 @@ function ViewSharedTrees() {
             }
         }
     
-        // Fetch user data by senderID
         async function fetchUserData() {
             const response = await fetch(`http://localhost:5000/api/auth/users/`);
             if (response.ok) {
                 const userData = await response.json();
-                return userData; // Assuming this contains the user data
+                return userData;
             } 
             else {
                 console.error(`Error fetching user data`);
@@ -36,7 +35,6 @@ function ViewSharedTrees() {
             }
         }
 
-        // fetch results and update state
         const fetchData = async () => {
             const results = await fetchResults();
             setTrees(results);
@@ -44,7 +42,7 @@ function ViewSharedTrees() {
             setUserData(userData);
         };
         fetchData();
-    }, [currentUserID]); // no dependencies
+    }, [currentUserID]);
 
     return (
         <div style={styles.DefaultStyle}>

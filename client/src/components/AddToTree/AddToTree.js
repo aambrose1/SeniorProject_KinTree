@@ -219,23 +219,22 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
         console.log(data);
         reset();
         close();
-        // Wait for the API request to complete
+        // wait for the API request to complete
         const response = await fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
 
         if (response.ok) {
-          // Parse the response and update `treeData`
+          // parse the response
           const treeResponse = await response.json();
           setTreeData(treeResponse.object);
           console.log(treeData);
 
-          // Call AddTreeMember after the API request is complete
+          // call after the API request is complete
           return AddTreeMember(userId, accountUserId, data.selectedMember, data.memberRelationshipType, accountUserName, treeData, results, currentAccountID);
         } 
         else {
-            // Handle errors from the API
             const errorData = await response.json();
             console.error('Error:', errorData.message);
         }

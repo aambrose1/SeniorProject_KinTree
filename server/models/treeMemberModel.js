@@ -24,7 +24,7 @@ const treeMember = {
     
     updateMemberInfo: async (id, data) => {
         await db('treeMembers').where({ id }).update(data);
-        const updatedRecord = await  db('treeMembers').where({ id }).first();  // Return updated record
+        const updatedRecord = await  db('treeMembers').where({ id }).first();
         return updatedRecord;
     },
     assignNewMemberRelationship: async (recieverId, getMemberById, relationshipType) => {

@@ -111,7 +111,6 @@ function Tree() {
                     </div>
                     {/* add family member button */}
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {/* TODO: fix hard coding of passed user ID (service?) */}
                         <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px'}}/>} userid={currentAccountID}/>
                     </div>
                 </div>
