@@ -15,7 +15,21 @@ const Relationships = {
 
     getRelationshipbyId: async (personId) => {
         return db('relationships').where('person1_id', personId).andWhere('person2_id', personId);
+    },
+
+    getRelationshipByUser: async (userId) => {
+        return db('relationship').where('userId', userId).select('*');
+    },
+
+    getRelationshipByOtherUser: async (userId) => {
+        return db('relationship').whereNot('userId', userId).select('*');
+    },
+
+    deleteByUser: async (userId) => {
+        return db('relationship').where({userId}).del();
     }
+
+
 
 };
 

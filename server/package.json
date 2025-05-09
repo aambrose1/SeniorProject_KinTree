@@ -4,7 +4,8 @@
   "description": "This repository contains the codebase for the KinTree project. This project stems from the CSE 3213/3223 Software Engineering Senior Project I/II course sequence at Mississippi State University.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -12,11 +13,11 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.5.0",
     "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
-    "mysql2": "^3.12.0",
+    "mysql2": "^3.14.1",
     "nodemon": "^3.1.7"
   },
   "devDependencies": {

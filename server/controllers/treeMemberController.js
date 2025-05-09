@@ -85,6 +85,7 @@ const editTreeMember = async (req, res) => {
 
 const getMembersByUser = async (req,res) =>{
     try{
+
         const { userId } = req.params;
         const members = await treeMember.getMembersByUser(userId)
         console.log(members);
@@ -102,7 +103,7 @@ const getMembersByUser = async (req,res) =>{
 const getMembersByOtherUser = async (req,res) =>{
     try{
         const { userId} = req.params;
-        const members = treeMember.getMembersByOtherUser(userId)
+        const members = await treeMember.getMembersByOtherUser(userId)
         res.status(200).json(members);
     }
     catch(error){
@@ -132,7 +133,6 @@ const deleteByUser =  async (req, res) => {
       }
 
 }
-
 const getMemberById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -161,4 +161,5 @@ const getActiveMemberId = async (req, res) => {
     }
 }
 
-module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId };  // Export both methods
+module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId };  
+

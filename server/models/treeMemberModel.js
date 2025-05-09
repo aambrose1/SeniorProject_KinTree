@@ -21,6 +21,11 @@ const treeMember = {
     getMembersByUser: async (userId) => {
         return db('treeMembers').where({userId}).select('*');
     },
+
+    getMembeByOtherUser: async (userId) => {
+        return db('treeMembers').whereNot({userId}).select('*');
+
+    },
     
     updateMemberInfo: async (id, data) => {
         await db('treeMembers').where({ id }).update(data);
@@ -31,10 +36,17 @@ const treeMember = {
         return db('treeMembers').where({person1_id: recieverId, person2_id: recieverId}).update({relationshipType: relationshipType})
     },
 
+
+    deleteByUser: async (userId) => {
+        return db('treeMembers').where({userId}).del();
+      
     getActiveMemberId: async (id) => {
         // userId and memberUserId are both equal to the id
         return db('treeMembers').where({userId: id, memberUserId: id}).first();
+
     }
+
+
 };
 
 module.exports = treeMember;
