@@ -36,3 +36,6 @@ Then, from the same directory, run the following command to run the server/API:
 
 Directions for database setup are in progress.
 
+MySQL Install (https://dev.mysql.com/downloads/mysql/)
+
+
