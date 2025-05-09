@@ -11,6 +11,7 @@ The current KinTree project team as of Spring 2025 includes Owen Adams, Kennedi 
 ### Prerequisites
 
 Node.js (install the correct version for your own OS [here](https://nodejs.org/en))
+MySQL Install (https://dev.mysql.com/downloads/mysql/)
 
 ### Setup
 
@@ -36,6 +37,14 @@ Then, from the same directory, run the following command to run the server/API:
 
 Directions for database setup are in progress.
 
-MySQL Install (https://dev.mysql.com/downloads/mysql/)
+Run the command 'npm install knex mysql2'
+
+Create a .env file with MySQL information. Add username, password, and database name.
+
+Run the command 'node mysql-connection.js' to verify the connection.
+
+Run the command 'knex:migrate status' to ensure proper migration files are loaded. 
+
+Run the command 'knex migrate:latest' to create existing database tables. 
 
 
