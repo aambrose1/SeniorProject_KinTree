@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-    return knex.schema.table('relationships',function(table) {
+    return knex.schema.alterTable('relationships',function(table) {
         table.enu('side', ['paternal', 'maternal']).nullable();
     });
 };
@@ -13,7 +13,7 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-  return knex.schema.table('relationships', function(table){
+  return knex.schema.alterTable('relationships', function(table){
     table.dropColumn('side');
   });
 };

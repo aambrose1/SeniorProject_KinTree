@@ -4,10 +4,10 @@
  */
 exports.up = function(knex) {
     return knex.schema
-        .table('relationships',function(table) {
+        .alterTable('relationships',function(table) {
             table.integer('userId').unsigned().notNullable().references('id').inTable('users');
         })
-        .table('treeMembers',function(table) {
+        .alterTable('treeMembers',function(table) {
             table.integer('userId').unsigned().notNullable().references('id').inTable('users');
         });
 
@@ -19,10 +19,10 @@ exports.up = function(knex) {
  */
 exports.down = function(knex) {
   return knex.schema
-  .table('relationships', function(table){
+  .alterTable('relationships', function(table){
     table.dropColumn('userId');
   })
-  .table('treeMembers', function(table) {
+  .alterTable('treeMembers', function(table) {
     table.dropColumn('userId');
   })
 };

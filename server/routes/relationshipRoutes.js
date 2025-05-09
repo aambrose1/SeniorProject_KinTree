@@ -5,7 +5,7 @@ const { getRelationships, getRelationshipsByUser, getRelationshipsByOtherUser, a
 
 router.post('/', addRelationship);
 router.get('/:id', getRelationships);
-routter.get('/user/:id', getRelationshipsByUser);
+router.get('/user/:id', getRelationshipsByUser);
 router.get('/assignedUser/:id', getRelationshipsByOtherUser);
 router.get('/family-side/:id', filterBySide);
 router.delete('/remove/:id', deleteByUser);

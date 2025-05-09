@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
   host: process.env.DB_HOST,  // localhost
   user: process.env.DB_USER,      // Make sure DB_USER is set
   password: process.env.DB_PASSWORD,  // Ensure DB_PASSWORD is set
-  database: process.env.DB_DATABASE,           // Ensure DB_NAME is set
+  database: process.env.DB_NAME,           // Ensure DB_NAME is set
   port: process.env.DB_PORT || 3306        // Port should be 3306
 });
 
@@ -16,6 +16,7 @@ connection.connect((err) => {
     console.error('Error connecting to MySQL:', err.stack);
     return;
   }
+  
   console.log('Connected to MySQL as id ' + connection.threadId);
 
   // Example query to check connection
