@@ -20,13 +20,17 @@ From the command line, navigate to the /SeniorProject_KinTree/client directory, 
 
 `npm install`
 
-Once all dependencies are installed, you can run the frontend of the project (from the /SeniorProject_RelateMe/client directory) by running the following command:
+Once all dependencies are installed, you can run the frontend of the project (from the /SeniorProject_KinTree/client directory) by running the following command:
 
 `npm start`
 
 This command runs the application in development mode. You can open http://localhost:3000 in your browser to view the application. Any changes made to the source code will cause the application page to refresh and show reflected changes (once the changed file is saved).
 
-To run the backend of code (server/API), open another command line window and run the following command in the backend directory (/SeniorProject_KinTree/server):
+To run the backend of code (server/API), you must first install the backend node dependencies. Open another command line window and run the following command in the backend directory (/SeniorProject_KinTree/server):
+
+`npm install`
+
+Then, from the same directory, run the following command to run the server/API:
 
 `node server.js`
 
