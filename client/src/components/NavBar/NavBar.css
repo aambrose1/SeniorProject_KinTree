@@ -1,0 +1,133 @@
+.navbar {
+    height: 100%;
+    width: 150px;
+    background-color: #ccdfcd;
+    text-decoration: none;
+    /* position: fixed; */
+    justify-content: center;
+    font-family: Alata;
+    position: fixed;
+    /* top: 0; */
+    z-index: 10;
+    text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+    .navbar {
+        display: none;
+    }
+}
+
+.nested-navbar {
+    height: 100%;
+    width: 160px;
+    top: 0px;
+    background-color: #ebffec;
+    position: absolute;
+    padding-top: 30px;
+    margin-left: 85px;
+    z-index: 100;
+}
+
+.nav-item {
+    display: block;
+    border-radius: 4px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    color: black;
+    background-color: #ccdfcd;
+    text-decoration: none;
+    font: Alata;
+    font-size: 16pt;
+    transition: all .5s;
+}
+
+.nav-item:hover {
+    background-color: #ebffec; 
+}
+
+.nav-item-active {
+    display: block;
+    border-radius: 4px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    background-color: #ebffec;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16pt;
+}
+
+.nav-item-nested {
+    display: block;
+    border-radius: 4px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    color: black;
+    background-color: #ebffec;
+    font-weight: normal;
+    text-decoration: none;
+    font: Alata;
+    font-size: 16pt;
+}
+
+.nav-item-nested:hover {
+    background-color: #ffffff;
+}
+
+.nav-item-nested-active {
+    display: block;
+    border-radius: 4px;
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+    background: #ffffff;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 16pt;
+}
+
+.settings-and-help {
+    display: flex;
+    margin-top: 50vh;
+    margin-bottom: 5vh;
+    gap: 26%;
+    align-items: center;
+}
+
+.settings-icon {
+    display: flex;
+    background-color: #ccdfcd;
+    margin-left: 2%;
+    height: 30px;
+    width: 30px;
+    color: black;
+}
+
+.settings-icon:hover {
+    color: #ebffec;
+}
+
+.help-icon {
+    color: black;
+    background-color: #ccdfcd;
+    height: 35px;
+    width: 30px
+}
+
+.help-icon:hover {
+    color: #ebffec;
+}
+
+.divider {
+    border-bottom-width: flex;
+    border-bottom-color: #ccc;
+}

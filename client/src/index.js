@@ -9,25 +9,43 @@ import Account from './pages/Account/Account';
 import Tree from './pages/Tree/Tree';
 import Login from './pages/Login/Login';
 import Family from './pages/Family/Family';
-import Register from './pages/Register/Register';
-import Reset from './pages/Reset/Reset';
-import ShareTree from './pages/ShareTree/ShareTree';
-import SharedTrees from './pages/SharedTrees/SharedTrees';
+import ShareTree from './pages/Tree/ShareTree/ShareTree';
+import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
+import Dashboard from './components/UserActivityDashboard/UserActivityDash';
+import WebsiteSettings from './pages/WebsiteSettings/WebsiteSettings';
+// import Register from './pages/Register/Register';
+import { CurrentUserProvider } from './CurrentUserProvider';
+import Help from './pages/Help/Help';
+import Chat from './pages/Chat/Chat';
 import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
+import CreateAccount from './pages/CreateAccount/CreateAccount';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/account',
-    element: <Account />,
+    element: (
+      <ProtectedRoute>
+        <Account />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/account/:id',
-    element: <Account />,
+    element: (
+      <ProtectedRoute>
+        <Account />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/login',
@@ -35,31 +53,81 @@ const router = createBrowserRouter([
   },
   {
     path: '/register',
-    element: <Register />,
+    element: <CreateAccount />,
   },
   {
     path: '/tree',
-    element: <Tree />,
+    element: (
+      <ProtectedRoute>
+        <Tree />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: '/tree/viewsharedtrees',
+        element: (
+          <ProtectedRoute>
+            <ViewSharedTrees />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/tree/sharetree',
+        element: (
+          <ProtectedRoute>
+            <ShareTree />
+          </ProtectedRoute>
+        ),
+      }
+    ]
   },
   {
     path: '/family',
-    element: <Family />,
+    element: (
+      <ProtectedRoute>
+        <Family />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: '/reset',
-    element: <Reset />,
+    path: '/useractivitydash',
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: '/sharetree',
-    element: <ShareTree />,
+    path: '/websitesettings',
+    element: (
+      <ProtectedRoute>
+        <WebsiteSettings />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: '/sharedtrees',
-    element: <SharedTrees />,
+    path: '/help',
+    element: (
+      <ProtectedRoute>
+        <Help />
+      </ProtectedRoute>
+    ),
   },
   {
-    path: 'sharedtree/:id',
-    element: <ViewSharedTree />,
+    path: '/chat',
+    element: (
+      <ProtectedRoute>
+        <Chat />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/sharedtree/:id',
+    element: (
+      <ProtectedRoute>
+        <ViewSharedTree />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '*',
@@ -69,16 +137,23 @@ const router = createBrowserRouter([
       return null;
     },
   }
-])
+  
+]) 
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
+  <CurrentUserProvider>
   <React.StrictMode>
     <RouterProvider router={router}>
       <App />
     </RouterProvider>
   </React.StrictMode>
+  </CurrentUserProvider>
 );
+
+
+
 
 
 // If you want to start measuring performance in your app, pass a function

@@ -1,24 +1,30 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as styles from './styles';
 // import { ReactComponent as TreeIcon } from '../../assets/background-tree.svg'; // background tree image from Figma; TODO configure overlay with tree svg
 import f3 from 'family-chart';
 import './tree.css'; // styling adapted from family-chart package sample code
 import { ReactComponent as PlusSign } from '../../assets/plus-sign.svg';
-import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
-import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
+// import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
+// import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
 import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMember';
 import { Link } from 'react-router-dom';
+import NavBar from '../../components/NavBar/NavBar';
+import { useLocation, Outlet } from 'react-router-dom';
+import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
 
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/
 
-class FamilyTree extends React.Component {
-    cont = React.createRef();
-  
-    componentDidMount() {
-        if (!this.cont.current) return;
-        
-        create(treeData);
+function FamilyTree() {
+    const contRef = useRef(null); // Use a ref for the container
+    const { currentAccountID } = useCurrentUser(); // Use the hook in the function component
+
+    useEffect(() => {
+        if (!contRef.current) {
+            console.log("failure");
+            return;
+        }
+        console.log("success");
 
         function create(data) {
             const f3Chart = f3.createChart('#FamilyChart', data)
@@ -26,123 +32,56 @@ class FamilyTree extends React.Component {
                 .setCardXSpacing(250)
                 .setCardYSpacing(150)
                 .setOrientationVertical()
-                .setSingleParentEmptyCard(true, {label: 'ADD'})
-            
-            const f3Card = f3Chart.setCard(f3.CardHtml)
-                // can edit displayed fields here
-                .setCardDisplay([["first name"],[]])
-                .setCardDim({"width":80,"height":80})
-                .setMiniTree(true)
-                .setStyle('imageCircle')
-                .setOnHoverPathToMain()
-            
-            // remove zooming transitions
-            f3Card.setOnCardClick((e, d) => {})
-            
-            f3Chart.updateTree({initial: true})
-        }
-    }
-  
-    render() {
-      return <div className="f3 f3-cont" id="FamilyChart" ref={this.cont}></div>;
-    }
-  }
+                .setSingleParentEmptyCard(false);
 
-// sample data for now, but TODO retrieve from API
-// can add "avatar" field and link under data object to show pfp on tree
-let treeData = [
-    {
-    "id": "0",
-    "rels": {
-        "father": "1",
-        "mother": "2",
-        "children": ["5"]
-    },
-    "data": {
-        "first name": "Ronald",
-        "last name": "Smith",
-        "avatar": "https://i.imgur.com/mfojszj.png",
-        "email": "ronald@gmail.com"
-    }
-    },
-    {
-    "id": "1",
-    "rels": {
-        "father": "3",
-        "mother": "4",
-        "spouses": [
-            "2"
-        ],
-        "children": [
-            "0"
-        ]
-        },
-    "data": {
-        "first name": "John",
-        "last name": "Smith",
-        "flag": "paternal"
+            const f3Card = f3Chart.setCard(f3.CardHtml)
+                .setCardDisplay([["first name"], []])
+                .setCardDim({ width: 80, height: 80 })
+                .setMiniTree(false)
+                .setStyle('imageCircle')
+                .setOnHoverPathToMain();
+
+            f3Card.setOnCardClick((e, d) => {}); // Remove zooming transitions
+
+            f3Chart.updateMainId("21");
+            f3Chart.updateTree({ initial: true });
         }
-    },
-    {
-        "id": "2",
-        "rels": {
-            "spouses": [
-                "1"
-            ],
-            "children": [
-                "0"
-            ]
-            },
-        "data": {
-            "first name": "Jane",
-            "last name": "Smith",
-            "flag": "maternal"
-            }
-    },
-    {
-        "id": "3",
-        "rels": {
-            "children": ["1"],
-            "spouses": ["4"]
-        },
-        "data": {
-            "first name": "Alice",
-            "last name": "Smith",
-            "flag": "paternal"
-        }
-    },
-    {
-        "id": "4",
-        "rels": {
-            "children": ["1"],
-            "spouses": ["3"]
-        },
-        "data": {
-            "first name": "Bob",
-            "last name": "Smith",
-            "flag": "paternal"
-        }
-    },
-    {
-        "id": "5",
-        "rels": {
-            "father": "0",
-        },
-        "data": {
-            "first name": "Tom",
-            "last name": "Smith"
-        }
-    },
-];
+
+        let getRequestOptions = {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        };
+
+        fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, getRequestOptions)
+            .then(async (response) => {
+                if (response.ok) {
+                    let treeData = await response.json();
+                    console.log(treeData.object);
+                    const parsedData = treeData.object;
+                    console.log(parsedData);
+                    create(parsedData);
+                } else {
+                    console.error('Error:', response);
+                }
+            });
+    }, [currentAccountID]);
+
+    return <div className="f3 f3-cont" id="FamilyChart" ref={contRef}></div>;
+}
+
+let parsedData = [];
 
 // builds the actual page
 function Tree() {
-    let user_lastname = "Smith";
+    const { currentAccountID, currentUserName, fetchCurrentUserID } = useCurrentUser(); // Use the hook in the function component
+    fetchCurrentUserID();
+    const location = useLocation();
+    const isTreePage = location.pathname === '/tree';
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
     return (
         <div style={styles.DefaultStyle}>
-
+            <NavBar />
             {/* TODO make these work again, removed them for now so I could work with the header placement; might want to integrate these with actual background somehow */}
             {/* <div style={styles.ArrowContainerStyle}>
                 <div style={{flex: '50%'}}></div>
@@ -150,6 +89,7 @@ function Tree() {
                 <ArrowBL style={styles.BottomLeftArrowStyle} />
                 <div style={{flex: '50%', textAlign: 'right'}}></div>
             </div>  */}
+            {isTreePage ? (
 
             <div style={styles.MainContainerStyle} className="main-container">
                 {/* <Link to="/" style={{ position: 'absolute', top: '0px', left: '0px', margin: '10px' }}>Home</Link> */}
@@ -167,11 +107,11 @@ function Tree() {
                             width: '200px',
                             borderColor : '#000000'
                         }}/>
-                        <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {user_lastname} Family</h2> 
+                        <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {currentUserName?.split(" ")[1]} Family</h2> 
                     </div>
                     {/* add family member button */}
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px'}} />} />
+                        <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px'}}/>} userid={currentAccountID}/>
                     </div>
                 </div>
                 
@@ -180,8 +120,11 @@ function Tree() {
                 {/* using a border fo</div>r now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
                 <div style={styles.FamilyTreeContainerStyle}> <FamilyTree/> </div>
             </div>
+            ) : (
+            <Outlet />
+            )}
         </div>
-    );   
+    )
 }
 
 export default Tree;

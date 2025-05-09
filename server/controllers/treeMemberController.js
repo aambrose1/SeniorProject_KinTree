@@ -3,9 +3,9 @@ const relationship = require('../models/relationshipModel');
 
 const addTreeMember = async (req, res) => {
     try {
-        const { firstName, lastName, birthDate, deathDate, location, phoneNumber, relationships, userId } = req.body;
+        const { firstName, lastName, birthDate, deathDate, location, phoneNumber, relationships, userId, memberUserId } = req.body;
 
-        // Ensure all necessary fields are passed in the request body
+        // ensure all necessary fields are passed in the request body
         const [newMember] = await treeMember.addMember({
             firstName,
             lastName,
@@ -13,12 +13,12 @@ const addTreeMember = async (req, res) => {
             deathDate,
             location,
             phoneNumber,
-            userId
-
+            userId,
+            memberUserId
         });
         /// need to fix that a value can be left empty (deathDate)
 
-        // If there are relationships, add them to the database
+        // if there are relationships, add them to the database
         if (relationships && relationships.length > 0) {
             for (const rel of relationships) {
                 await relationship.addRelationship({
@@ -46,7 +46,7 @@ const editTreeMember = async (req, res) => {
         const { id } = req.params;
         const updateData = req.body;
 
-        // Check if the family member exists
+        // check if the family member exists
         const existingMember = await treeMember.getMemberById(id);  // Fixed typo here
 
         if (!existingMember) {
@@ -56,7 +56,7 @@ const editTreeMember = async (req, res) => {
             //this works 
         }
 
-        // Delete empty or undefined fields from updateData
+        // delete empty or undefined fields from updateData
         for (let key in updateData) {
             if (updateData[key] === '' || updateData[key] === undefined) {
                 delete updateData[key];
@@ -70,7 +70,6 @@ const editTreeMember = async (req, res) => {
             //this works 
         }
 
-        // Update the family member info
         const updatedMember = await treeMember.updateMemberInfo(id, updateData);
         res.status(200).json({  // Changed to 200 status code
             message: 'Family member updated successfully',
@@ -86,8 +85,10 @@ const editTreeMember = async (req, res) => {
 
 const getMembersByUser = async (req,res) =>{
     try{
-        const { userId} = req.params;
-        const members = treeMember.getMemberByUser(userId)
+
+        const { userId } = req.params;
+        const members = await treeMember.getMembersByUser(userId)
+        console.log(members);
         res.status(200).json(members);
     }
     catch(error){
@@ -102,7 +103,7 @@ const getMembersByUser = async (req,res) =>{
 const getMembersByOtherUser = async (req,res) =>{
     try{
         const { userId} = req.params;
-        const members = treeMember.getMembersByOtherUser(userId)
+        const members = await treeMember.getMembersByOtherUser(userId)
         res.status(200).json(members);
     }
     catch(error){
@@ -132,5 +133,33 @@ const deleteByUser =  async (req, res) => {
       }
 
 }
+const getMemberById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const member = await treeMember.getMemberById(id);
+        if (!member) {
+            return res.status(404).json({ error: 'Family member not found' });
+        }
+        res.status(200).json(member);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching family member' });
+    }
+};
 
-module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser };  // Export both methods
+const getActiveMemberId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const member = await treeMember.getActiveMemberId(id);
+        if (!member) {
+            return res.status(404).json({ error: 'Family member not found' });
+        }
+        res.status(200).json(member);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching family member' });
+    }
+}
+
+module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId };  
+

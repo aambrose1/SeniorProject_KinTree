@@ -18,7 +18,7 @@ const treeMember = {
         return db('treeMembers').where({ id }).first();
     },
 
-    getMemberByUser: async (userId) => {
+    getMembersByUser: async (userId) => {
         return db('treeMembers').where({userId}).select('*');
     },
 
@@ -29,15 +29,21 @@ const treeMember = {
     
     updateMemberInfo: async (id, data) => {
         await db('treeMembers').where({ id }).update(data);
-        const updatedRecord = await  db('treeMembers').where({ id }).first();  // Return updated record
+        const updatedRecord = await  db('treeMembers').where({ id }).first();
         return updatedRecord;
     },
     assignNewMemberRelationship: async (recieverId, getMemberById, relationshipType) => {
         return db('treeMembers').where({person1_id: recieverId, person2_id: recieverId}).update({relationshipType: relationshipType})
     },
 
+
     deleteByUser: async (userId) => {
         return db('treeMembers').where({userId}).del();
+      
+    getActiveMemberId: async (id) => {
+        // userId and memberUserId are both equal to the id
+        return db('treeMembers').where({userId: id, memberUserId: id}).first();
+
     }
 
 

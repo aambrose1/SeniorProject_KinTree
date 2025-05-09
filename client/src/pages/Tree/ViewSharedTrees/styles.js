@@ -1,9 +1,10 @@
 export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     padding: '10px',
     fontFamily: 'Alata',
     alignItems: 'center',
+    width: '100%',
   }
 
   export const ContainerStyle = {
@@ -11,7 +12,7 @@ export const DefaultStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    width: '40%',
+    width: '60%',
     maxWidth: '600px',
     height: 'auto',
     borderRadius: '30px',
@@ -40,3 +41,11 @@ export const ListStyle = {
     width: '80%',
     padding: '0'
   };
+
+export const RightSide = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+};

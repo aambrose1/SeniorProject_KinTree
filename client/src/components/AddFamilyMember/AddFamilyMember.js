@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
@@ -7,56 +7,255 @@ import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
+import { useCurrentUser } from '../../CurrentUserProvider';
 
 // TODO: make form clear when dismissed by clicking outside of modal
 //       make sync contact button functional
 
-function AddFamilyMemberPopup({ trigger }) {
-  const { register, setValue, handleSubmit, reset } = useForm();
+function AddFamilyMemberPopup({ trigger, userid }) {
   const [manual, setManual] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [selectedMember, setSelectedMember] = useState(null);
-  const [selectedMemberRelationship, setSelectedMemberRelationship] = useState(null);
+  const { currentUserID, currentAccountID } = useCurrentUser();
 
-  let matPat = ["parent", "cousin", "aunt", "uncle", "grandparent", "niece", "nephew"];
+  var family = useRef([]);
+  var users = useRef([]);
 
-  const closeModal = () => {
-    setManual(false);
-    setSearchTerm("");
-    setSearchResults([]);
-    setSelectedMember(null);
-    setSelectedMemberRelationship(null);
-    reset();
-  };
+  // first form -- search for existing user
+  const {
+    register,
+    reset,
+    watch,
+    handleSubmit,
+  } = useForm({defaultValues: {selectedMember: '', selectedMemberRelationship: '', matPat: ''}});
 
-  // TODO: connect to backend
-  const onSubmit = (data, close) => {
-    console.log(data);
-    reset();
-    close();
-  };
+  // stored list of family members that require maternal/paternal distinction (maybe shift this to retrieval from backend, so that it can be updated without changing code)
+  let matPat = useMemo(() => ["parent", "cousin", "aunt", "uncle", "grandparent", "niece", "nephew"], []);
 
+  // manage mat/pat selector using currently selected relationship type
+  const selectedMemberRelationship = watch("selectedMemberRelationship");
+  var enableMatPat = useRef(false);
   useEffect(() => {
+    if(matPat.includes(selectedMemberRelationship)) {
+      enableMatPat.current = true;
+    }
+    else {
+      enableMatPat.current = false;
+    }
+  }, [selectedMemberRelationship, matPat]);
+
+  // second form -- manually add family member
+  const {
+    register: register2,
+    handleSubmit: handleSubmit2,
+  } = useForm({defaultValues: {firstName: '', lastName: '', relationship: '', matPat2: '', location: '', birthday: '', birthplace: '', deathdate: ''}});
+
+
+
+  // populate search results for existing user search
+  useEffect(() => {
+    // no search term, clear results
     if (searchTerm === "") {
       setSearchResults([]);
       return;
     }
 
-    // simulate an API call
+    // get non-friends
     const fetchResults = async () => {
-      // TODO: replace with actual API call
-      const results = [
-        { id: 1, name: "John Doe" },
-        { id: 2, name: "Jane Smith" },
-        { id: 3, name: "Alice Johnson" }
-      ].filter(member => member.name.toLowerCase().includes(searchTerm.toLowerCase()));
-      setSelectedMember(null);
-      setSearchResults(results);
+      let requestOptionsMembers = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+      let requestOptionsUsers = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+
+      fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`, requestOptionsMembers) // gets all family members
+        .then(async(response) => {
+          if (response.ok) {
+            const responseData = await response.json();
+            console.log(responseData);
+            family.current = responseData;
+          }
+          else {
+            // print message in return body
+            console.error('Error:', response);
+          }
+        })
+        // fetch all users (this is totally scalable)
+        .then(fetch(`http://localhost:5000/api/auth/users`, requestOptionsUsers)
+          .then(async(response) => {
+            if (response.ok) {
+              const responseData = await response.json();
+              console.log(responseData);
+              users.current = responseData.filter(user => 
+                user.username.toLowerCase().includes(searchTerm.toLowerCase()) && 
+                !family.current.some(member => member.memberUserId === user.id)
+              );
+              setSearchResults(users.current);
+            } 
+            else {
+              // print message in return body
+              console.error('Error:', response);
+            }
+          })
+        )
     };
 
+    // go fetch!
     fetchResults();
-  }, [searchTerm]);
+  }, [searchTerm, currentAccountID]);
+
+
+
+  // reset variables on close
+  const closeModal = () => {
+    setManual(false);
+    setSearchTerm("");
+    setSearchResults([]);
+    reset();
+  };
+
+  // form submission (existing user)
+  const onSubmitExisting = (data) => {
+    console.log("submit attempted");
+    let memberId = data.selectedMember;
+    let requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        "firstName": users.current.find(user => user.id === Number(memberId)).username.split(" ")[0],
+        "lastName": users.current.find(user => user.id === Number(memberId)).username.split(" ")[1],
+        "birthDate": null,
+        "deathDate" : null,
+        "location": null,
+        "phoneNumber": null,
+        "userId": userid,
+        "memberUserId": users.current.find(user => user.id === Number(memberId)).id
+      })
+    };
+
+    let nextRequestOptions = {}; // will populate later
+
+    let treeUserId = currentUserID;
+    let treeMemberId;
+
+    // add user to family members table
+    fetch(`http://localhost:5000/api/family-members/`, requestOptions) // add new family member
+    .then(async(response) => {
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log(responseData);
+        console.log(responseData.message);
+        treeMemberId = responseData.member;
+        nextRequestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            person1_id: treeUserId,
+            person2_id: treeMemberId,
+            relationshipType: data.selectedMemberRelationship,
+            relationshipStatus: "active",
+            side: data.matPat || null,
+            userId: userid,
+            memberUserId: null
+          })
+        };
+        return fetch(`http://localhost:5000/api/relationships/`, nextRequestOptions);
+      }
+      else {
+        // print message in return body
+        const errorData = await response.json();
+        console.error('Error:', errorData.message);
+        nextRequestOptions = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            person1_id: treeUserId,
+            person2_id: treeMemberId,
+            relationshipType: data.selectedMemberRelationship,
+            relationshipStatus: "active",
+            side: data.matPat || null,
+            userId: userid,
+          })
+        };
+      }
+    })
+    .then(async(response) => {
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.message);
+        return window.location.href = `/account/${treeMemberId}`;
+      }
+      else {
+        // print message in return body
+        console.error('Error:', response);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  };
+
+  // form submission (manual entry)
+  const onSubmitManual = (data) => {
+    console.log("submit attempted");
+    // add new member to family members table
+    let requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        "firstName": data.firstName,
+        "lastName": data.lastName,
+        "birthDate": data.birthday || null,
+        "deathDate" : data.deathDate || null,
+        "location": data.location || null,
+        "phoneNumber": "",
+        "userId": userid
+      })
+    };
+
+    let treeUserId = currentUserID; // TODO: will retrieve this from a service or something
+    let treeMemberId;
+
+    fetch(`http://localhost:5000/api/family-members/`, requestOptions) // add new family member
+    .then(async(response) => {
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log(responseData.message);
+          treeMemberId = responseData.member;
+        }
+        else {
+          // print message in return body
+          console.error('Error:', response);
+        }
+        return fetch(`http://localhost:5000/api/relationships/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            person1_id: treeUserId,
+            person2_id: treeMemberId,
+            relationshipType: data.relationship,
+            relationshipStatus: "active",
+            side: data.matPat2 || null,
+            userId: userid,
+          })
+        });
+      })
+      .then(async(response) => {
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log(responseData.message);
+          // redirect to account page
+          return window.location.href = `/account/${treeMemberId}`;
+        }
+        else {
+          // print message in return body
+          console.error('Error:', response);
+        }
+      });
+  };
 
   return (
     <Popup trigger={trigger} onClose={closeModal} modal>
@@ -73,7 +272,7 @@ function AddFamilyMemberPopup({ trigger }) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit(data => onSubmit(data, close))}> 
+            <form key={1} onSubmit={handleSubmit(data => onSubmitExisting(data, close))}> 
               <div style={styles.MainContainerStyle}>
                 <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
                   <h2 style={{ marginTop: '0px', margin: '0' }}>Add Family Member</h2>
@@ -98,17 +297,11 @@ function AddFamilyMemberPopup({ trigger }) {
                         <label>
                           <input
                             type="radio"
-                            name="selectedMember"
                             value={result.id}
-                            onChange={() => {
-                              setSelectedMember(result.id);
-                              setValue("selectedMember", result.id);
-                            }}
-                            checked={selectedMember === result.id}
-                            // {...register("selectedMember", { required: true })} // TODO make work
+                            {...register("selectedMember", { required: true })}
                           />
                           <Link to={`/account/${result.id}`} style={{ marginLeft: '10px' }}>
-                            {result.name}
+                            {result.username}
                           </Link>
                         </label>
                       </div>
@@ -124,7 +317,7 @@ function AddFamilyMemberPopup({ trigger }) {
                 <div>
                   <label>
                     Relationship:
-                    <select style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''} onChange={e => setSelectedMemberRelationship(e.target.value)}>
+                    <select {...register("selectedMemberRelationship", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''}>
                         <option value="" disabled hidden>Select</option>
                         <option value="spouse">Spouse</option>
                         <option value="child">Child</option>
@@ -142,17 +335,17 @@ function AddFamilyMemberPopup({ trigger }) {
                 </div>
 
                 <div style={{ marginTop: '10px', display: matPat.includes(selectedMemberRelationship) ? 'block' : 'none' }}>
-                  <input type="radio" name="matPat" value="maternal" /> Maternal
-                  <input type="radio" name="matPat" value="paternal" /> Paternal
+                  <input type="radio" name="matPat" value="maternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })}/> Maternal
+                  <input type="radio" name="matPat" value="paternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })}/> Paternal
                 </div>
 
                 {/* add button */}
                 <div style={styles.ButtonDivStyle}>
-                  <button type="submit" onClick={() => { close(); }} disabled={selectedMemberRelationship === null ? true : false} style={styles.ButtonStyle}>Add</button>
+                  <button type="submit" disabled={selectedMemberRelationship === null ? true : false} style={styles.ButtonStyle}>Add</button>
                 </div>
 
                 <div>
-                  <button onClick={() => {setManual(true); setSelectedMember(null); setSelectedMemberRelationship(null);}} style={styles.GrayButtonStyle}>Can't find your family member?</button>
+                  <button type="button" onClick={() => {setManual(true);}} style={styles.GrayButtonStyle}>Can't find your family member?</button>
                 </div>
               </div>
             </form>
@@ -171,7 +364,7 @@ function AddFamilyMemberPopup({ trigger }) {
             </div>
 
             {/* fill out info about family member */}
-            <form onSubmit={handleSubmit(data => onSubmit(data, close))} style={styles.FormStyle}>
+            <form key={2} onSubmit={handleSubmit2(data => onSubmitManual(data, close))} style={styles.FormStyle}>
               <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
                 <h2 style={{ marginTop: '0px' }}>Manually Add Family Member</h2>
               </div>
@@ -193,13 +386,13 @@ function AddFamilyMemberPopup({ trigger }) {
                 <li style={styles.ItemStyle}>
                   <label>
                     *First Name:
-                    <input {...register("firstName", { required: true })} type="text" placeholder="" style={styles.FieldStyle} required />
+                    <input {...register2("firstName", { required: true })} type="text" placeholder="" style={styles.FieldStyle} required />
                   </label>
                 </li>
                 <li style={styles.ItemStyle}>
                   <label>
                     *Last Name:
-                    <input {...register("lastName", { required: true })} type="text" placeholder="" style={styles.FieldStyle} required />
+                    <input {...register2("lastName", { required: true })} type="text" placeholder="" style={styles.FieldStyle} required />
                   </label>
                 </li>
 
@@ -207,7 +400,7 @@ function AddFamilyMemberPopup({ trigger }) {
                 <li style={styles.ItemStyle}>
                   <label>
                     *Relationship:
-                    <select {...register("relationship", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''} onChange={e => setSelectedMemberRelationship(e.target.value)} required>
+                    <select {...register2("relationship", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''} required>
                       <option value="" disabled hidden>Select</option>
                       <option value="spouse">Spouse</option>
                       <option value="child">Child</option>
@@ -225,8 +418,8 @@ function AddFamilyMemberPopup({ trigger }) {
                 </li>
 
                 <div style={{ marginTop: '10px', display: matPat.includes(selectedMemberRelationship) ? 'block' : 'none' }}>
-                  <input type="radio" name="matpatflag" value="maternal" /> Maternal
-                  <input type="radio" name="matpatflag" value="paternal" /> Paternal
+                  <input type="radio" name="matPat2" value="maternal" {...register2("matPat2", { required: matPat.includes(selectedMemberRelationship) })}/> Maternal
+                  <input type="radio" name="matPat2" value="paternal" {...register2("matPat2", { required: matPat.includes(selectedMemberRelationship) })}/> Paternal
                 </div>
 
                 {/* optional fields */}
@@ -234,25 +427,25 @@ function AddFamilyMemberPopup({ trigger }) {
                 <li style={styles.ItemStyle}>
                   <label>
                     Location:
-                    <input {...register("location")} type="text" placeholder="" style={styles.FieldStyle} />
+                    <input {...register2("location")} type="text" placeholder="" style={styles.FieldStyle} />
                   </label>
                 </li>
                 <li style={styles.ItemStyle}>
                   <label>
                     Birth Date:
-                    <input {...register("birthday")} type="date" placeholder="" style={styles.DateFieldStyle} />
+                    <input {...register2("birthday")} type="date" placeholder="" style={styles.DateFieldStyle} />
                   </label>
                 </li>
                 <li style={styles.ItemStyle}>
                   <label>
                     Place of Birth:
-                    <input {...register("birthplace")} type="text" placeholder="" style={styles.FieldStyle} />
+                    <input {...register2("birthplace")} type="text" placeholder="" style={styles.FieldStyle} />
                   </label>
                 </li>
                 <li style={styles.ItemStyle}>
                   <label>
                     Date of Death:
-                    <input {...register("deathdate")} type="date" placeholder="" style={styles.DateFieldStyle} />
+                    <input {...register2("deathdate")} type="date" placeholder="" style={styles.DateFieldStyle} />
                   </label>
                 </li>
               </ul>

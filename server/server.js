@@ -9,6 +9,8 @@ const treeMemberRoutes = require('./routes/treeMemberRoute');  // Fixed typo
 const relationshipRoutes = require('./routes/relationshipRoutes');  // Fixed typo
 const sharedTreeRoutes = require('./routes/sharedTreeRoutes');
 const backupRoutes = require('./routes/backupRoutes');
+const treeInfoRoutes = require('./routes/treeInfoRoutes');  // Fixed typo
+
 dotenv.config();
 
 const app = express();
@@ -32,6 +34,7 @@ app.use('/api/family-members', treeMemberRoutes);
 app.use('/api/relationships', relationshipRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/backup', backupRoutes);
+app.use('/api/tree-info', treeInfoRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

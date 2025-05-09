@@ -1,8 +1,7 @@
 export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     textAlign: 'center',
-    alignItems: 'center',
     fontFamily: 'Alata'
 }
 
@@ -21,12 +20,12 @@ export const MainContainerStyle = {
     // position: 'absolute', // needed for arrows to work, temporarily removed to make header work properly to left of tree
     top: '0', 
     left: '0', 
-    zIndex: '10', 
+    zIndex: '1', 
     overflow: 'hidden', 
     alignItems: 'center', 
     justifyContent: 'flex-start', 
     display: 'flex', 
-    margin: '50px'
+    margin: '3% 14%',
 }
 
 export const TopRightArrowStyle = {
@@ -49,15 +48,16 @@ export const BottomLeftArrowStyle = {
 export const HeaderStyle = {
     display: 'flex',
     width: '20%', 
-    marginLeft: '5%',
-    marginRight: '5%',
+    marginLeft: '9%',
+    marginRight: '10%',
     marginBottom: '5%',
     flexDirection: 'column',
     alignItems: 'center',
+    zIndex: '-1'
 }
 
 export const FamilyTreeContainerStyle = { 
-    width: '60%', 
+    width: '80%', 
     height: '90vh', 
     borderStyle: 'double', 
     // maxWidth: '800px', 

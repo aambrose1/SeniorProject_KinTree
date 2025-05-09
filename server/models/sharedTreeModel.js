@@ -20,7 +20,7 @@ const sharedTrees ={
     },
 
     getSharedTreebyReciever: async(id) => {
-        return db('sharedTrees').where('recieverId', id);
+        return db('sharedTrees').where({ recieverId: id }).select('*');
     },
 
     getSharedTreeByToken: async (token) => {

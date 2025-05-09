@@ -1,9 +1,10 @@
+import { text } from "d3"
+
 export const DefaultStyle = {
     display: 'flex',
-    flexDirection: 'column',
-    padding: '10px',
-    fontFamily: 'Alata',
-    alignItems: 'center',
+    flexDirection: 'row',
+    textAlign: 'center',
+    fontFamily: 'Alata'
 }
 
 export const SubtitleContainerStyle = {
@@ -26,10 +27,12 @@ export const ContainerStyle = {
     alignItems: 'center',
     justifyContent: 'flex-start',
     width: '70%',
-    height: '100vh',
+    height: '85vh',
     borderRadius: '30px',
     backgroundColor: '#faf9f6',
     padding: '20px',
+    margin: '2% 10% 10% 15%',
+    boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
 }
 
 export const MemberLinkStyle = {

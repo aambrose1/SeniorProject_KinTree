@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import * as styles from './styles';
 import Popup from 'reactjs-popup';
 import { ReactComponent as DropdownIcon } from '../../assets/dropdown-arrow.svg';
+import NavBar from '../../components/NavBar/NavBar';
+import { useCurrentUser } from '../../CurrentUserProvider';
 
 const defaultAvatar = require('../../assets/default-avatar.png');
 
@@ -13,118 +15,163 @@ function Family() {
     const [sortSelection, setSort] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredData, setFilteredData] = useState([]);
+    const [familyData, setFamilyData] = useState([]);
+    const [user_lastname, setUserLastName] = useState("");
 
-    let user_lastname = "Smith";
+    const { currentUserID, currentUserName, fetchCurrentUserID, currentAccountID } = useCurrentUser();
+
+    // get user's last name
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                await fetchCurrentUserID(); // Wait for fetchCurrentUserID to complete
+                const name = currentUserName; // Retrieve the last name after fetch
+                setUserLastName(name?.split(" ")[1]); // Store it in state
+            } catch (error) {
+                console.error("Error fetching current user ID:", error);
+            }
+        };
+    
+        fetchUserData(); // Call the async function
+    }, [fetchCurrentUserID]);
 
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
 
-    // TODO replace with API retrieval
-    const familyData = useMemo(() => [
-        {
-        "id": "0",
-        "rels": {
-            "father": "1",
-            "mother": "2",
-            "children": ["5"]
-        },
-        "data": {
-            "first name": "Ronald",
-            "last name": "Smith",
-            "avatar": "https://i.imgur.com/mfojszj.png"
+    // const familyData = useMemo(() => [
+    //     {
+    //     "id": "0",
+    //     "rels": {
+    //         "father": "1",
+    //         "mother": "2",
+    //         "children": ["5"]
+    //     },
+    //     "data": {
+    //         "first name": "Ronald",
+    //         "last name": "Smith",
+    //         "avatar": "https://i.imgur.com/mfojszj.png"
+    //     }
+    //     },
+    //     {
+    //     "id": "1",
+    //     "rels": {
+    //         "father": "3",
+    //         "mother": "4",
+    //         "spouses": [
+    //             "2"
+    //         ],
+    //         "children": [
+    //             "0"
+    //         ]
+    //         },
+    //     "data": {
+    //         "first name": "John",
+    //         "last name": "Smith",
+    //         "flag": "paternal"
+    //         }
+    //     },
+    //     {
+    //         "id": "2",
+    //         "rels": {
+    //             "spouses": [
+    //                 "1"
+    //             ],
+    //             "children": [
+    //                 "0"
+    //             ]
+    //             },
+    //         "data": {
+    //             "first name": "Jane",
+    //             "last name": "Smith",
+    //             "flag": "maternal"
+    //             }
+    //     },
+    //     {
+    //         "id": "3",
+    //         "rels": {
+    //             "children": ["1"],
+    //             "spouses": ["4"]
+    //         },
+    //         "data": {
+    //             "first name": "Alice",
+    //             "last name": "Smith",
+    //             "flag": "paternal"
+    //         }
+    //     },
+    //     {
+    //         "id": "4",
+    //         "rels": {
+    //             "children": ["1"],
+    //             "spouses": ["3"]
+    //         },
+    //         "data": {
+    //             "first name": "Bob",
+    //             "last name": "Smith",
+    //             "flag": "paternal"
+    //         }
+    //     },
+    //     {
+    //         "id": "5",
+    //         "rels": {
+    //             "father": "0",
+    //         },
+    //         "data": {
+    //             "first name": "Tom",
+    //             "last name": "Smith"
+    //         }
+    //     },
+    // ], []);
+
+    // fetch family data from API
+    
+    useEffect(() => {
+        if (!currentAccountID) {
+            console.error('No current account ID');
+            return;
         }
-        },
-        {
-        "id": "1",
-        "rels": {
-            "father": "3",
-            "mother": "4",
-            "spouses": [
-                "2"
-            ],
-            "children": [
-                "0"
-            ]
-            },
-        "data": {
-            "first name": "John",
-            "last name": "Smith",
-            "flag": "paternal"
-            }
-        },
-        {
-            "id": "2",
-            "rels": {
-                "spouses": [
-                    "1"
-                ],
-                "children": [
-                    "0"
-                ]
-                },
-            "data": {
-                "first name": "Jane",
-                "last name": "Smith",
-                "flag": "maternal"
+    
+        const fetchFamilyData = async () => {
+            try {
+                console.log('Current account ID:', currentAccountID);
+    
+                const response = await fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch family data: ${response.statusText}`);
                 }
-        },
-        {
-            "id": "3",
-            "rels": {
-                "children": ["1"],
-                "spouses": ["4"]
-            },
-            "data": {
-                "first name": "Alice",
-                "last name": "Smith",
-                "flag": "paternal"
+    
+                const responseData = await response.json(); // [{...}, {...}, ...]
+                setFamilyData(responseData);
+                console.log('Family data:', responseData);
+            } catch (error) {
+                console.error('Error fetching family data:', error);
             }
-        },
-        {
-            "id": "4",
-            "rels": {
-                "children": ["1"],
-                "spouses": ["3"]
-            },
-            "data": {
-                "first name": "Bob",
-                "last name": "Smith",
-                "flag": "paternal"
-            }
-        },
-        {
-            "id": "5",
-            "rels": {
-                "father": "0",
-            },
-            "data": {
-                "first name": "Tom",
-                "last name": "Smith"
-            }
-        },
-    ], []);
+        };
+    
+        fetchFamilyData();
+    }, [currentAccountID]);
 
     useEffect(() => {
-        let filtered = familyData;
+        let filtered = Array.isArray(familyData) ? familyData : [];
 
         if (searchTerm !== "") {
             filtered = filtered.filter(member =>
-                member.data["first name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.data["last name"].toLowerCase().includes(searchTerm.toLowerCase())
+                member["firstName"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+                member["lastName"].toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
-        if (filterSelection !== "") {
-            filtered = filtered.filter(member => member.data["flag"] === filterSelection);
-        }
+        // TODO: no longer works with the dynamic data bc mat/pat flags are not stored in treeMembers
+        // if (filterSelection !== "") {
+        //     filtered = filtered.filter(member => member.data["flag"] === filterSelection);
+        // }
 
         if (sortSelection !== "") {
             filtered = filtered.sort((a, b) => {
                 if(sortSelection === "firstName") {
-                    return a.data["first name"].localeCompare(b.data["first name"]);
+                    return a["firstName"].localeCompare(b["firstName"]);
                 }
                 else if(sortSelection === "lastName") {
-                    return a.data["last name"].localeCompare(b.data["last name"]);
+                    return a["lastName"].localeCompare(b["lastName"]);
                 }
                 return 0;
             });
@@ -135,7 +182,9 @@ function Family() {
 
     return (
         <div style={styles.DefaultStyle}>
+            <NavBar />
             {/* main container */}
+            <div style={{width: '150px'}}></div>
             <div style={styles.ContainerStyle}>
                 {/* header */}
                 <h1 style={{ marginBottom: '0px'}}>The {user_lastname} Family</h1>
@@ -227,8 +276,8 @@ function Family() {
                     {filteredData.map((member) => (
                         <div key={member.id} style={styles.MemberStyle}>
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <img src={member.data["avatar"] ? member.data["avatar"] : defaultAvatar} alt={`${member.data["first name"]} ${member.data["last name"]}`} style={styles.AvatarStyle} />
-                                {member.data["first name"]} {member.data["last name"]}
+                                <img src={member?.avatar ? member?.avatar : defaultAvatar} alt={`${member["firstName"]} ${member["lastName"]}`} style={styles.AvatarStyle} />
+                                {member["firstName"]} {member["lastName"]}
                             </div>
                             <div>
                                 <Link to={`/account/${member.id}`} style={styles.MemberLinkStyle}>
