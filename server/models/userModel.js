@@ -21,7 +21,7 @@ const User = {
 
     deleteUser: async (id) => {
         return db('users').where({id}).del();
-    }
+    },
 
     getAllUsers: async () => {
         return db('users').select('*');
