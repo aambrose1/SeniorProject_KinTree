@@ -35,16 +35,16 @@ Then, from the same directory, run the following command to run the server/API:
 
 `node server.js`
 
-Directions for database setup are in progress.
+### Database Setup
 
-Run the command 'npm install knex mysql2'
+Run the command `npm install knex mysql2`
 
 Create a .env file with MySQL information. Add username, password, and database name.
 
-Run the command 'node mysql-connection.js' to verify the connection.
+Run the command `node mysql-connection.js` to verify the connection.
 
-Run the command 'knex:migrate status' to ensure proper migration files are loaded. 
+Run the command `knex:migrate status` to ensure proper migration files are loaded. 
 
-Run the command 'knex migrate:latest' to create existing database tables. 
+Run the command `knex migrate:latest` to create existing database tables. 
 
 
