@@ -14,7 +14,7 @@ const treeInfoRoutes = require('./routes/treeInfoRoutes');  // Fixed typo
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5000;
 
 const db = knex({
   client: 'mysql2',

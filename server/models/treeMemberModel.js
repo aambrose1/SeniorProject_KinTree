@@ -39,6 +39,7 @@ const treeMember = {
 
     deleteByUser: async (userId) => {
         return db('treeMembers').where({userId}).del();
+    },
       
     getActiveMemberId: async (id) => {
         // userId and memberUserId are both equal to the id
