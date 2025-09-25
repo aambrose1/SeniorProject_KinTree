@@ -41,7 +41,7 @@ Open the MySQL Client Terminal, login with your password to run the mySQL server
 Create a new database instance on your machine:
 `CREATE DATABASE <name>`
 
-Create a .env file with MySQL information. Example env is in the project's root folder.
+Create a .env file with MySQL information. Example env is in the project's /docs/ folder.
 
 Open another command line window in /SeniorProject_KinTree/server/ and run the command `npm install knex mysql2` to install Knex and mySQL2.
 
