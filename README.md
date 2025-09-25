@@ -2,16 +2,15 @@
 
 This repository contains the codebase for the KinTree project. This project stems from the CSE 3213/3223 Software Engineering Senior Project I/II course sequence at Mississippi State University.
 
-KinTree is an application that allows users to connect with family members and build virtual, visualized, and dynamic family trees collaboratively. This project began in the Fall of 2024 and is ongoing. KinTree utilizes React, Node.js, and MySQL.
+KinTree is an application that allows users to connect with family members and build virtual, visualized, and dynamic family trees collaboratively. KinTree utilizes React, Node.js, and MySQL. This project originated in [Fall 2024](https://github.com/OwenAdams2023/SeniorProject_KinTree#). The project is ongoing through this forked repository in Fall 2025.
 
-The current KinTree project team as of Spring 2025 includes Owen Adams, Kennedi James, Destiny Milsap, and Jade Thompson. The primary stakeholder for this project is Dr. Charan Gudla.
+The current KinTree project team as of Fall 2025 includes Andrea Ambrose, Matthew Loyed, Xiang Chen, and Charles Lenson. The primary stakeholder for this project is Dr. Charan Gudla.
 
 # Install
 
 ### Prerequisites
 
-Node.js (install the correct version for your own OS [here](https://nodejs.org/en))
-MySQL Install (https://dev.mysql.com/downloads/mysql/)
+Node.js (install the correct version for your own OS [here](https://nodejs.org/en)) and install MySQL [here](https://dev.mysql.com/downloads/installer/). Set up account information through the Configurator application or through the terminal.
 
 ### Setup
 
@@ -21,13 +20,13 @@ From the command line, navigate to the /SeniorProject_KinTree/client directory, 
 
 `npm install`
 
-Once all dependencies are installed, you can run the frontend of the project (from the /SeniorProject_KinTree/client directory) by running the following command:
+Once all dependencies are installed, you can run the frontend of the project from the /SeniorProject_KinTree/client directory by running the following command:
 
 `npm start`
 
-This command runs the application in development mode. You can open http://localhost:3000 in your browser to view the application. Any changes made to the source code will cause the application page to refresh and show reflected changes (once the changed file is saved).
+This command runs the application in development mode. You can open http://localhost:3000 in your browser to view the application and saved changes.
 
-To run the backend of code (server/API), you must first install the backend node dependencies. Open another command line window and run the following command in the backend directory (/SeniorProject_KinTree/server):
+To run the backend, you must first install the backend node dependencies. Open another command line window and run the following command in the backend directory (/SeniorProject_KinTree/server):
 
 `npm install`
 
@@ -37,14 +36,22 @@ Then, from the same directory, run the following command to run the server/API:
 
 ### Database Setup
 
-Run the command `npm install knex mysql2`
+Open the MySQL Client Terminal, login with your password to run the mySQL server.
 
-Create a .env file with MySQL information. Add username, password, and database name.
+Create a new database instance on your machine:
+`CREATE DATABASE <name>`
 
-Run the command `node mysql-connection.js` to verify the connection.
+Create a .env file with MySQL information. Example env is in the project's root folder.
 
-Run the command `knex:migrate status` to ensure proper migration files are loaded. 
+Open another command line window in /SeniorProject_KinTree/server/ and run the command `npm install knex mysql2` to install Knex and mySQL2.
 
-Run the command `knex migrate:latest` to create existing database tables. 
+Verify the connection:
 
+`node mysql-connection.js` 
+
+Ensure proper migration files are loaded:
+
+`npx knex:migrate status`
+
+Run the command `npx knex migrate:latest` to create and/or update existing database tables.
 
