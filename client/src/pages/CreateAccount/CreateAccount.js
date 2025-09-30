@@ -29,7 +29,7 @@ const yupValidation = yup.object().shape(
         zipcode: yup.string().matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
         password: yup.string().required("Password is a required field.")
             .matches(
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})$/
                 , "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
             )
 
