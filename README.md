@@ -10,7 +10,7 @@ The current KinTree project team as of Fall 2025 includes Andrea Ambrose, Matthe
 
 ### Prerequisites
 
-Node.js (install the correct version for your own OS [here](https://nodejs.org/en)) and install MySQL [here](https://dev.mysql.com/downloads/installer/). Set up account information through the Configurator application or through the terminal.
+Node.js (install the correct version for your own OS [here](https://nodejs.org/en)) and install MySQL [here](https://dev.mysql.com/downloads/mysql/). Set up account information through the Configurator application or through the terminal.
 
 ### Setup
 
@@ -41,7 +41,7 @@ Open the MySQL Client Terminal, login with your password to run the mySQL server
 Create a new database instance on your machine:
 `CREATE DATABASE <name>`
 
-Create a .env file with MySQL information. Example env is in the project's /docs/ folder.
+In the /server/ directory, create a .env file with MySQL information. Example env is in the project's /docs/ folder.
 
 Open another command line window in /SeniorProject_KinTree/server/ and run the command `npm install knex mysql2` to install Knex and mySQL2.
 
