@@ -1,4 +1,4 @@
-// server.js
+// server.js - main backend code navigation
 const express = require('express');
 const knex = require('knex');
 const dotenv = require('dotenv');

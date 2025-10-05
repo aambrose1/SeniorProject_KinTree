@@ -28,34 +28,60 @@ const yupValidation = yup.object().shape(
             ),
         zipcode: yup.string().matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
         password: yup.string().required("Password is a required field.")
-            .matches(
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})$/
-                , "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
-            )
+        .matches(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*.\-_]).{8,}$/,
+            "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Character"
+        )
 
     }
 );
 
 const CreateAccount = () => {
-    const {register, handleSubmit, formState: {errors}} = useForm({resolver: yupResolver(yupValidation)});
+    const {register, handleSubmit, formState: {errors}} = useForm({resolver: yupResolver(yupValidation), mode: 'onSubmit'});
     const [isHovering, setIsHovering] = useState(false);
     const [formData, setFormData] = useState({});
 
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSubmit = async (data) => {  
+        try {
+            console.log(data);
     
-        // register account
-        fetch(`http://localhost:5000/api/auth/register`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: data.firstname + " " + data.lastname,
-                email: data.email,
-                password: data.password,
-            }),
-        })
+            // register account
+            const response = await fetch(`http://localhost:5000/api/auth/register`, {  
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: data.firstname + " " + data.lastname,
+                    email: data.email,
+                    password: data.password,
+                }),
+            });
+
+
+            if (response.ok) { // success
+                const responseData = await response.json();
+                console.log('Account created successfully:', responseData);
+                
+                // Redirect to home page
+                window.location.href = '/';
+            } else { // failure
+                console.error('Registration failed:', response.statusText);
+                
+                // add feedback to user here
+                alert('Registration failed. Please try again.');
+            }
+        } catch (error) {  
+            console.error('Error:', error);
+
+            // Handle network or other errors
+            alert('Something went wrong. Please try again.');
+        }
+    };
+
+
+    /*
+    
             .then(async (response) => {
                 if (response.ok) {
                     const responseData = await response.json();
@@ -122,10 +148,7 @@ const CreateAccount = () => {
                     console.error('Error initializing family member:', errorData);
                 }
             })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-    };
+    */
 
     const ButtonStyle = {
         fontFamily: 'Alata',
@@ -201,7 +224,7 @@ const CreateAccount = () => {
                     <div style={styles.ItemStyle}>
                         <label>Password</label>
                         <input id="password" {...register("password")} style={styles.FieldStyle}/>
-                        {errors.password && <p>{errors.password.message}</p>}
+                        {errors.password && <p style={{color: 'red'}}>{errors.password.message}</p>}
                     </div>
                     <br />
                 </div>
