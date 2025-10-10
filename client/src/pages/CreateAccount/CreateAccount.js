@@ -12,6 +12,7 @@ const yupValidation = yup.object().shape(
         firstname: yup.string().required("First name is a required field."),
         lastname: yup.string().required("Last name is a required field."),
         birthdate: yup.date().required("Birthdate is a required field."),
+        gender: yup.string().oneOf(['M', 'F'], 'Please select a valid option').required('Gender field is required'),
         email: yup.string().required("Email is a required field.")
             .matches(
                 "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
@@ -64,7 +65,7 @@ const CreateAccount = () => {
                     // Use responseData.user directly
                     const accountID = responseData.user;
     
-                    // Initialize user's tree by adding themself
+                    // Add user as a family member
                     return fetch(`http://localhost:5000/api/family-members/`, {
                         method: 'POST',
                         headers: {
@@ -79,8 +80,9 @@ const CreateAccount = () => {
                             phoneNumber: data.phonenum,
                             userId: accountID,
                             memberUserId: accountID,
+                            gender: data.gender,
                         }),
-                    }).then(async (response) => {
+                    }).then(async (response) => { // Initialize user's tree by adding themself
                         if (response.ok) {
                             const familyMemberResponse = await response.json();
                             console.log(familyMemberResponse);
@@ -95,6 +97,7 @@ const CreateAccount = () => {
                                         "data": {
                                             "first name": data.firstname,
                                             "last name": data.lastname,
+                                            "gender": data.gender,
                                         },
                                         "rels": {
                                             "children": [],
@@ -162,6 +165,14 @@ const CreateAccount = () => {
                         <label>Birthdate</label>
                         <input id="birthdate" {...register("birthdate")} style={styles.FieldStyle}/>
                         {errors.birthdate && <p>{errors.birthdate.message}</p>}
+                    </div>
+                    <div style={styles.ItemStyle}>
+                        <label>Gender</label>
+                        <select id="gender" {...register("gender")} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }}>
+                            <option value="" disabled hidden>Select</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Email</label>

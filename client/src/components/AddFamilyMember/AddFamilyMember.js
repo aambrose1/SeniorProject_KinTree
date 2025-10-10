@@ -27,7 +27,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     reset,
     watch,
     handleSubmit,
-  } = useForm({defaultValues: {selectedMember: '', selectedMemberRelationship: '', matPat: ''}});
+  } = useForm({defaultValues: {selectedMember: '', selectedMemberRelationship: '', matPat: '', gender: ''}});
 
   // stored list of family members that require maternal/paternal distinction (maybe shift this to retrieval from backend, so that it can be updated without changing code)
   let matPat = useMemo(() => ["parent", "cousin", "aunt", "uncle", "grandparent", "niece", "nephew"], []);
@@ -48,7 +48,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   const {
     register: register2,
     handleSubmit: handleSubmit2,
-  } = useForm({defaultValues: {firstName: '', lastName: '', relationship: '', matPat2: '', location: '', birthday: '', birthplace: '', deathdate: ''}});
+  } = useForm({defaultValues: {firstName: '', lastName: '', relationship: '', matPat2: '', location: '', birthday: '', birthplace: '', deathdate: '', gender: ''}});
 
 
 
@@ -132,7 +132,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         "location": null,
         "phoneNumber": null,
         "userId": userid,
-        "memberUserId": users.current.find(user => user.id === Number(memberId)).id
+        "memberUserId": users.current.find(user => user.id === Number(memberId)).id,
+        "gender": data.gender, // Ensure gender is explicitly handled and not undefined
       })
     };
 
@@ -159,7 +160,6 @@ function AddFamilyMemberPopup({ trigger, userid }) {
             relationshipStatus: "active",
             side: data.matPat || null,
             userId: userid,
-            memberUserId: null
           })
         };
         return fetch(`http://localhost:5000/api/relationships/`, nextRequestOptions);
@@ -201,6 +201,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   // form submission (manual entry)
   const onSubmitManual = (data) => {
     console.log("submit attempted");
+    console.log("Form data:", data); // Log the form data to see what we're getting
     // add new member to family members table
     let requestOptions = {
       method: 'POST',
@@ -212,7 +213,9 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         "deathDate" : data.deathDate || null,
         "location": data.location || null,
         "phoneNumber": "",
-        "userId": userid
+        "userId": userid,
+        "memberUserId": null,
+        "gender": data.gender // Send the gender value directly, don't use || null
       })
     };
 
@@ -313,6 +316,17 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   )}
                 </div>
 
+                {/* select gender */}
+                <div>
+                  <label style={styles.ItemStyle}> *Gender: 
+                    <select {...register("gender", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''} required>
+                        <option value="" disabled hidden>Select</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                  </label>
+                </div>
+
                 {/* select relationship */}
                 <div>
                   <label>
@@ -393,6 +407,16 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   <label>
                     *Last Name:
                     <input {...register2("lastName", { required: true })} type="text" placeholder="" style={styles.FieldStyle} required />
+                  </label>
+                </li>
+                <li>
+                  <label style={styles.ItemStyle}> 
+                    *Gender: 
+                    <select {...register2("gender", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '85px' }} defaultValue={''} required>
+                        <option value="" disabled hidden>Select</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
                   </label>
                 </li>
 
