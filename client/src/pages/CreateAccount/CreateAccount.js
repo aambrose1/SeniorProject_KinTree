@@ -167,12 +167,14 @@ const CreateAccount = () => {
                         {errors.birthdate && <p>{errors.birthdate.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Gender</label>
+                        <label>Gender
                         <select id="gender" {...register("gender")} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }}>
                             <option value="" disabled hidden>Select</option>
                             <option value="M">Male</option>
                             <option value="F">Female</option>
                         </select>
+                        </label>
+                        {errors.gender && <p>{errors.gender.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Email</label>

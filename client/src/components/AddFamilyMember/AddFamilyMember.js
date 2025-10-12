@@ -133,7 +133,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         "phoneNumber": null,
         "userId": userid,
         "memberUserId": users.current.find(user => user.id === Number(memberId)).id,
-        "gender": data.gender, // Ensure gender is explicitly handled and not undefined
+        "gender": data.gender, 
       })
     };
 
@@ -199,7 +199,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   };
 
   // form submission (manual entry)
-  const onSubmitManual = (data) => {
+  const onSubmitManual = (data, close) => {
     console.log("submit attempted");
     console.log("Form data:", data); // Log the form data to see what we're getting
     // add new member to family members table
@@ -212,10 +212,10 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         "birthDate": data.birthday || null,
         "deathDate" : data.deathDate || null,
         "location": data.location || null,
-        "phoneNumber": "",
+        "phoneNumber": data.phoneNumber || null,
         "userId": userid,
         "memberUserId": null,
-        "gender": data.gender // Send the gender value directly, don't use || null
+        "gender": data.gender 
       })
     };
 
@@ -258,6 +258,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
           console.error('Error:', response);
         }
       });
+      reset();
+      close();
   };
 
   return (
@@ -409,9 +411,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                     <input {...register2("lastName", { required: true })} type="text" placeholder="" style={styles.FieldStyle} required />
                   </label>
                 </li>
-                <li>
-                  <label style={styles.ItemStyle}> 
-                    *Gender: 
+                <li style={styles.ItemStyle} >
+                  <label>*Gender:
                     <select {...register2("gender", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '85px' }} defaultValue={''} required>
                         <option value="" disabled hidden>Select</option>
                         <option value="M">Male</option>
@@ -447,7 +448,6 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 </div>
 
                 {/* optional fields */}
-                <br></br>
                 <li style={styles.ItemStyle}>
                   <label>
                     Location:
