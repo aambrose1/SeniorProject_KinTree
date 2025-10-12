@@ -1,11 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import * as styles from './styles';
 // import { ReactComponent as TreeIcon } from '../../assets/background-tree.svg'; // background tree image from Figma; TODO configure overlay with tree svg
-import f3 from 'family-chart';
+import * as f3 from 'family-chart';
 import './tree.css'; // styling adapted from family-chart package sample code
 import { ReactComponent as PlusSign } from '../../assets/plus-sign.svg';
-// import { ReactComponent as ArrowTR } from '../../assets/arrow-1.svg';
-// import { ReactComponent as ArrowBL } from '../../assets/arrow-2.svg';
 import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMember';
 import { Link } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
@@ -16,35 +14,40 @@ import { useCurrentUser } from '../../CurrentUserProvider'; // import the contex
 // see https://github.com/donatso/family-chart/
 
 function FamilyTree() {
-    const contRef = useRef(null); // Use a ref for the container
-    const { currentAccountID } = useCurrentUser(); // Use the hook in the function component
+    const contRef = React.createRef();
+    const { currentAccountID } = useCurrentUser();
 
     useEffect(() => {
-        if (!contRef.current) {
-            console.log("failure");
-            return;
-        }
-        console.log("success");
+        if (!contRef.current) return;
+
+        let chart = null;
 
         function create(data) {
-            const f3Chart = f3.createChart('#FamilyChart', data)
-                .setTransitionTime(0)
+            // Clean up any existing chart first
+            const existingChart = document.querySelector('#FamilyChart');
+            if (existingChart) {
+                existingChart.innerHTML = '';
+            }
+
+            chart = f3.createChart('#FamilyChart', data)
+                .setTransitionTime(500)
                 .setCardXSpacing(250)
                 .setCardYSpacing(150)
+                .setSingleParentEmptyCard(false, {label: ''})
+                .setShowSiblingsOfMain(true)
                 .setOrientationVertical()
-                .setSingleParentEmptyCard(false);
-
-            const f3Card = f3Chart.setCard(f3.CardHtml)
-                .setCardDisplay([["first name"], []])
-                .setCardDim({ width: 80, height: 80 })
+                
+            
+            chart.setCardHtml()
+                .setCardDisplay([["first name"],[]])
+                .setCardDim({})
                 .setMiniTree(false)
                 .setStyle('imageCircle')
-                .setOnHoverPathToMain();
+                .setOnCardClick((e, data) => {
+                    window.location.href = `/account/${data.data.id}`;
+                });
 
-            f3Card.setOnCardClick((e, d) => {}); // Remove zooming transitions
-
-            f3Chart.updateMainId("21");
-            f3Chart.updateTree({ initial: true });
+            chart.updateTree({initial: true});
         }
 
         let getRequestOptions = {
@@ -56,20 +59,19 @@ function FamilyTree() {
             .then(async (response) => {
                 if (response.ok) {
                     let treeData = await response.json();
-                    console.log(treeData.object);
                     const parsedData = treeData.object;
-                    console.log(parsedData);
+                    console.log("Tree data: ", parsedData);
                     create(parsedData);
                 } else {
-                    console.error('Error:', response);
+                    console.error('Error in Loading Tree Data:', response);
                 }
             });
-    }, [currentAccountID]);
+
+        
+    }, [contRef, currentAccountID]);
 
     return <div className="f3 f3-cont" id="FamilyChart" ref={contRef}></div>;
 }
-
-let parsedData = [];
 
 // builds the actual page
 function Tree() {
@@ -82,19 +84,8 @@ function Tree() {
     return (
         <div style={styles.DefaultStyle}>
             <NavBar />
-            {/* TODO make these work again, removed them for now so I could work with the header placement; might want to integrate these with actual background somehow */}
-            {/* <div style={styles.ArrowContainerStyle}>
-                <div style={{flex: '50%'}}></div>
-                <ArrowTR style={styles.TopRightArrowStyle} />
-                <ArrowBL style={styles.BottomLeftArrowStyle} />
-                <div style={{flex: '50%', textAlign: 'right'}}></div>
-            </div>  */}
             {isTreePage ? (
-
-            <div style={styles.MainContainerStyle} className="main-container">
-                {/* <Link to="/" style={{ position: 'absolute', top: '0px', left: '0px', margin: '10px' }}>Home</Link> */}
-                
-
+            <div style={styles.MainContainerStyle} className="main-container">                
                 {/* header content */}
                 <div style={styles.HeaderStyle}>
                     {/* titles */}

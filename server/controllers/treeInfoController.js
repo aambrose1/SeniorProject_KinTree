@@ -10,7 +10,7 @@ const addObject = async (req, res) => {
         });
 
         res.status(201).json({
-            message: 'Tree object added successfully',
+            message: 'Tree object added successfully to DB',
             object: newObject
         });
     } catch (error) {
@@ -70,7 +70,7 @@ const getObject = async (req, res) => {
                 error: 'Object not found'
             });
         }
-        console.log("Data sent from backend:", retrievedObject.object);
+        console.log("treeInfo getObject triggered. Data sent from backend:", retrievedObject.object);
         
         res.status(200).json(retrievedObject);
     } catch (error) {
