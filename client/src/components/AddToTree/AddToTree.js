@@ -7,6 +7,7 @@ import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
+import { addRelationship }from '../../utils/treeUtils.js';
 
 //                                 john              jane            parent                  jane is john's mom
 function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelationship, accountUserName, treeData, results, currentAccountID) {
@@ -14,11 +15,12 @@ function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelations
 
   // maybe - check if account user is already in tree, return error if they are (user will need to delete them and re-add)
 
+  // Link relative to user; 
   console.log("relative " + relativeUserId);
   console.log("account " + accountUserId);
   console.log(results.current.find(result => Number(result.id) === Number(accountUserId)))
 
-  // intialize user in tree
+  // Initialize user in tree
   treeIndex[`${accountUserId}`] = {
       "id": `${accountUserId}`,
       "rels": {
@@ -27,109 +29,15 @@ function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelations
       },
       "data": {
         "first name": `${accountUserName.split(" ")[0]}`,
-        "last name": `${accountUserName.split(" ")[1]}`,
         "gender": `${results.current.find(result => Number(result.id) === Number(accountUserId))["gender"]}`
       }
     }
 
-
-  if(relativeRelationship === "parent"){
-    // add account user as child to relative
-    treeIndex[`${relativeUserId}`]["rels"]["children"].push(`${accountUserId}`);
-    // add relative as parent to account user
-    if(treeIndex[`${relativeUserId}`]["data"]["gender"] === "M") {
-      treeIndex[`${accountUserId}`]["rels"]["father"] = `${relativeUserId}`;
-    }
-    else if(treeIndex[`${relativeUserId}`]["data"]["gender"] === "F") {
-      treeIndex[`${accountUserId}`]["rels"]["mother"] = `${relativeUserId}`;
-    }
-    else{
-      console.log("no gender found");
-    }
-    // add relative's spouse(s) (if any) as parent to account user
-    treeIndex[`${relativeUserId}`]["rels"]["spouses"].forEach(spouse => {
-      if(treeIndex[`${spouse}`]["data"]["gender"] === "M") {
-        treeIndex[`${accountUserId}`]["rels"]["father"] = `${spouse}`;
-      }
-      else if(treeIndex[`${spouse}`]["data"]["gender"] === "F") {
-        treeIndex[`${accountUserId}`]["rels"]["mother"] = `${spouse}`;
-      }
-      else {
-        console.log("no gender found");
-      }
-    });
-    // add account user as child to relative's spouse(s) (if any)
-    treeIndex[`${relativeUserId}`]["rels"]["spouses"].forEach(spouse => {
-      treeIndex[`${spouse}`]["rels"]["children"].push(`${accountUserId}`);
-    });
-  }
-
-  else if(relativeRelationship === "child") {
-    // add account user as parent to relative
-    if(treeIndex[`${accountUserId}`]["data"]["gender"] === "M"){
-      treeIndex[`${relativeUserId}`]["rels"]["father"] = `${accountUserId}`;
-    }
-    else if(treeIndex[`${accountUserId}`]["data"]["gender"] === "F"){
-      treeIndex[`${relativeUserId}`]["rels"]["mother"] = `${accountUserId}`;
-    }
-    else{
-      console.log("no gender found");
-    }
-    // add relative as child to account user
-    treeIndex[`${accountUserId}`]["rels"]["children"].push(`${relativeUserId}`);
-    // add account user as spouse to relative's existing parent(s) (if any) + make account user parent of relative's siblings (if any)
-    if(treeIndex[`${relativeUserId}`]["rels"]["father"] !== undefined && treeIndex[`${accountUserId}`]["data"]["gender"] === "F") { // make account user the wife
-      treeIndex[`${relativeUserId}`["rels"]["father"]]["rels"]["spouses"].push(`${accountUserId}`);
-      treeIndex[`${relativeUserId}`["rels"]["father"]]["rels"]["children"].forEach(child => { // make account user mother of relative's siblings
-        if(child !== `${relativeUserId}`) {
-          treeIndex[`${child}`]["rels"]["mother"] = `${accountUserId}`;
-        }
-      });
-    }
-    else if(treeIndex[`${relativeUserId}`]["rels"]["mother"] !== undefined && treeIndex[`${accountUserId}`]["data"]["gender"] === "M"){ // make account user the husband
-      treeIndex[`${relativeUserId}`["rels"]["mother"]]["rels"]["spouses"].push(`${accountUserId}`);
-      treeIndex[`${relativeUserId}`["rels"]["father"]]["rels"]["children"].forEach(child => { // make account user father of relative's siblings
-        if(child !== `${relativeUserId}`) {
-          treeIndex[`${child}`]["rels"]["father"] = `${accountUserId}`;
-        }
-      });
-    }
-    else{
-      console.log("no gender found or no existing parent");
-    }
-  }
-
-  else if(relativeRelationship === "sibling") {
-    // add account user as child to relative's parent(s)
-    if(treeIndex[`${relativeUserId}`]["rels"]["father"] !== undefined) {
-      treeIndex[`${relativeUserId}`["rels"]["father"]]["rels"]["children"].push(`${accountUserId}`);
-      treeIndex[`${accountUserId}`]["rels"]["father"] = `${treeIndex[`${relativeUserId}`]["rels"]["father"]}`;
-    }
-    if(treeIndex[`${relativeUserId}`]["rels"]["mother"] !== undefined) {
-      treeIndex[`${relativeUserId}`["rels"]["mother"]]["rels"]["children"].push(`${accountUserId}`);
-      treeIndex[`${accountUserId}`]["rels"]["mother"] = `${treeIndex[`${relativeUserId}`]["rels"]["mother"]}`;
-    }
-  }
-
-  else if(relativeRelationship === "spouse") {
-    // add account user as spouse to relative
-    treeIndex[`${relativeUserId}`]["rels"]["spouses"].push(`${accountUserId}`);
-    // add relative as spouse to account user
-    treeIndex[`${accountUserId}`]["rels"]["spouses"].push(`${relativeUserId}`);
-    // add account user as parent to relative's children (if any)
-    treeIndex[`${relativeUserId}`]["rels"]["children"].forEach(child => {
-      if(treeIndex[`${accountUserId}`]["data"]["gender"] === "M") {
-        treeIndex[`${child}`]["rels"]["father"] = `${accountUserId}`;
-      }
-      else if(treeIndex[`${accountUserId}`]["data"]["gender"] === "F"){
-        treeIndex[`${child}`]["rels"]["mother"] = `${accountUserId}`;
-      }
-      treeIndex[`${accountUserId}`]["rels"]["children"].push(`${child}`);
-    });
-  }
-
-  else {
-    console.log("Error: invalid relationship type");
+  // Add the primary relationship
+  try {
+    addRelationship(treeIndex, accountUserId, relativeUserId, relativeRelationship);
+  } catch (error) {
+    throw new Error(error.message); // Re-throw the error to be caught by onSubmit
   }
 
   let updatedTreeData = Object.values(treeIndex);
@@ -141,13 +49,16 @@ function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelations
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedTreeData)
   };
-  fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, requestOptions)
+
+  return fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, requestOptions)
     .then(async(response) => {
         if (response.ok) {
           console.log("Tree object updated successfully");
+          return true;
         }
         else{
           console.error('Error:', response);
+          return false;
         }
     });
 }
@@ -155,6 +66,7 @@ function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelations
 function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAccountRelationshipType, userId }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
   var results = useRef([]);
   var filteredResults = useRef([]);
   const { currentAccountID } = useCurrentUser();
@@ -167,7 +79,7 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
         .then(async(response) => {
           if (response.ok) {
             results.current = await response.json();
-            console.log(results.current);
+            console.log('AddToTree Current Family Members:', results.current);
           }
           else {
             console.log('Error:', response);
@@ -179,11 +91,12 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
           .then(async(response) => {
             if (response.ok) {
               let responseData = await response.json();
-              console.log(responseData.object);
+              console.log('AddToTree Current Tree Object Data:', responseData.object);
               setTreeData(responseData.object);
             }
             else {
               console.error('Error:', response);
+              throw new Error('Error fetching tree data');
             }
           });
       })
@@ -203,7 +116,7 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
     );
 
     console.log("Filtered Results:", filteredResults.current);
-  }, [treeData, results.current]);
+  }, [treeData]);
 
     // form
     const {
@@ -216,27 +129,22 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
     let selectedMember = watch("selectedMember");
 
     const onSubmit = async (data, close) => {
-        console.log(data);
-        reset();
-        close();
-        // wait for the API request to complete
-        const response = await fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        if (response.ok) {
-          // parse the response
-          const treeResponse = await response.json();
-          setTreeData(treeResponse.object);
-          console.log(treeData);
-
-          // call after the API request is complete
-          return AddTreeMember(userId, accountUserId, data.selectedMember, data.memberRelationshipType, accountUserName, treeData, results, currentAccountID);
-        } 
-        else {
-            const errorData = await response.json();
-            console.error('Error:', errorData.message);
+        console.log("Submission data:", data);
+        setErrorMessage(""); // Clear any previous error messages
+        
+        try {
+            const result = await AddTreeMember(userId, accountUserId, data.selectedMember, data.memberRelationshipType, accountUserName, treeData, results, currentAccountID);
+            if (!result) {
+                setErrorMessage("Failed to update tree data.");
+                return;
+            }
+            reset();
+            close();
+            return window.location.href = `/tree`;
+        } catch (error) {
+            console.error("Error adding member to tree:", error.message);
+            setErrorMessage(error.message || "Failed to add member to tree.");
+            return;
         }
     };
 
@@ -270,7 +178,7 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
         <div style={styles.DefaultStyle}>
         {/* close button */}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={() => { reset(); close(); }} style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer' }}>
+            <button onClick={() => { reset(); setErrorMessage(""); close(); }} style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer' }}>
                 <CloseIcon style={{ width: '40px', height: '40px', margin: '10px 10px 0px 10px' }} />
             </button>
         </div>
@@ -325,7 +233,7 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
                 <div style={{display: selectedMember === "" ? "none" : "flex"}}>
                     <li style={styles.ItemStyle}>
                         <label style={{ marginBottom: '10px' }}>
-                            What is this person's relationship to {accountUserName}?
+                            What is their relationship to {accountUserName}?
                         </label>
                         <select {...register("memberRelationshipType", { required: selectedMember !== null })} >
                                 <option value="" disabled hidden>Select</option>
@@ -336,6 +244,18 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
                             </select>
                     </li>
                 </div>
+                {errorMessage && (
+                    <div style={{ 
+                        color: 'red', 
+                        textAlign: 'center', 
+                        padding: '10px',
+                        marginTop: '10px',
+                        fontFamily: 'Alata',
+                        width: '100%'
+                    }}>
+                        {errorMessage}
+                    </div>
+                )}
 
             </ul>
             <div style={styles.ButtonDivStyle}>
