@@ -10,7 +10,7 @@ import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMemb
 import { Link } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
 import { useLocation, Outlet } from 'react-router-dom';
-import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
+import { useCurrentUser } from '../../contexts/CurrentUserContext'; // import the context
 
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/

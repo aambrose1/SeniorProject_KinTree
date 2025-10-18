@@ -59,7 +59,8 @@ const login = async(req,res) => {
     }
 
     res.status(200).json({
-      message: "You are logged in!"
+      message: "You are logged in!",
+      user: existingUser
     });
   }
   catch (error){

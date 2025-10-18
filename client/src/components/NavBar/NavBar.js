@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
 import { AiOutlineSetting, AiOutlineQuestion } from 'react-icons/ai'; //this is for the settings icon and help icon
 import './NavBar.css';
-import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
+import { useCurrentUser } from '../../contexts/CurrentUserContext'; // import the context
 
 //ToDO: import * as styles from './styles';
 //ToDo: Add mobile version of navbar (collapsible)

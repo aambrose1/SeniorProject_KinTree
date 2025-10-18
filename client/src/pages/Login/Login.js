@@ -8,42 +8,15 @@ import { useCurrentUser } from '../../CurrentUserProvider';
 function Login() {
     const { register, handleSubmit } = useForm();
     const [ errorMessage, setErrorMessage ] = useState("");
-    const { setCurrentAccountID, fetchCurrentUserID, fetchCurrentAccountID } = useCurrentUser();
+    const { login } = useCurrentUser();
     
-    const onSubmit = (data) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        };
-        fetch('http://localhost:5000/api/auth/login', requestOptions)
-            .then(async(response) => {
-                if (response.ok) {
-                    fetch(`http://localhost:5000/api/auth/user/email/${data.email}`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' }
-                    })
-                    .then(async(response) => {
-                        if (response.ok) {
-                            let userData = await response.json();
-                            await setCurrentAccountID(userData.id); // set the current user ID in context
-                            console.log("set currentAccountID to: ", userData.id);
-                            await fetchCurrentUserID();
-                            window.location.href='/'
-                        }
-                    })
-                    return response.json();
-                }
-                else {
-                    const errorData = await response.json();
-                    console.error('Error:', errorData.message);
-                    setErrorMessage(errorData.message);
-                    throw new Error('Network response was not ok');
-                }
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            })
+    const onSubmit = async (data) => {
+        try {
+            await login(data.email, data.password);
+            
+        } catch (error) {
+            setErrorMessage(error.message);
+        }
     };
 
     document.body.style.overflow = 'hidden';

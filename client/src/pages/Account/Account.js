@@ -3,7 +3,7 @@ import * as styles from './styles';
 import { Link, useParams } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
 import AddToTreePopup from '../../components/AddToTree/AddToTree';
-import { CurrentUserProvider, useCurrentUser } from '../../CurrentUserProvider';
+import { CurrentUserProvider, useCurrentUser } from '../../contexts/CurrentUserContext';
 
 function Account() {
     const [ownAccount, setOwnAccount] = useState(false); // will be retrieved

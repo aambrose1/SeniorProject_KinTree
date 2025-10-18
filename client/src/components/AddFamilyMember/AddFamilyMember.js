@@ -7,7 +7,7 @@ import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
-import { useCurrentUser } from '../../CurrentUserProvider';
+import { useCurrentUser } from '../../contexts/CurrentUserContext';
 
 // TODO: make form clear when dismissed by clicking outside of modal
 //       make sync contact button functional

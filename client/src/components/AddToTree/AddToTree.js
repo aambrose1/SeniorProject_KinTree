@@ -6,7 +6,7 @@ import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { Link } from 'react-router-dom';
-import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
+import { useCurrentUser } from '../../contexts/CurrentUserContext'; // import the context
 
 //                                 john              jane            parent                  jane is john's mom
 function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelationship, accountUserName, treeData, results, currentAccountID) {
