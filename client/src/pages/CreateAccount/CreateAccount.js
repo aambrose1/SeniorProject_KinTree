@@ -156,6 +156,15 @@ const CreateAccount = () => {
                     </button>
                 </div>
                 
+                <div style={{textAlign: 'center', marginTop: '20px', fontFamily: 'Alata'}}>
+                    <p style={{color: '#666', fontSize: '14px'}}>
+                        Already have an account? 
+                        <a href="/login" style={{color: '#3a5a40', textDecoration: 'none', marginLeft: '5px', fontWeight: 'bold'}}>
+                            Login here
+                        </a>
+                    </p>
+                </div>
+                
                 </form>
             </div>
         </div>
