@@ -1,11 +1,12 @@
 import { useState } from "react";
 import * as styles from "./styles";
 import NavBar from "../../components/NavBar/NavBar";
+import { handleLogout } from '../../utils/authHandlers';
 
 function WebsiteSettings() {
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-
+  
   return (
     <div style={styles.DefaultStyle}>
       <NavBar />
@@ -66,6 +67,10 @@ function WebsiteSettings() {
           <h2 style={styles.SubTitle}>Event & Notifications</h2>
           <label>Sync with Google Calendar:</label><br/>
           <button style={styles.Button}>Connect</button>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
+                <button onClick={handleLogout}>Sign Out</button>
         </div>
       </div>
       </div>

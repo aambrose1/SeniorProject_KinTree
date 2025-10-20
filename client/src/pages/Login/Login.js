@@ -4,47 +4,21 @@ import logo from '../../assets/kintreelogo-adobe.png';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../CurrentUserProvider';
+import { handleLogin } from '../../utils/authHandlers';
 
 function Login() {
     const { register, handleSubmit } = useForm();
     const [ errorMessage, setErrorMessage ] = useState("");
     const { setCurrentAccountID, fetchCurrentUserID, fetchCurrentAccountID } = useCurrentUser();
     
-    const onSubmit = (data) => {
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        };
-        fetch('http://localhost:5000/api/auth/login', requestOptions)
-            .then(async(response) => {
-                if (response.ok) {
-                    fetch(`http://localhost:5000/api/auth/user/email/${data.email}`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' }
-                    })
-                    .then(async(response) => {
-                        if (response.ok) {
-                            let userData = await response.json();
-                            await setCurrentAccountID(userData.id); // set the current user ID in context
-                            console.log("set currentAccountID to: ", userData.id);
-                            await fetchCurrentUserID();
-                            window.location.href='/'
-                        }
-                    })
-                    return response.json();
-                }
-                else {
-                    const errorData = await response.json();
-                    console.error('Error:', errorData.message);
-                    setErrorMessage(errorData.message);
-                    throw new Error('Network response was not ok');
-                }
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            })
-    };
+    const onSubmit = async (data) => {
+        setErrorMessage(""); // clear previous errors
+        try {
+          await handleLogin(data.email, data.password); // just call the handler
+        } catch (error) {
+          setErrorMessage(error.message);
+        }
+      };
 
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
@@ -54,7 +28,7 @@ function Login() {
             <div style={styles.Container}>
                 <img src={logo} alt="KinTree Logo" style={styles.Logo} />
                 <h1 style={styles.Header}>Sign In</h1>
-                <form onSubmit={handleSubmit(data => onSubmit(data))} style={styles.FormStyle}>
+                <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
                     <ul style={styles.ListStyle}>
                         <li style={styles.ItemStyle}>
                             <label>

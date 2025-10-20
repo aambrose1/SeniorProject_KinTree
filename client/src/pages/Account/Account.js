@@ -1,11 +1,12 @@
 import { React, useEffect, useState } from 'react';
 import * as styles from './styles';
-import { Link, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
 import AddToTreePopup from '../../components/AddToTree/AddToTree';
 import { CurrentUserProvider, useCurrentUser } from '../../CurrentUserProvider';
 
 function Account() {
+    const navigate = useNavigate(); // used to change route without refreshing page, used to prevent infinite refreshes
     const [ownAccount, setOwnAccount] = useState(false); // will be retrieved
     const [existsInTree, setExistsInTree] = useState(false); // will be retrieved
     const [relationshipType, setRelationshipType] = useState(''); // will be retrieved
@@ -24,12 +25,11 @@ function Account() {
 
     // if no id is provided, retrieve current user's id and show that page
     useEffect(() => {
-        if (!id) {
-            id = currentUserID;
-            setOwnAccount(true);
-            window.location.href = `/account/${currentUserID}`;
+        if (!id && currentUserID) {
+          setOwnAccount(true);
+          navigate(`/account/${currentUserID}`, { replace: true });
         }
-    }, [id, currentUserID]);
+      }, [id, currentUserID, navigate]);
 
     // TODO: query for data of account user & verify that userID of logged in user matches
 

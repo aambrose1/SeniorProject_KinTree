@@ -1,3 +1,5 @@
+// deprecated if we use supabase i believe
+
 const db = require('../db/knex');
 const { get } = require('../routes/treeMemberRoute');
 
