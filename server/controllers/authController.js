@@ -71,20 +71,59 @@ const login = async(req,res) => {
   }
 };
 
-const deleteByUser = async (req,res) => {
+const editByUser = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const { username, email, password } = req.body; 
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const updatedFields = {};
+
+    if (username) updatedFields.username = username;
+    if (email) {
+      const existingUser = await User.findByEmail(email);
+      if (existingUser && existingUser.id !== parseInt(id)) {
+        return res.status(400).json({ error: 'Email already in use' });
+      }
+      updatedFields.email = email;
+    }
+    if (password) {
+      const saltRounds = 12;
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      updatedFields.password = hashedPassword;
+    }
+
+    const updatedUser = await User.updateUser(id, updatedFields);
+
+    res.status(200).json({
+      message: 'User updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error updating user' });
+  }
+};
+
+async function deleteByUser(req, res) {
   const { id } = req.params;
 
-  try{
+  try {
     await User.deleteUser(id);
 
-    res.json({ 
+    res.json({
       message: "User deleted successfullyS"
-    })
+    });
 
   }
-  catch (error){
+  catch (error) {
     console.error(error);
-    res.status(500);json({error:"Error deleting user"})
+    res.status(500); json({ error: "Error deleting user" });
   }
 }
 
