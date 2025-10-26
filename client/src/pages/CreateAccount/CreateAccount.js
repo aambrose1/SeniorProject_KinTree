@@ -163,7 +163,7 @@ const CreateAccount = () => {
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Birthdate</label>
-                        <input id="birthdate" {...register("birthdate")} style={styles.FieldStyle}/>
+                        <input id="birthdate" type="date" {...register("birthdate")} style={styles.FieldStyle}/>
                         {errors.birthdate && <p>{errors.birthdate.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>

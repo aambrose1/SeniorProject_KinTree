@@ -1,23 +1,39 @@
 const treeMember = require('../models/treeMemberModel');
 const relationship = require('../models/relationshipModel');
+const { update } = require('../db/knex');
+
+// format dates to YYYY-MM-DD
+const formatDate = (dateValue) => {
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) return null; // Invalid date
+    
+    // Extract YYYY-MM-DD from the date object
+    const year = d.getUTCFullYear();
+    const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // month starts at zero
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+};
 
 const addTreeMember = async (req, res) => {
     try {
         const { firstName, lastName, birthDate, deathDate, location, phoneNumber, relationships, userId, memberUserId, gender } = req.body;
 
+        const formattedBirthDate = formatDate(birthDate);
+        const formattedDeathDate = formatDate(deathDate);
+
         // ensure all necessary fields are passed in the request body
         const [newMember] = await treeMember.addMember({
             firstName,
             lastName,
-            birthDate,
-            deathDate,
+            birthDate: formattedBirthDate,
+            deathDate: formattedDeathDate,
             location,
             phoneNumber,
             userId,
             memberUserId,
             gender
         });
-        /// need to fix that a value can be left empty (deathDate)
 
         // if there are relationships, add them to the database
         if (relationships && relationships.length > 0) {
@@ -57,11 +73,15 @@ const editTreeMember = async (req, res) => {
             //this works 
         }
 
-        // delete empty or undefined fields from updateData
+        
         for (let key in updateData) {
+            // delete empty or undefined fields from updateData
             if (updateData[key] === '' || updateData[key] === undefined) {
                 delete updateData[key];
             }
+            // Verify YYYY-MM-DD format before sending it to the database
+            if (key === 'birthDate') { updateData.birthDate = formatDate(updateData.birthDate);}
+            if (key === 'deathDate') { updateData.deathDate = formatDate(updateData.deathDate);}
         }
 
         if (Object.keys(updateData).length === 0) {
