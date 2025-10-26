@@ -11,11 +11,16 @@ import { useCurrentUser } from '../../CurrentUserProvider';
 
 // TODO: make form clear when dismissed by clicking outside of modal
 //       make sync contact button functional
+const getRequestOptions = {
+  method: 'GET',
+  headers: { 'Content-Type': 'application/json' },
+}
 
 function AddFamilyMemberPopup({ trigger, userid }) {
   const [manual, setManual] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
   const { currentUserID, currentAccountID } = useCurrentUser();
 
   var family = useRef([]);
@@ -27,7 +32,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     reset,
     watch,
     handleSubmit,
-  } = useForm({defaultValues: {selectedMember: '', selectedMemberRelationship: '', matPat: '', gender: ''}});
+  } = useForm({defaultValues: {selectedMember: '', selectedMemberRelationship: '', matPat: ''}});
 
   // stored list of family members that require maternal/paternal distinction (maybe shift this to retrieval from backend, so that it can be updated without changing code)
   let matPat = useMemo(() => ["parent", "cousin", "aunt", "uncle", "grandparent", "niece", "nephew"], []);
@@ -62,16 +67,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
     // get non-friends
     const fetchResults = async () => {
-      let requestOptionsMembers = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
-      let requestOptionsUsers = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
 
-      fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`, requestOptionsMembers) // gets all family members
+      fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`, getRequestOptions) // gets all family members
         .then(async(response) => {
           if (response.ok) {
             const responseData = await response.json();
@@ -83,13 +80,13 @@ function AddFamilyMemberPopup({ trigger, userid }) {
             console.error('Error:', response);
           }
         })
+        // TODO: make this 
         // fetch all users (this is totally scalable)
-        .then(fetch(`http://localhost:5000/api/auth/users`, requestOptionsUsers)
+        .then(fetch(`http://localhost:5000/api/auth/users`, getRequestOptions)
           .then(async(response) => {
             if (response.ok) {
               const responseData = await response.json();
-              console.log(responseData);
-              users.current = responseData.filter(user => 
+                users.current = responseData.filter(user => 
                 user.username.toLowerCase().includes(searchTerm.toLowerCase()) && 
                 !family.current.some(member => member.memberUserId === user.id)
               );
@@ -103,7 +100,6 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         )
     };
 
-    // go fetch!
     fetchResults();
   }, [searchTerm, currentAccountID]);
 
@@ -114,152 +110,143 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     setManual(false);
     setSearchTerm("");
     setSearchResults([]);
+    setErrorMessage("");
     reset();
   };
 
   // form submission (existing user)
-  const onSubmitExisting = (data) => {
+  const onSubmitExisting = async (data, close) => {
     console.log("submit attempted");
-    let memberId = data.selectedMember;
-    let requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        "firstName": users.current.find(user => user.id === Number(memberId)).username.split(" ")[0],
-        "lastName": users.current.find(user => user.id === Number(memberId)).username.split(" ")[1],
-        "birthDate": null,
-        "deathDate" : null,
-        "location": null,
-        "phoneNumber": null,
-        "userId": userid,
-        "memberUserId": users.current.find(user => user.id === Number(memberId)).id,
-        "gender": data.gender, 
-      })
-    };
+    console.log("Form data:", data); // Log the form data to see what we're getting
+    setErrorMessage("");
+    try {
+      let memberId = data.selectedMember;
+      const selectedUser = users.current.find(user => user.id === Number(memberId));
+      
+      let requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          "firstName": selectedUser.username.split(" ")[0] || selectedUser.firstName,
+          "lastName": selectedUser.username.split(" ")[1] || selectedUser.lastName,
+          "birthDate": selectedUser.birthDate || null,
+          "deathDate": selectedUser.deathDate || null,
+          "location": selectedUser.location || null,
+          "phoneNumber": selectedUser.phoneNumber || null,
+          "userId": currentUserID, // The user adding the family member
+          "memberUserId": selectedUser.id, // Existing user's ID
+          "gender": selectedUser.gender, 
+        })
+      };
 
-    let nextRequestOptions = {}; // will populate later
+      let treeUserId = currentUserID;
+      let treeMemberId;
 
-    let treeUserId = currentUserID;
-    let treeMemberId;
+      const memberResponse = await fetch(`http://localhost:5000/api/family-members/`, requestOptions); // add new family member
+      console.log('Member response', memberResponse);
+      const memberData = await memberResponse.json();
+      if (!memberResponse.ok) {
+        throw new Error(memberData.error || 'Failed to add family member');
+      }
+      console.log('memberData', memberData);
+      treeMemberId = memberData.member;
 
-    // add user to family members table
-    fetch(`http://localhost:5000/api/family-members/`, requestOptions) // add new family member
-    .then(async(response) => {
-      if (response.ok) {
-        const responseData = await response.json();
-        console.log(responseData);
-        console.log(responseData.message);
-        treeMemberId = responseData.member;
-        nextRequestOptions = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            person1_id: treeUserId,
-            person2_id: treeMemberId,
-            relationshipType: data.selectedMemberRelationship,
-            relationshipStatus: "active",
-            side: data.matPat || null,
-            userId: userid,
-          })
-        };
-        return fetch(`http://localhost:5000/api/relationships/`, nextRequestOptions);
+      // relationship table uses id's from treeMembers table, not user ids!
+      let relRequestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          person1_id: treeUserId, // user adding the member
+          person2_id: treeMemberId, // added member
+          relationshipType: data.selectedMemberRelationship,
+          relationshipStatus: "active",
+          side: data.matPat || null,
+          userId: currentUserID,
+        })
+      };
+      const relResponse = await fetch(`http://localhost:5000/api/relationships/`, relRequestOptions); // add relationship   
+      const relData = await relResponse.json();
+      if (!relResponse.ok) {
+        throw new Error(relData.error || 'Failed to add relationship');
       }
-      else {
-        // print message in return body
-        const errorData = await response.json();
-        console.error('Error:', errorData.message);
-        nextRequestOptions = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            person1_id: treeUserId,
-            person2_id: treeMemberId,
-            relationshipType: data.selectedMemberRelationship,
-            relationshipStatus: "active",
-            side: data.matPat || null,
-            userId: userid,
-          })
-        };
-      }
-    })
-    .then(async(response) => {
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data.message);
-        return window.location.href = `/account/${treeMemberId}`;
-      }
-      else {
-        // print message in return body
-        console.error('Error:', response);
-      }
-    })
-    .catch(error => {
+
+      reset();
+      close();
+
+      console.log(relData.message);
+      return window.location.href = `/account/${treeMemberId}`; // redirect to account page
+
+    } catch (error) {
       console.error('Error:', error);
-    });
+      setErrorMessage(error.message);
+    }
   };
 
   // form submission (manual entry)
-  const onSubmitManual = (data, close) => {
+  const onSubmitManual = async (data, close) => {
     console.log("submit attempted");
-    console.log("Form data:", data); // Log the form data to see what we're getting
-    // add new member to family members table
-    let requestOptions = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        "firstName": data.firstName,
-        "lastName": data.lastName,
-        "birthDate": data.birthday || null,
-        "deathDate" : data.deathDate || null,
-        "location": data.location || null,
-        "phoneNumber": data.phoneNumber || null,
-        "userId": userid,
-        "memberUserId": null,
-        "gender": data.gender 
-      })
-    };
+    // console.log("Form data:", data);
+    setErrorMessage("");
+    
+    try {
+      // add new member to family members table
+      let requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          "firstName": data.firstName,
+          "lastName": data.lastName,
+          "birthDate": data.birthDate,
+          "deathDate": data.deathDate,
+          "location": data.location || null,
+          "phoneNumber": data.phoneNumber || null,
+          "userId": currentUserID, // The user adding the family member
+          "memberUserId": null, // manually added members do not have associated user accounts
+          "gender": data.gender 
+        })
+      };
 
-    let treeUserId = currentUserID; // TODO: will retrieve this from a service or something
-    let treeMemberId;
+      let treeUserId = currentUserID; // TODO: will retrieve this from a service or something
+      let treeMemberId;
 
-    fetch(`http://localhost:5000/api/family-members/`, requestOptions) // add new family member
-    .then(async(response) => {
-        if (response.ok) {
-          const responseData = await response.json();
-          console.log(responseData.message);
-          treeMemberId = responseData.member;
-        }
-        else {
-          // print message in return body
-          console.error('Error:', response);
-        }
-        return fetch(`http://localhost:5000/api/relationships/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            person1_id: treeUserId,
-            person2_id: treeMemberId,
-            relationshipType: data.relationship,
-            relationshipStatus: "active",
-            side: data.matPat2 || null,
-            userId: userid,
-          })
-        });
-      })
-      .then(async(response) => {
-        if (response.ok) {
-          const responseData = await response.json();
-          console.log(responseData.message);
-          // redirect to account page
-          return window.location.href = `/account/${treeMemberId}`;
-        }
-        else {
-          // print message in return body
-          console.error('Error:', response);
-        }
+      const memberResponse = await fetch(`http://localhost:5000/api/family-members/`, requestOptions);
+      const memberData = await memberResponse.json();
+      
+      if (!memberResponse.ok) {
+        throw new Error(memberData.error || 'Failed to add family member');
+      }
+      
+      console.log(memberData.message);
+      treeMemberId = memberData.member;
+
+      const relResponse = await fetch(`http://localhost:5000/api/relationships/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          person1_id: treeUserId,
+          person2_id: treeMemberId,
+          relationshipType: data.relationship,
+          relationshipStatus: "active",
+          side: data.matPat2 || null,
+          userId: userid,
+        })
       });
+      
+      const relData = await relResponse.json();
+      
+      if (!relResponse.ok) {
+        throw new Error(relData.error || 'Failed to add relationship');
+      }
+      
+      console.log(relData.message);
       reset();
       close();
+      return window.location.href = `/account/${treeMemberId}`;
+      
+    } catch (error) {
+      console.error('Error:', error);
+      setErrorMessage(error.message);
+    }
   };
 
   return (
@@ -282,7 +269,23 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
                   <h2 style={{ marginTop: '0px', margin: '0' }}>Add Family Member</h2>
                 </div>
-                
+
+                {/* Error message display */}
+                  {errorMessage && (
+                    <div style={{ 
+                      backgroundColor: '#ffebee', 
+                      color: '#c62828', 
+                      padding: '10px', 
+                      borderRadius: '5px', 
+                      margin: '10px',
+                      textAlign: 'center',
+                      fontFamily: 'Alata',
+                      border: '1px solid #ef5350'
+                    }}>
+                      {errorMessage}
+                    </div>
+                  )}
+
                 {/* search for existing user */}
                 <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                   <input
@@ -318,17 +321,6 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   )}
                 </div>
 
-                {/* select gender */}
-                <div>
-                  <label style={styles.ItemStyle}> *Gender: 
-                    <select {...register("gender", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''} required>
-                        <option value="" disabled hidden>Select</option>
-                        <option value="M">Male</option>
-                        <option value="F">Female</option>
-                    </select>
-                  </label>
-                </div>
-
                 {/* select relationship */}
                 <div>
                   <label>
@@ -351,8 +343,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 </div>
 
                 <div style={{ marginTop: '10px', display: matPat.includes(selectedMemberRelationship) ? 'block' : 'none' }}>
-                  <input type="radio" name="matPat" value="maternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })}/> Maternal
-                  <input type="radio" name="matPat" value="paternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })}/> Paternal
+                  <input type="radio" name="matPat" value="maternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })}/> * Maternal
+                  <input type="radio" name="matPat" value="paternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })}/> * Paternal
                 </div>
 
                 {/* add button */}
@@ -396,6 +388,22 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                       
                   </button>
               </div>
+
+              {/* Error message display */}
+              {errorMessage && (
+                <div style={{ 
+                  backgroundColor: '#ffebee', 
+                  color: '#c62828', 
+                  padding: '10px', 
+                  borderRadius: '5px', 
+                  margin: '10px',
+                  textAlign: 'center',
+                  fontFamily: 'Alata',
+                  border: '1px solid #ef5350'
+                }}>
+                  {errorMessage}
+                </div>
+              )}
     
               <ul style={styles.ListStyle}>
                   {/* required fields */}
@@ -457,7 +465,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 <li style={styles.ItemStyle}>
                   <label>
                     Birth Date:
-                    <input {...register2("birthday")} type="date" placeholder="" style={styles.DateFieldStyle} />
+                    <input {...register2("birthDate")} type="date" placeholder="" style={styles.DateFieldStyle} />
                   </label>
                 </li>
                 <li style={styles.ItemStyle}>
@@ -469,7 +477,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 <li style={styles.ItemStyle}>
                   <label>
                     Date of Death:
-                    <input {...register2("deathdate")} type="date" placeholder="" style={styles.DateFieldStyle} />
+                    <input {...register2("deathDate")} type="date" placeholder="" style={styles.DateFieldStyle} />
                   </label>
                 </li>
               </ul>
