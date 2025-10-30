@@ -14,6 +14,31 @@ export async function registerUser(email, password, metadata = {}) {
     }
   });
   if (error) throw error;
+
+  // After successful signup, upsert the profile into public.users via backend
+  try {
+    const user = data?.user || (await supabase.auth.getUser()).data?.user;
+    if (user) {
+      await fetch('http://localhost:5000/api/auth/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auth_uid: user.id,
+          email: user.email,
+          username: user.email,
+          // Map possible metadata key variants
+          firstName: metadata.firstName || metadata.first_name || null,
+          lastName: metadata.lastName || metadata.last_name || null,
+          phoneNumber: metadata.phoneNumber || metadata.phone_number || metadata.phonenum || null,
+          birthDate: metadata.birthDate || metadata.birthdate || null,
+        })
+      });
+    }
+  } catch (e) {
+    // Non-fatal: keep signup success even if sync fails
+    console.warn('Profile sync skipped:', e?.message || e);
+  }
+
   return data;
 }
 

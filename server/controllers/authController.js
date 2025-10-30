@@ -1,5 +1,5 @@
 // authController.js - the main backend file for user registration, signin, etc
-const User = require('../models/userModel');  // delete once done repalcing with supabase
+const User = require('../models/userModel');  // now backed by Supabase
 
 const deleteByUser = async (req,res) => {
   const { id } = req.params;
@@ -57,3 +57,25 @@ const getAllUsers = async (req, res) => {
 }
 
 module.exports = { deleteByUser, findById, findByEmail, getAllUsers };
+ 
+// Add a sync endpoint: POST /api/auth/sync
+// Body: { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate }
+const syncAuthUser = async (req, res) => {
+  try {
+    const { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate } = req.body || {};
+    if (!auth_uid || !email) {
+      return res.status(400).json({ error: 'auth_uid and email are required' });
+    }
+    const user = await User.upsertByAuthUser({ auth_uid, email, username, firstName, lastName, phoneNumber, birthDate });
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Sync error:', error);
+    res.status(500).json({ 
+      error: 'Error syncing auth user',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+module.exports.syncAuthUser = syncAuthUser;

@@ -1,4 +1,6 @@
 const Relationship = require('../models/relationshipModel');
+const User = require('../models/userModel');
+const treeMember = require('../models/treeMemberModel');
 
 const getRelationships = async (req, res) => {
     try{
@@ -43,28 +45,69 @@ const getRelationshipsByOtherUser = async (req,res) => {
 };
 
 const addRelationship = async (req,res) =>{
-
     //need to add functionality to refuse a relationship if it already exists 
-try{
-    const {person1_id, person2_id, relationshipType, relationshipStatus, side, userId} = req.body;
-    const [newRelationship] =  await Relationship.addRelationship({
-        person1_id, 
-        person2_id, 
-        relationshipType, 
-        relationshipStatus, 
-        side,
-        userId
-    });
-    res.status(201).json({
-        message: 'Relationship added successfully',
-        member: newRelationship
-    });
-} catch (error) {
-    console.error(error);
-    res.status(500).json({
-        error: 'Error adding relationship'
-    });
-}
+    try{
+        let {person1_id, person2_id, relationshipType, relationshipStatus, side, userId} = req.body;
+        
+        console.log('addRelationship received:', {person1_id, person2_id, userId, typeof_person1_id: typeof person1_id});
+        
+        // Resolve person1_id if it's a UUID (user ID) - need to find the member ID for that user
+        if (typeof person1_id === 'string' && person1_id.includes('-')) {
+            const userIdInt = await User.resolveUserIdFromAuthUid(person1_id);
+            if (!userIdInt) {
+                return res.status(400).json({ error: 'Invalid person1_id: User not found' });
+            }
+            // Find the active member for this user
+            const member = await treeMember.getActiveMemberId(userIdInt);
+            if (!member) {
+                return res.status(400).json({ error: 'No active member found for person1_id user' });
+            }
+            person1_id = member.id;
+        }
+        
+        // Resolve person2_id if it's a UUID (user ID)
+        if (typeof person2_id === 'string' && person2_id.includes('-')) {
+            const userIdInt = await User.resolveUserIdFromAuthUid(person2_id);
+            if (!userIdInt) {
+                return res.status(400).json({ error: 'Invalid person2_id: User not found' });
+            }
+            // Find the active member for this user
+            const member = await treeMember.getActiveMemberId(userIdInt);
+            if (!member) {
+                return res.status(400).json({ error: 'No active member found for person2_id user' });
+            }
+            person2_id = member.id;
+        }
+        
+        // Resolve userId from UUID to integer
+        if (userId && typeof userId === 'string' && userId.includes('-')) {
+            userId = await User.resolveUserIdFromAuthUid(userId);
+            if (!userId) {
+                return res.status(400).json({ error: 'Invalid userId: User not found' });
+            }
+        }
+        
+        console.log('addRelationship resolved:', {person1_id, person2_id, userId});
+        
+        const newRelationship = await Relationship.addRelationship({
+            person1_id, 
+            person2_id, 
+            relationshipType, 
+            relationshipStatus, 
+            side,
+            userId
+        });
+        res.status(201).json({
+            message: 'Relationship added successfully',
+            member: newRelationship
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: 'Error adding relationship',
+            details: error.message
+        });
+    }
 }
 
 const filterBySide = async (req,res) => {

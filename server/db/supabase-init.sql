@@ -63,3 +63,12 @@ create table backups (
     backupData json,
     createdAt timestamp default now()
 );
+
+-- 6. Tree Info Table
+create table treeinfo (
+    id serial primary key,
+    userid integer not null references users(id) on delete cascade,
+    object jsonb,
+    created_at timestamp with time zone default now(),
+    updated_at timestamp with time zone default now()
+);

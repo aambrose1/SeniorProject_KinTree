@@ -82,6 +82,25 @@ export const CurrentUserProvider = ({ children }) => {
           setSupabaseUser(session.user);
           setCurrentAccountIDState(session.user.id);
           setCurrentUserNameState(session.user.email);
+          // Auto-sync profile into public.users using auth metadata when available
+          try {
+            const m = session.user.user_metadata || {};
+            await fetch('http://localhost:5000/api/auth/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                auth_uid: session.user.id,
+                email: session.user.email,
+                username: session.user.email,
+                firstName: m.firstName || m.first_name || null,
+                lastName: m.lastName || m.last_name || null,
+                phoneNumber: m.phoneNumber || m.phone_number || m.phonenum || null,
+                birthDate: m.birthDate || m.birthdate || null,
+              })
+            });
+          } catch (e) {
+            console.warn('Auth sync failed:', e?.message || e);
+          }
         } else {
           setSupabaseUser(null);
           setCurrentAccountIDState('');
