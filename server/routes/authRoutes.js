@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { deleteByUser, findByEmail, findById, getAllUsers } = require('../controllers/authController'); // Assuming you have a controller for your registration logic
+const { deleteByUser, findByEmail, findById, getAllUsers } = require('../controllers/authController'); 
 
 router.delete('/remove/:id', deleteByUser);
 router.get('/user/:id', findById);

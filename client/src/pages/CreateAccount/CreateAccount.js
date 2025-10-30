@@ -23,7 +23,7 @@ const yupValidation = yup.object().shape(
         country: yup.string().required("Country of residence is a required field."),
         phonenum: yup.string()
             .matches(
-                /^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
+                /^(\+\d{1,2}\s?)?1?-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
                 , "Invalid phone number format."
             ),
         zipcode: yup.string().matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
@@ -43,7 +43,17 @@ const CreateAccount = () => {
     const onSubmit = async (data) => {
         setErrorMessage(""); // clear previous errors
         try {
-            const user = await handleRegister(data.email, data.password); // frontend Supabase registration
+            const user = await handleRegister(data.email, data.password, {
+                first_name: data.firstname,
+                last_name: data.lastname,
+                birthdate: data.birthdate,
+                address: data.address,
+                city: data.city,
+                state: data.state,
+                country: data.country,
+                phone_number: data.phonenum,
+                zipcode: data.zipcode
+            }); // frontend Supabase registration
 
             // TODO: store additional info in mysqldatabase later
             // await fetch('http://localhost:5000/api/users', {
@@ -91,6 +101,14 @@ const CreateAccount = () => {
                 <img src={logo} alt="KinTree Logo" style={styles.Logo} />
                 <h1 style={styles.Header}>Create Account</h1>
                 <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
+                
+                {/* Error Message Display */}
+                {errorMessage && (
+                    <div style={{color: 'red', marginBottom: '10px', padding: '10px', backgroundColor: '#ffe6e6', border: '1px solid red', borderRadius: '4px'}}>
+                        {errorMessage}
+                    </div>
+                )}
+                
                 <div style={styles.ListStyle}>
                     <div style={styles.ItemStyle}>
                         <label>First Name</label>
@@ -150,7 +168,10 @@ const CreateAccount = () => {
                     <br />
                 </div>
                 <div style={styles.ButtonDivStyle}>
-                    <button type="submit" style={ButtonStyle}
+                    <button type="submit" style={{
+                        ...ButtonStyle,
+                        backgroundColor: isHovering ? '#2d4a33' : '#3a5a40'
+                    }}
                     onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
                         Create Account
                     </button>

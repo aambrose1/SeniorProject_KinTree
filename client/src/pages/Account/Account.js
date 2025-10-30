@@ -3,7 +3,7 @@ import * as styles from './styles';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
 import AddToTreePopup from '../../components/AddToTree/AddToTree';
-import { CurrentUserProvider, useCurrentUser } from '../../CurrentUserProvider';
+import { useCurrentUser } from '../../CurrentUserProvider';
 
 function Account() {
     const navigate = useNavigate(); // used to change route without refreshing page, used to prevent infinite refreshes
@@ -11,43 +11,69 @@ function Account() {
     const [existsInTree, setExistsInTree] = useState(false); // will be retrieved
     const [relationshipType, setRelationshipType] = useState(''); // will be retrieved
 
-    const { currentUserID, fetchCurrentUserID, currentAccountID } = useCurrentUser();
-    useEffect(() => {
-        // define a regular function to call the async function
-        const fetchData = async () => {
-            await fetchCurrentUserID();
-        };
+    const { currentUserID, supabaseUser, loading } = useCurrentUser();
     
-        fetchData();
-    }, [fetchCurrentUserID]);
+    // Redirect to login if not authenticated
+    useEffect(() => {
+        if (!loading && !supabaseUser) {
+            navigate('/login');
+        }
+    }, [loading, supabaseUser, navigate]);
     // takes id from url path
     let { id } = useParams();
 
     // if no id is provided, retrieve current user's id and show that page
     useEffect(() => {
-        if (!id && currentUserID) {
+        if (!id && supabaseUser?.id) {
           setOwnAccount(true);
-          navigate(`/account/${currentUserID}`, { replace: true });
+          navigate(`/account/${supabaseUser.id}`, { replace: true });
         }
-      }, [id, currentUserID, navigate]);
+      }, [id, supabaseUser?.id, navigate]);
 
     // TODO: query for data of account user & verify that userID of logged in user matches
+    
 
     const [userData, setUserData] = useState({
         id: id,
-        username: 'Loading...',
+        firstName: 'Loading...',
+        lastName: '',
+        email: '',
+        birthdate: '',
+        address: '',
+        city: '',
+        state: '',
+        country: '',
+        phone_number: '',
+        zipcode: ''
     })
 
-    // fetch user info
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-    };
-
-    // find this person's account info
+    // Fetch user info - check if it's a Supabase user or family member
     useEffect(() => {
         if (!id) return;
 
+        // Check if this is the current Supabase user
+        if (id === supabaseUser?.id) {
+            console.log('Supabase user data:', supabaseUser);
+            console.log('User metadata:', supabaseUser.user_metadata);
+            
+            setUserData({
+                id: supabaseUser.id,
+                firstName: supabaseUser.user_metadata?.first_name || 'User',
+                lastName: supabaseUser.user_metadata?.last_name || '',
+                email: supabaseUser.email,
+                birthdate: supabaseUser.user_metadata?.birthdate || '',
+                address: supabaseUser.user_metadata?.address || '',
+                city: supabaseUser.user_metadata?.city || '',
+                state: supabaseUser.user_metadata?.state || '',
+                country: supabaseUser.user_metadata?.country || '',
+                phone_number: supabaseUser.user_metadata?.phone_number || '',
+                zipcode: supabaseUser.user_metadata?.zipcode || ''
+            });
+            setOwnAccount(true);
+            return;
+        }
+
+        // Otherwise, try to fetch from family members API
         const requestOptions = {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
@@ -60,26 +86,38 @@ function Account() {
                     setUserData(data);
                 } else {
                     console.error('Error fetching user data:', response);
+                    // If family member not found, show basic info
+                    setUserData({
+                        id: id,
+                        firstName: 'Unknown',
+                        lastName: 'User',
+                        email: '',
+                    });
                 }
             })
             .catch((error) => {
                 console.error('There was a problem with the fetch operation:', error);
             });
-    }, [id]);
+    }, [id, supabaseUser]);
         
     useEffect(() => {
-        if(!userData.memberUserId){
-            setOwnAccount(false);
-        }
-        else if(userData.userId === userData.memberUserId) {
-            // don't fetch relationship
+        // Check if this is the current user's own account
+        if (id === supabaseUser?.id) {
             setOwnAccount(true);
             return;
         }
+
+        // If it's not the current user, check relationships (only for family members)
+        if (!userData.memberUserId) {
+            setOwnAccount(false);
+            return;
+        }
+
         const requestOptions = {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         };
+        
         // if not self, determine relationship to user
         fetch(`http://localhost:5000/api/relationships/${id}`, requestOptions)
             .then(async(response) => {
@@ -90,7 +128,7 @@ function Account() {
                         if(relationships[i].person1_id === parseInt(currentUserID) && relationships[i].person2_id === parseInt(id)) {
                             // this is the relationship
                             setRelationshipType(relationships[i].relationshipType);
-                            return; // check this
+                            return;
                         }
                     }
                 } 
@@ -103,18 +141,18 @@ function Account() {
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
             });
-        }, [id, currentUserID, userData.id]);
+        }, [id, currentUserID, userData.id, userData.memberUserId, supabaseUser?.id]);
 
     // check if user exists in tree
     useEffect(() => {
-        if (!id || !currentAccountID) return;
+        if (!id || !supabaseUser?.id) return;
 
         const requestOptions = {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         };
 
-        fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, requestOptions)
+        fetch(`http://localhost:5000/api/tree-info/${supabaseUser.id}`, requestOptions)
             .then(async (response) => {
                 if (response.ok) {
                     console.log("tree info response");
@@ -135,7 +173,7 @@ function Account() {
             .catch((error) => {
                 console.error('There was a problem with the fetch operation:', error);
             });
-    }, [id, currentAccountID]);
+    }, [id, supabaseUser?.id]);
 
     return (
         <div style={styles.DefaultStyle}>
@@ -154,7 +192,7 @@ function Account() {
                         {/* if someone else's account, show buttons */}
                         {!ownAccount && (
                             <div style={styles.ButtonGroupStyle}>
-                                <AddToTreePopup trigger={<button style={existsInTree ? styles.DisabledGreenButtonStyle : styles.GreenButtonStyle} disabled={existsInTree}>Add To Tree</button>} accountUserName={userData.firstName} accountUserId={id} userId={currentUserID} currentUserAccountRelationshipType={relationshipType} />
+                                <AddToTreePopup trigger={<button style={existsInTree ? styles.DisabledGreenButtonStyle : styles.GreenButtonStyle} disabled={existsInTree}>Add To Tree</button>} accountUserName={userData.firstName} accountUserId={id} userId={supabaseUser?.id} currentUserAccountRelationshipType={relationshipType} />
                                 <button style={existsInTree ? styles.GreenButtonStyle : styles.DisabledGreenButtonStyle}>Remove from Tree</button>
                             </div>
                         )}
@@ -162,6 +200,43 @@ function Account() {
 
                     {/* divider line */}
                     <hr style={{ width: '100%', border: '1px solid #000', margin: '1px 0' }} />
+                </div>
+
+                {/* User Information Section */}
+                <div style={{padding: '20px 0'}}>
+                    <h2 style={{fontFamily: 'Alata', fontSize: '20px', marginBottom: '15px', color: '#3a5a40'}}>Profile Information</h2>
+                    
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '15px'}}>
+                        {/* Basic Info */}
+                        <div style={{backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '8px'}}>
+                            <h3 style={{fontFamily: 'Alata', fontSize: '16px', marginBottom: '10px', color: '#3a5a40'}}>Basic Information</h3>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                <div><strong>Email:</strong> {userData?.email || 'Not provided'}</div>
+                                {userData?.birthdate && <div><strong>Birth Date:</strong> {new Date(userData.birthdate).toLocaleDateString()}</div>}
+                                {userData?.phone_number && <div><strong>Phone:</strong> {userData.phone_number}</div>}
+                            </div>
+                        </div>
+
+                        {/* Address Info */}
+                        <div style={{backgroundColor: '#f9f9f9', padding: '15px', borderRadius: '8px'}}>
+                            <h3 style={{fontFamily: 'Alata', fontSize: '16px', marginBottom: '10px', color: '#3a5a40'}}>Address Information</h3>
+                            <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                {userData?.address && <div><strong>Address:</strong> {userData.address}</div>}
+                                {(userData?.city || userData?.state) && (
+                                    <div><strong>City, State:</strong> {[userData.city, userData.state].filter(Boolean).join(', ')}</div>
+                                )}
+                                {userData?.zipcode && <div><strong>ZIP Code:</strong> {userData.zipcode}</div>}
+                                {userData?.country && <div><strong>Country:</strong> {userData.country}</div>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Show message if no additional info is available */}
+                    {!userData?.birthdate && !userData?.phone_number && !userData?.address && !userData?.city && !userData?.state && !userData?.zipcode && !userData?.country && (
+                        <div style={{textAlign: 'center', padding: '20px', color: '#666', fontStyle: 'italic'}}>
+                            No additional profile information available. Update your profile to add more details.
+                        </div>
+                    )}
                 </div>
             </div>
             </div>
