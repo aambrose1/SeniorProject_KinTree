@@ -10,9 +10,14 @@ The current KinTree project team as of Fall 2025 includes Andrea Ambrose, Matthe
 
 ### Prerequisites
 
-Node.js (install the correct version for your own OS [here](https://nodejs.org/en)) and install MySQL [here](https://dev.mysql.com/downloads/mysql/). Set up account information through the Configurator application or through the terminal.
+Node.js (install the correct version for your own OS [here](https://nodejs.org/en)) and get your Supabase URL, CLIENT KEY, and SERVICE KEY from your project dashboard [here](https://supabase.com/)
 
-### Setup
+### Database Setup
+
+In the /server/ folder, add an .env file with variables `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. 
+In the /client/ folder, add an .env file with variables `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY`.
+
+### Web Application Setup
 
 To set up the KinTree codebase on your own machine, start by cloning the repository to your local file system.
 
@@ -33,25 +38,4 @@ To run the backend, you must first install the backend node dependencies. Open a
 Then, from the same directory, run the following command to run the server/API:
 
 `node server.js`
-
-### Database Setup
-
-Open the MySQL Client Terminal, login with your password to run the mySQL server.
-
-Create a new database instance on your machine:
-`CREATE DATABASE <name>`
-
-In the /server/ directory, create a .env file with MySQL information. Example env is in the project's /docs/ folder.
-
-Open another command line window in /SeniorProject_KinTree/server/ and run the command `npm install knex mysql2` to install Knex and mySQL2.
-
-Verify the connection:
-
-`node mysql-connection.js` 
-
-Ensure proper migration files are loaded:
-
-`npx knex:migrate status`
-
-Run the command `npx knex migrate:latest` to create and/or update existing database tables.
 
