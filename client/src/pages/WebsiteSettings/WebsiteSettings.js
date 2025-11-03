@@ -252,8 +252,13 @@ function WebsiteSettings() {
           <button style={styles.Button}>Connect</button>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
-                <button onClick={handleLogout}>Sign Out</button>
+        <div style={styles.SignOutContainer}>
+          <button 
+            onClick={handleLogout}
+            style={styles.SignOutButton}
+          >
+            Sign Out
+          </button>
         </div>
       </div>
       </div>
