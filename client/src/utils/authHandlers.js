@@ -22,6 +22,8 @@ export async function handleRegister(email, password, metadata = {}) {
   try {
     const data = await registerUser(email, password, metadata);
     console.log("Registered user:", data.user);
+    // Redirect to verify email page with email parameter
+    window.location.href = `/verify-email?email=${encodeURIComponent(email)}`;
     return data; // Return the data so the calling function can use it
   } catch (error) {
     console.error('Registration error:', error.message);

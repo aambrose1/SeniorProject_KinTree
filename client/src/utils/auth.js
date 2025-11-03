@@ -1,7 +1,7 @@
 import { supabase } from './supabaseClient';
 
 // These functions are used to handle the authentication of the user, but only the pure login, logout, etc functionality. 
-// It should not include frontend logic like redirects.
+// It should NOT include frontend logic like redirects.
 
 // Register new user
 export async function registerUser(email, password, metadata = {}) {
@@ -10,7 +10,7 @@ export async function registerUser(email, password, metadata = {}) {
     password,
     options: {
       data: metadata,
-      emailRedirectTo: `${window.location.origin}/login`
+      emailRedirectTo: `${window.location.origin}/verify-email` // this is an email redirect, not a ui redirect so its fine
     }
   });
   if (error) throw error;

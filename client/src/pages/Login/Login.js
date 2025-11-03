@@ -70,7 +70,6 @@ function Login() {
             const { error } = await supabase.auth.resend({
                 type: 'signup',
                 email: attemptedEmail,
-                options: { emailRedirectTo: `${window.location.origin}/login` }
             });
             if (error) throw error;
             // surface a lightweight notice

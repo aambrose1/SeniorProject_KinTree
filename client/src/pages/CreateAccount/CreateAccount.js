@@ -74,7 +74,7 @@ const CreateAccount = () => {
             //   });
 
             console.log('Registration successful:', user);
-            window.location.href = '/login'; // redirect after registration to login
+            // Redirect is handled in handleRegister() - do not redirect here
         } catch (error) {
           setErrorMessage(error.message);
           console.error('Password:', data.password);

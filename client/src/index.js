@@ -21,6 +21,7 @@ import Help from './pages/Help/Help';
 import Chat from './pages/Chat/Chat';
 import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
 import CreateAccount from './pages/CreateAccount/CreateAccount';
+import VerifyEmail from './pages/VerifyEmail/VerifyEmail';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
   {
     path: '/update-password',
     element: <UpdatePassword />,  
+  },
+  {
+    path: '/verify-email',
+    element: <VerifyEmail />,
   },
 
   {
