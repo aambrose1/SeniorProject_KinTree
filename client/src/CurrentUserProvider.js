@@ -1,13 +1,14 @@
 import { React, useState, createContext, useContext, useEffect } from "react"
-import { set } from "react-hook-form";
+import { supabase } from "./utils/supabaseClient";
 
 export const currentContext = createContext();
 
 export const CurrentUserProvider = ({ children }) => {
   const [currentUserID, setCurrentUserIDState] = useState('');
-  const [currentAccountID, setCurrentAccountIDState] = useState(''); // TODO login will set this
+  const [currentAccountID, setCurrentAccountIDState] = useState(''); 
   const [currentUserName, setCurrentUserNameState] = useState('');
   const [loading, setLoading] = useState(true);
+  const [supabaseUser, setSupabaseUser] = useState(null);
 
   const setCurrentAccountID = (accountID) => { // logging in will trigger this
     localStorage.setItem("currentAccountID", accountID);
@@ -52,29 +53,80 @@ export const CurrentUserProvider = ({ children }) => {
   }
 
 
-  // init
+  // Initialize Supabase auth state
   useEffect(() => {
-    const initializeState = () => {
-      const storedAccountID = localStorage.getItem("currentAccountID");
-      const storedUserID = localStorage.getItem("currentUserID");
-      const storedUserName = localStorage.getItem("currentUserName");
-
-      if (storedAccountID) {
-        setCurrentAccountIDState(storedAccountID);
+    const initializeAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          setSupabaseUser(session.user);
+          setCurrentAccountIDState(session.user.id);
+          setCurrentUserNameState(session.user.email); // Use email as default username
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setLoading(false);
       }
-      if (storedUserID) {
-        setCurrentUserIDState(storedUserID);
-      }
-      if (storedUserName) {
-        setCurrentUserNameState(storedUserName);
-      }
-      setLoading(false);
     };
-    initializeState();
+
+    initializeAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setSupabaseUser(session.user);
+          setCurrentAccountIDState(session.user.id);
+          setCurrentUserNameState(session.user.email);
+          // Auto-sync profile into public.users using auth metadata when available
+          try {
+            const m = session.user.user_metadata || {};
+            await fetch('http://localhost:5000/api/auth/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                auth_uid: session.user.id,
+                email: session.user.email,
+                username: session.user.email,
+                firstName: m.firstName || m.first_name || null,
+                lastName: m.lastName || m.last_name || null,
+                phoneNumber: m.phoneNumber || m.phone_number || m.phonenum || null,
+                birthDate: m.birthDate || m.birthdate || null,
+              })
+            });
+          } catch (e) {
+            console.warn('Auth sync failed:', e?.message || e);
+          }
+        } else {
+          setSupabaseUser(null);
+          setCurrentAccountIDState('');
+          setCurrentUserNameState('');
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
-    <currentContext.Provider value={{ loading, currentAccountID, setCurrentAccountIDState, currentUserID, setCurrentUserIDState, setCurrentAccountID, setCurrentUserID, fetchCurrentUserID, fetchCurrentAccountID, currentUserName }}>
+    <currentContext.Provider value={{ 
+      loading, 
+      currentAccountID, 
+      setCurrentAccountIDState, 
+      currentUserID, 
+      setCurrentUserIDState, 
+      setCurrentAccountID, 
+      setCurrentUserID, 
+      fetchCurrentUserID, 
+      fetchCurrentAccountID, 
+      currentUserName,
+      supabaseUser 
+    }}>
       {children}
     </currentContext.Provider>
   )

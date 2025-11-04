@@ -1,30 +1,62 @@
 const treeMember = require('../models/treeMemberModel');
 const relationship = require('../models/relationshipModel');
+const User = require('../models/userModel');
 
 const addTreeMember = async (req, res) => {
     try {
         const { firstName, lastName, birthDate, deathDate, location, phoneNumber, relationships, userId, memberUserId } = req.body;
 
+        // Resolve UUIDs to integer user IDs - CRITICAL: database requires integers, not UUIDs
+        console.log('addTreeMember received userId:', userId, typeof userId);
+        const userIdInt = await User.resolveUserIdFromAuthUid(userId);
+        console.log('Resolved userIdInt:', userIdInt, typeof userIdInt);
+        if (!userIdInt) {
+            return res.status(400).json({ 
+                error: 'Invalid user ID. User not found in database. Please sync your account first.',
+                received: userId
+            });
+        }
+        
+        const memberUserIdInt = memberUserId ? await User.resolveUserIdFromAuthUid(memberUserId) : null;
+        if (memberUserId && !memberUserIdInt) {
+            return res.status(400).json({ 
+                error: 'Invalid member user ID. User not found in database.',
+                received: memberUserId
+            });
+        }
+
         // ensure all necessary fields are passed in the request body
-        const [newMember] = await treeMember.addMember({
+        const newMember = await treeMember.addMember({
             firstName,
             lastName,
             birthDate,
             deathDate,
             location,
             phoneNumber,
-            userId,
-            memberUserId
+            userId: userIdInt,  // Now guaranteed to be an integer
+            memberUserId: memberUserIdInt  // Now guaranteed to be an integer or null
         });
         /// need to fix that a value can be left empty (deathDate)
 
         // if there are relationships, add them to the database
         if (relationships && relationships.length > 0) {
             for (const rel of relationships) {
+                // Ensure person2_id is an integer, not a UUID
+                let person2_id = rel.person2_id;
+                if (typeof person2_id === 'string' && person2_id.includes('-')) {
+                    // If it looks like a UUID, try to resolve it
+                    person2_id = await User.resolveUserIdFromAuthUid(person2_id);
+                    if (!person2_id) {
+                        console.error('Could not resolve person2_id UUID:', rel.person2_id);
+                        continue; // Skip this relationship
+                    }
+                }
                 await relationship.addRelationship({
                     person1_id: newMember.id,
-                    person2_id: rel.person2_id,  // Corrected from 'relationship.person2_id' to 'rel.person2_id'
-                    relationship_status: 'active'
+                    person2_id: person2_id,
+                    relationshipType: rel.relationshipType || 'sibling',
+                    relationshipStatus: 'active',
+                    userId: userIdInt  // Need to include userId for the relationship
                 });
             }
         }
@@ -85,16 +117,21 @@ const editTreeMember = async (req, res) => {
 
 const getMembersByUser = async (req,res) =>{
     try{
-
         const { userId } = req.params;
-        const members = await treeMember.getMembersByUser(userId)
+        // Resolve UUID to integer user ID first
+        const userIdInt = await User.resolveUserIdFromAuthUid(userId);
+        if (!userIdInt) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const members = await treeMember.getMembersByUser(userIdInt)
         console.log(members);
         res.status(200).json(members);
     }
     catch(error){
         console.error(error);
         res.status(500).json({
-            error: 'Error fetching members'
+            error: 'Error fetching members',
+            details: error.message
         });
         
     }
@@ -103,7 +140,7 @@ const getMembersByUser = async (req,res) =>{
 const getMembersByOtherUser = async (req,res) =>{
     try{
         const { userId} = req.params;
-        const members = await treeMember.getMembersByOtherUser(userId)
+        const members = await treeMember.getMembeByOtherUser(userId)
         res.status(200).json(members);
     }
     catch(error){
@@ -129,7 +166,7 @@ const deleteByUser =  async (req, res) => {
       }
       catch (error){
         console.error(error);
-        res.status(500);json({error:"Error deleting family member"})
+        res.status(500).json({error:"Error deleting family member"})
       }
 
 }
@@ -150,14 +187,18 @@ const getMemberById = async (req, res) => {
 const getActiveMemberId = async (req, res) => {
     try {
         const { id } = req.params;
-        const member = await treeMember.getActiveMemberId(id);
-        if (!member) {
-            return res.status(404).json({ error: 'Family member not found' });
+        // Resolve UUID to integer user ID first
+        const userId = await User.resolveUserIdFromAuthUid(id);
+        if (!userId) {
+            return res.status(200).json({});
         }
+        const member = await treeMember.getActiveMemberId(userId);
+        // If none found, return empty object to avoid frontend JSON parse errors
+        if (!member) return res.status(200).json({});
         res.status(200).json(member);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Error fetching family member' });
+        res.status(500).json({ error: 'Error fetching family member', details: error.message });
     }
 }
 

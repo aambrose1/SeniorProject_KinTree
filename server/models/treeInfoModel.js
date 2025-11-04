@@ -1,18 +1,36 @@
-const db = require('../db/knex');
+// treeInfoModel.js - model for treeInfo table (Supabase)
+const supabase = require('../lib/supabase');
 
 const treeInfo = {
     addObject: async (data) => {
-        return db('treeInfo').insert(data, ['id']);
+        const { data: inserted, error } = await supabase
+            .from('treeinfo')
+            .insert([ data ])
+            .select('*')
+            .single();
+        if (error) throw error;
+        return inserted;
     },
 
-    updateObject: async (id, data) => {
-        await db('treeInfo').where({ userId: id }).update(data);
-        const updatedObject = await db('treeInfo').where({ id }).first();
-        return updatedObject;
+    updateObject: async (userId, data) => {
+        const { data: updated, error } = await supabase
+            .from('treeinfo')
+            .update(data)
+            .eq('userid', userId)
+            .select('*')
+            .single();
+        if (error) throw error;
+        return updated;
     },
 
-    getObject: async (id) => {
-        return db('treeInfo').where({ userId: id }).first();
+    getObject: async (userId) => {
+        const { data, error } = await supabase
+            .from('treeinfo')
+            .select('*')
+            .eq('userid', userId)
+            .maybeSingle();
+        if (error) throw error;
+        return data;
     },
 };
 
