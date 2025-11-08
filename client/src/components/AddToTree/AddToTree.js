@@ -7,7 +7,8 @@ import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
-import { addRelationship }from '../../utils/treeUtils.js';
+import { addRelationship }from '../../utils/relationUtil.js';
+import { familyTreeService } from '../../services/familyTreeService';
 
 //                                 john              jane            parent                  jane is john's mom
 function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelationship, accountUserName, treeData, results, currentAccountID) {
@@ -71,6 +72,7 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
   var filteredResults = useRef([]);
   const { currentAccountID } = useCurrentUser();
   const [treeData, setTreeData] = useState([]);
+  
     
   // retrieve a list of all family members that are within the tree object
   useEffect(() => {

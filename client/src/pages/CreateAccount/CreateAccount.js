@@ -70,7 +70,8 @@ const CreateAccount = () => {
                 memberUserId: data.user.id,
                 gender: formData.gender
             };
-            const memberId = await familyTreeService.createFamilyMember(memberData);
+            const memberResponse = await familyTreeService.createFamilyMember(memberData);
+            const memberId = memberResponse.member.id;
             
             // add new user to their tree object
             await familyTreeService.initializeTreeInfo(memberId, memberData, data.user.id);

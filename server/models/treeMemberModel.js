@@ -15,6 +15,7 @@ const treeMember = {
             phonenumber: data.phoneNumber || data.phonenumber,
             userid: data.userId || data.userid,
             memberuserid: data.memberUserId || data.memberuserid,
+            gender: data.gender
         };
         // Remove undefined/null values
         Object.keys(mappedData).forEach(key => mappedData[key] === undefined && delete mappedData[key]);

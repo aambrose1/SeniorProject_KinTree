@@ -8,6 +8,7 @@ import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
 import { useCurrentUser } from '../../CurrentUserProvider';
+import { familyTreeService } from '../../services/familyTreeService';
 
 // TODO: make form clear when dismissed by clicking outside of modal
 //       make sync contact button functional
@@ -68,40 +69,28 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     // get non-friends
     const fetchResults = async () => {
 
-      fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`, getRequestOptions) // gets all family members
+      family.current = await familyTreeService.getFamilyMembersByUserId(currentUserID);
+
+      // fetch all users (this is totally scalable)
+      fetch(`http://localhost:5000/api/auth/users`, getRequestOptions)
         .then(async(response) => {
           if (response.ok) {
             const responseData = await response.json();
-            console.log(responseData);
-            family.current = responseData;
-          }
+              users.current = responseData.filter(user => 
+              user.username.toLowerCase().includes(searchTerm.toLowerCase()) && 
+              !family.current.some(member => member.memberUserId === user.id)
+            );
+            setSearchResults(users.current);
+          } 
           else {
             // print message in return body
             console.error('Error:', response);
           }
         })
-        // TODO: make this 
-        // fetch all users (this is totally scalable)
-        .then(fetch(`http://localhost:5000/api/auth/users`, getRequestOptions)
-          .then(async(response) => {
-            if (response.ok) {
-              const responseData = await response.json();
-                users.current = responseData.filter(user => 
-                user.username.toLowerCase().includes(searchTerm.toLowerCase()) && 
-                !family.current.some(member => member.memberUserId === user.id)
-              );
-              setSearchResults(users.current);
-            } 
-            else {
-              // print message in return body
-              console.error('Error:', response);
-            }
-          })
-        )
     };
 
     fetchResults();
-  }, [searchTerm, currentAccountID]);
+  }, [searchTerm, currentAccountID, currentUserID]);
 
 
 
@@ -120,36 +109,31 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     console.log("Form data:", data); // Log the form data to see what we're getting
     setErrorMessage("");
     try {
-      let memberId = data.selectedMember;
-      const selectedUser = users.current.find(user => user.id === Number(memberId));
-      
-      let requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          "firstName": selectedUser.username.split(" ")[0] || selectedUser.firstName,
-          "lastName": selectedUser.username.split(" ")[1] || selectedUser.lastName,
-          "birthDate": selectedUser.birthDate || null,
-          "deathDate": selectedUser.deathDate || null,
-          "location": selectedUser.location || null,
-          "phoneNumber": selectedUser.phoneNumber || null,
-          "userId": currentUserID, // The user adding the family member
-          "memberUserId": selectedUser.id, // Existing user's ID
-          "gender": selectedUser.gender, 
-        })
+      const selectedUser = users.current.find(user => user.id === Number(data.selectedMember));
+
+      const selectedUserData = {
+        firstName: selectedUser.firstName,
+        lastName: selectedUser.lastName,
+        birthDate: selectedUser.birthDate || null,
+        deathDate: selectedUser.deathDate || null,
+        location: selectedUser.location || null,
+        phoneNumber: selectedUser.phoneNumber || null,
+        userId: currentUserID, // The user adding the family member
+        memberUserId: selectedUser.id, // Existing user's ID
+        gender: selectedUser.gender, 
       };
+      
 
       let treeUserId = currentUserID;
-      let treeMemberId;
 
-      const memberResponse = await fetch(`http://localhost:5000/api/family-members/`, requestOptions); // add new family member
-      console.log('Member response', memberResponse);
+      const memberResponse = await familyTreeService.createFamilyMember(selectedUserData);
       const memberData = await memberResponse.json();
       if (!memberResponse.ok) {
         throw new Error(memberData.error || 'Failed to add family member');
       }
       console.log('memberData', memberData);
-      treeMemberId = memberData.member;
+
+      const treeMemberId = memberData.member.id;
 
       // relationship table uses id's from treeMembers table, not user ids!
       let relRequestOptions = {

@@ -44,7 +44,8 @@ function Account() {
         state: '',
         country: '',
         phone_number: '',
-        zipcode: ''
+        zipcode: '',
+        gender: ''
     })
 
     // Fetch user info - check if it's a Supabase user or family member
@@ -67,7 +68,8 @@ function Account() {
                 state: supabaseUser.user_metadata?.state || '',
                 country: supabaseUser.user_metadata?.country || '',
                 phone_number: supabaseUser.user_metadata?.phone_number || '',
-                zipcode: supabaseUser.user_metadata?.zipcode || ''
+                zipcode: supabaseUser.user_metadata?.zipcode || '',
+                gender: supabaseUser.user_metadata?.gender || ''
             });
             setOwnAccount(true);
             return;

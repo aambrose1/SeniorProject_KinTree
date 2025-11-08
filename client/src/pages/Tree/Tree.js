@@ -1,11 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import * as styles from './styles';
 // import { ReactComponent as TreeIcon } from '../../assets/background-tree.svg'; // background tree image from Figma; TODO configure overlay with tree svg
 import * as f3 from 'family-chart';
 import './tree.css'; // styling adapted from family-chart package sample code
 import { ReactComponent as PlusSign } from '../../assets/plus-sign.svg';
 import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMember';
-import { Link } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
 import { useLocation, Outlet } from 'react-router-dom';
 import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
@@ -29,7 +28,7 @@ function FamilyTree() {
                 existingChart.innerHTML = '';
             }
 
-            chart = f3.createChart('#FamilyChart', data)
+            chart = f3.default.createChart('#FamilyChart', data)
                 .setTransitionTime(500)
                 .setCardXSpacing(250)
                 .setCardYSpacing(150)
