@@ -1,12 +1,15 @@
 const treeInfo = require('../models/treeInfoModel');
+const User = require('../models/userModel');
 
 const addObject = async (req, res) => {
     try {
         const { object, userId } = req.body;
+        // Resolve UUID to integer user ID if needed
+        const userIdInt = await User.resolveUserIdFromAuthUid(userId) || userId;
 
-        const [newObject] = await treeInfo.addObject({
+        const newObject = await treeInfo.addObject({
             object: JSON.stringify(object),
-            userId: userId
+            userId: userIdInt
         });
 
         res.status(201).json({
@@ -63,8 +66,12 @@ const updateObject = async (req, res) => {
 const getObject = async (req, res) => {
     try {
         const { id } = req.params;
-
-        const retrievedObject = await treeInfo.getObject(id);
+        // Resolve UUID to integer user ID first
+        const userId = await User.resolveUserIdFromAuthUid(id);
+        if (!userId) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        const retrievedObject = await treeInfo.getObject(userId);
         if (!retrievedObject) {
             return res.status(404).json({
                 error: 'Object not found'
@@ -77,6 +84,7 @@ const getObject = async (req, res) => {
         console.error(error);
         res.status(500).json({
             error: 'Error retrieving tree object',
+            details: error.message
         });
     }
 }

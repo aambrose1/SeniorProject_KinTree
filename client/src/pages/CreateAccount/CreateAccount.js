@@ -1,10 +1,11 @@
-import { set, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { React, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { yupResolver } from "@hookform/resolvers/yup"
+import { handleRegister } from '../../utils/authHandlers';
 import * as yup from "yup"
 import * as styles from './styles'
 import logo from '../../assets/kintreelogo-adobe.png';
+import { familyTreeService } from '../../services/familyTreeService';
 
 //validation functionality
 const yupValidation = yup.object().shape(
@@ -24,111 +25,62 @@ const yupValidation = yup.object().shape(
         country: yup.string().required("Country of residence is a required field."),
         phonenum: yup.string()
             .matches(
-                /^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
+                /^(\+\d{1,2}\s?)?1?-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
                 , "Invalid phone number format."
             ),
         zipcode: yup.string().matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
-        password: yup.string().required("Password is a required field.")
+        password: yup.string().required("Password is required")
             .matches(
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
-                , "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/,
+                "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
             )
-
     }
 );
 
 const CreateAccount = () => {
     const {register, handleSubmit, formState: {errors}} = useForm({resolver: yupResolver(yupValidation)});
+    const [errorMessage, setErrorMessage] = useState("");
     const [isHovering, setIsHovering] = useState(false);
-    const [formData, setFormData] = useState({});
 
-    const onSubmit = (data) => {
-        console.log(data);
-    
-        // register account
-        fetch(`http://localhost:5000/api/auth/register`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: data.firstname + " " + data.lastname,
-                email: data.email,
-                password: data.password,
-            }),
-        })
-            .then(async (response) => {
-                if (response.ok) {
-                    const responseData = await response.json();
-                    console.log(responseData);
-    
-                    // Use responseData.user directly
-                    const accountID = responseData.user;
-    
-                    // Add user as a family member
-                    return fetch(`http://localhost:5000/api/family-members/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            firstName: data.firstname,
-                            lastName: data.lastname,
-                            birthdate: data.birthdate,
-                            email: data.email,
-                            location: `${data.address}, ${data.city}, ${data.state} ${data.zipcode}, ${data.country}`,
-                            phoneNumber: data.phonenum,
-                            userId: accountID,
-                            memberUserId: accountID,
-                            gender: data.gender,
-                        }),
-                    }).then(async (response) => { // Initialize user's tree by adding themself
-                        if (response.ok) {
-                            const familyMemberResponse = await response.json();
-                            console.log(familyMemberResponse);
-                            return fetch(`http://localhost:5000/api/tree-info/`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    object: [{
-                                        "id": familyMemberResponse.member,
-                                        "data": {
-                                            "first name": data.firstname,
-                                            "last name": data.lastname,
-                                            "gender": data.gender,
-                                        },
-                                        "rels": {
-                                            "children": [],
-                                            "spouses": [],
-                                        }
-                                    }],
-                                    userId: accountID, 
-                                }),
-                            });
-                        }})
-                    }
-                    else {
-                        const errorData = await response.json();
-                        console.error('Error registering account:', errorData);
-                        throw new Error('Account registration failed');
-                    }
-            })
-            .then(async (response) => {
-                if (response.ok) {
-                    const responseData = await response.json();
-                    console.log(responseData);
-                    window.location.href = '/';
-                } else {
-                    const errorData = await response.json();
-                    console.error('Error initializing family member:', errorData);
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-    };
+    const onSubmit = async (formData) => {
+        setErrorMessage(""); // clear previous errors
+
+        try {
+            const data = await handleRegister(formData.email, formData.password, {
+                first_name: formData.firstname,
+                last_name: formData.lastname,
+                birthdate: formData.birthdate,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                country: formData.country,
+                phone_number: formData.phonenum,
+                zipcode: formData.zipcode,
+                gender: formData.gender
+            }); // frontend Supabase registration
+
+            // add new user as family member 
+            const memberData = {
+                first_name: formData.firstname,
+                last_name: formData.lastname,
+                birthdate: formData.birthdate,
+                email: formData.email,
+                location: `${formData.city}, ${formData.state}, ${formData.country}`,
+                userId: data.user.id,
+                memberUserId: data.user.id,
+                gender: formData.gender
+            };
+            const memberId = await familyTreeService.createFamilyMember(memberData);
+            
+            // add new user to their tree object
+            await familyTreeService.initializeTreeInfo(memberId, memberData, data.user.id);
+
+            console.log('Registration successful:', data);
+            window.location.href = '/login'; // redirect after registration to login
+        } catch (error) {
+            setErrorMessage(error.message);
+        }
+      };
 
     const ButtonStyle = {
         fontFamily: 'Alata',
@@ -150,6 +102,14 @@ const CreateAccount = () => {
                 <img src={logo} alt="KinTree Logo" style={styles.Logo} />
                 <h1 style={styles.Header}>Create Account</h1>
                 <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
+                
+                {/* Error Message Display */}
+                {errorMessage && (
+                    <div style={{color: 'red', marginBottom: '10px', padding: '10px', backgroundColor: '#ffe6e6', border: '1px solid red', borderRadius: '4px'}}>
+                        {errorMessage}
+                    </div>
+                )}
+                
                 <div style={styles.ListStyle}>
                     <div style={styles.ItemStyle}>
                         <label>First Name</label>
@@ -208,8 +168,8 @@ const CreateAccount = () => {
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Phone</label>
-                        <input id="phone" {...register("phone")} style={styles.FieldStyle}/>
-                        {errors.phone && <p>{errors.phone.message}</p>}
+                        <input id="phone" {...register("phonenum")} style={styles.FieldStyle}/>
+                        {errors.phonenum && <p>{errors.phonenum.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Password</label>
@@ -219,10 +179,22 @@ const CreateAccount = () => {
                     <br />
                 </div>
                 <div style={styles.ButtonDivStyle}>
-                    <button type="submit" style={ButtonStyle}
+                    <button type="submit" style={{
+                        ...ButtonStyle,
+                        backgroundColor: isHovering ? '#2d4a33' : '#3a5a40'
+                    }}
                     onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
                         Create Account
                     </button>
+                </div>
+                
+                <div style={{textAlign: 'center', marginTop: '20px', fontFamily: 'Alata'}}>
+                    <p style={{color: '#666', fontSize: '14px'}}>
+                        Already have an account? 
+                        <a href="/login" style={{color: '#3a5a40', textDecoration: 'none', marginLeft: '5px', fontWeight: 'bold'}}>
+                            Login here
+                        </a>
+                    </p>
                 </div>
                 
                 </form>

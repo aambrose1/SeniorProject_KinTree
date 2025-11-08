@@ -8,18 +8,22 @@ const treeSummary = require('../models/treeSummaryModel');
 const updateUserTreeSummary = async (req, res) => {
     const { userId } = req.params;
     try {
-        const members = await treeMember.getMemberByUser(userId);
-        const relationships = await relationship.getRelationshipByUser(userId);
+        // Resolve UUID to integer if needed
+        const User = require('../models/userModel');
+        const userIdInt = await User.resolveUserIdFromAuthUid(userId) || userId;
+        
+        const members = await treeMember.getMembersByUser(userIdInt);
+        const relationships = await relationship.getRelationshipByUser(userIdInt);
 
         const summary = { members, relationships};
 
-        const existing =  treeSummary.getSummaryByUser(userId);
+        const existing = await treeSummary.getSummaryByUser(userIdInt);
 
         if(existing){
-            await treeSummary.updateSummary(userId, summary);
+            await treeSummary.updateSummary(userIdInt, summary);
         }
         else{
-            await treeSummary.createSummary(userId,summary)
+            await treeSummary.createSummary(userIdInt, summary);
         }
         res.json({
             message: 'Tree summary updated'
@@ -28,7 +32,8 @@ const updateUserTreeSummary = async (req, res) => {
     catch (error) {
         console.error(error);
         res.status(500).json({
-            error: 'Failed to update tree summary'
+            error: 'Failed to update tree summary',
+            details: error.message
         });
     }
 

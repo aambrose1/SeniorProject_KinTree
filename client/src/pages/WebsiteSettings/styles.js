@@ -64,3 +64,30 @@ export const ToggleSwitch = {
   marginLeft: '10px',
   transform: 'scale(1.2)'
 };
+
+export const SignOutContainer = {
+  display: 'flex',
+  justifyContent: 'flex-end',
+  padding: '20px',
+  marginTop: '30px',
+  borderTop: '1px solid #e0e0e0'
+};
+
+export const SignOutButton = {
+  backgroundColor: '#dc3545',
+  color: 'white',
+  border: 'none',
+  borderRadius: '8px',
+  padding: '12px 24px',
+  fontSize: '16px',
+  fontWeight: '600',
+  cursor: 'pointer',
+  boxShadow: '0 2px 4px rgba(220, 53, 69, 0.2)',
+  transition: 'all 0.2s ease',
+  minWidth: '120px'
+};
+
+export const SignOutButtonHover = {
+  backgroundColor: '#c82333',
+  boxShadow: '0 4px 8px rgba(220, 53, 69, 0.3)'
+};

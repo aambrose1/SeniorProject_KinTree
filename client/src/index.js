@@ -8,6 +8,8 @@ import Home from './pages/Home/Home';
 import Account from './pages/Account/Account';
 import Tree from './pages/Tree/Tree';
 import Login from './pages/Login/Login';
+import ResetPassword from './pages/Reset/Reset';
+import UpdatePassword from './pages/Reset/UpdatePassword';
 import Family from './pages/Family/Family';
 import ShareTree from './pages/Tree/ShareTree/ShareTree';
 import ViewSharedTrees from './pages/Tree/ViewSharedTrees/ViewSharedTrees';
@@ -55,6 +57,16 @@ const router = createBrowserRouter([
     path: '/register',
     element: <CreateAccount />,
   },
+
+  {
+    path: '/reset-password',
+    element: <ResetPassword />,  
+  },
+  {
+    path: '/update-password',
+    element: <UpdatePassword />,  
+  },
+
   {
     path: '/tree',
     element: (

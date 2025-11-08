@@ -3,14 +3,14 @@ import { Navigate } from 'react-router-dom';
 import { useCurrentUser } from '../../CurrentUserProvider';
 
 function ProtectedRoute({ children }) {
-    const { currentAccountID, loading } = useCurrentUser();
+    const { supabaseUser, loading } = useCurrentUser();
 
     if (loading) {
         return <div>Loading...</div>;
     }
 
     // redirect to login
-    if (!currentAccountID) {
+    if (!supabaseUser) {
         return <Navigate to="/login" replace />;
     }
 
