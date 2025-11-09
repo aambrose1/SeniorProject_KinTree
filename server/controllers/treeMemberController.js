@@ -17,66 +17,67 @@ const User = require('../models/userModel');
 
 const addTreeMember = async (req, res) => {
     try {
-        const { firstName, lastName, birthDate, deathDate, location, phoneNumber, relationships, userId, memberUserId, gender } = req.body;
-
+        const { firstname, lastname, birthdate, deathdate, location, phonenumber, userid, memberuserid, gender } = req.body;
+        
         // Resolve UUIDs to integer user IDs - CRITICAL: database requires integers, not UUIDs
-        console.log('addTreeMember received userId:', userId, typeof userId);
-        const userIdInt = await User.resolveUserIdFromAuthUid(userId);
+        console.log('addTreeMember received userId:', userid, typeof userid);
+        const userIdInt = await User.resolveUserIdFromAuthUid(userid);
         console.log('Resolved userIdInt:', userIdInt, typeof userIdInt);
         if (!userIdInt) {
             return res.status(400).json({ 
                 error: 'Invalid user ID. User not found in database. Please sync your account first.',
-                received: userId
-            });
-        }
-        
-        const memberUserIdInt = memberUserId ? await User.resolveUserIdFromAuthUid(memberUserId) : null;
-        if (memberUserId && !memberUserIdInt) {
-            return res.status(400).json({ 
-                error: 'Invalid member user ID. User not found in database.',
-                received: memberUserId
+                received: userid
             });
         }
 
-        const formattedBirthDate = formatDate(birthDate);
-        const formattedDeathDate = formatDate(deathDate);
+        const memberUserIdInt = memberuserid ? await User.resolveUserIdFromAuthUid(memberuserid) : null;
+        if (memberuserid && !memberUserIdInt) {
+            return res.status(400).json({ 
+                error: 'Invalid member user ID. User not found in database.',
+                received: memberuserid
+            });
+        }
+
+        const formattedBirthDate = formatDate(birthdate);
+        const formattedDeathDate = formatDate(deathdate);
 
         // ensure all necessary fields are passed in the request body
         const newMember = await treeMember.addMember({
-            firstName,
-            lastName,
-            birthDate: formattedBirthDate,
-            deathDate: formattedDeathDate,
-            location,
-            phoneNumber,
-            userId: userIdInt,  // Now guaranteed to be an integer
-            memberUserId: memberUserIdInt,  // Now guaranteed to be an integer or null,
-            gender
+            firstname: firstname,
+            lastname: lastname,
+            birthdate: formattedBirthDate,
+            deathdate: formattedDeathDate,
+            location: location,
+            phonenumber: phonenumber,
+            userid: userIdInt,  // Now guaranteed to be an integer
+            memberuserid: memberUserIdInt || null,  // Now guaranteed to be an integer or null,
+            gender: gender
         });
 
-        // if there are relationships, add them to the database
-        if (relationships && relationships.length > 0) {
-            for (const rel of relationships) {
-                // Ensure person2_id is an integer, not a UUID
-                let person2_id = rel.person2_id;
-                if (typeof person2_id === 'string' && person2_id.includes('-')) {
-                    // If it looks like a UUID, try to resolve it
-                    person2_id = await User.resolveUserIdFromAuthUid(person2_id);
-                    if (!person2_id) {
-                        console.error('Could not resolve person2_id UUID:', rel.person2_id);
-                        continue; // Skip this relationship
-                    }
-                }
-                await relationship.addRelationship({
-                    person1_id: newMember.id,
-                    person2_id: person2_id,
-                    relationshipType: rel.relationshipType || 'sibling',
-                    relationshipStatus: 'active',
-                    userId: userIdInt  // Need to include userId for the relationship
-                });
-            }
-        }
-        //realtionship function does not work
+
+        // // if there are relationships, add them to the database
+        // if (relationships && relationships.length > 0) {
+        //     for (const rel of relationships) {
+        //         // Ensure person2_id is an integer, not a UUID
+        //         let person2_id = rel.person2_id;
+        //         if (typeof person2_id === 'string' && person2_id.includes('-')) {
+        //             // If it looks like a UUID, try to resolve it
+        //             person2_id = await User.resolveUserIdFromAuthUid(person2_id);
+        //             if (!person2_id) {
+        //                 console.error('Could not resolve person2_id UUID:', rel.person2_id);
+        //                 continue; // Skip this relationship
+        //             }
+        //         }
+        //         await relationship.addRelationship({
+        //             person1_id: newMember.id,
+        //             person2_id: person2_id,
+        //             relationshipType: rel.relationshipType || 'sibling',
+        //             relationshipStatus: 'active',
+        //             userId: userIdInt  // Need to include userId for the relationship
+        //         });
+        //     }
+        // } 
+        //relationship function does not work
 
         res.status(201).json({
             message: 'Family member added successfully',

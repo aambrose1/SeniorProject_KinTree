@@ -61,20 +61,19 @@ const CreateAccount = () => {
 
             // add new user as family member 
             const memberData = {
-                first_name: formData.firstname,
-                last_name: formData.lastname,
+                firstname: formData.firstname,
+                lastname: formData.lastname,
                 birthdate: formData.birthdate,
-                email: formData.email,
                 location: `${formData.city}, ${formData.state}, ${formData.country}`,
-                userId: data.user.id,
-                memberUserId: data.user.id,
+                phonenumber: formData.phonenum,
+                userid: data.user.id,
+                memberuserid: data.user.id,
                 gender: formData.gender
             };
-            const memberResponse = await familyTreeService.createFamilyMember(memberData);
-            const memberId = memberResponse.member.id;
+            await familyTreeService.createFamilyMember(memberData); 
             
             // add new user to their tree object
-            await familyTreeService.initializeTreeInfo(memberId, memberData, data.user.id);
+            await familyTreeService.initializeTreeInfo(data.user.id, memberData, data.user.id);
 
             console.log('Registration successful:', data);
             window.location.href = '/login'; // redirect after registration to login

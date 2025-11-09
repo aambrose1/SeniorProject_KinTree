@@ -3,13 +3,21 @@ const User = require('../models/userModel');
 
 const addObject = async (req, res) => {
     try {
-        const { object, userId } = req.body;
+        const { object, userid } = req.body;
         // Resolve UUID to integer user ID if needed
-        const userIdInt = await User.resolveUserIdFromAuthUid(userId) || userId;
+        const userIdInt = await User.resolveUserIdFromAuthUid(userid);
+        console.log('Resolved userIdInt:', userIdInt);
+        
+        if (!userIdInt) {
+            return res.status(400).json({
+                error: 'Invalid user ID. User not found in database.',
+                received: userid
+            });
+        }
 
         const newObject = await treeInfo.addObject({
             object: JSON.stringify(object),
-            userId: userIdInt
+            userid: userIdInt
         });
 
         res.status(201).json({
