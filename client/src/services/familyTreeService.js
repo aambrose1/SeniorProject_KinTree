@@ -102,5 +102,25 @@ export const familyTreeService = {
         }
 
         return responseData;
+    },
+    /**
+     * 
+     * @param {int} userId 
+     * @returns Array of the user's treeInfo Object
+     */
+    async getFamilyTreeByUserId(userId) {
+        const response = await fetch(`http://localhost:5000/api/tree-info/${userId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        })  
+        let responseData = await response.json();
+        if (!response.ok) {
+            console.error('Error in Loading Tree Data:', responseData.error);
+            throw new Error(responseData.error || 'Failed to load family tree data');
+        }
+        const parsedData = JSON.parse(responseData.object);
+        console.log("Tree data: ", parsedData);
+        
+        return parsedData;
     }
 };

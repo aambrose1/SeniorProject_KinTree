@@ -8,7 +8,8 @@ import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMemb
 import NavBar from '../../components/NavBar/NavBar';
 import { useLocation, Outlet } from 'react-router-dom';
 import { useCurrentUser, supabaseUser } from '../../CurrentUserProvider'; // import the context
-// FamilyTree class structure derived from family-chart package sample code
+import { familyTreeService } from '../../services/familyTreeService';
+
 // see https://github.com/donatso/family-chart/
 
 function FamilyTree() {
@@ -31,48 +32,39 @@ function FamilyTree() {
 
             if (!contRef.current) return;
 
-            try{
-                const f3chart = f3.createChart('#FamilyChart', data)
-                .setTransitionTime(1000)
-                .setCardXSpacing(250)
-                .setCardYSpacing(150)
-                .setSingleParentEmptyCard(true, {label: 'ADD'})
-                .setShowSiblingsOfMain(true)
-                .setOrientationVertical()
+            const f3chart = f3.createChart('#FamilyChart', data)
+            .setTransitionTime(1000)
+            .setCardXSpacing(250)
+            .setCardYSpacing(150)
+            .setSingleParentEmptyCard(true, {label: 'ADD'})
+            .setShowSiblingsOfMain(true)
+            .setOrientationVertical()
 
-                const f3Card = f3chart.setCardHtml()
-                    .setCardDisplay([["first name"],[]])
-                    .setCardDim({})
-                    .setMiniTree(true)
-                    .setStyle('imageCircle')
-                    .setOnHoverPathToMain()
-                    .setOnCardClick((e, data) => {
-                        window.location.href = `/account/${data.data.id}`;
-                    });
+            const f3Card = f3chart.setCardHtml()
+                .setCardDisplay([["first name"],[]])
+                .setCardDim({})
+                .setMiniTree(true)
+                .setStyle('imageCircle')
+                .setOnHoverPathToMain()
+                .setOnCardClick((e, data) => {
+                    window.location.href = `/account/${data.data.id}`;
+                });
 
-                f3chart.updateTree({initial: true});
-            } catch (error) {
-                console.error('Error creating family tree chart:', error); 
-            }
-            
+            f3chart.updateTree({initial: true});
         }
 
+        try{
+            const fetchData = async () => {
+                const treeData = await familyTreeService.getFamilyTreeByUserId(currentAccountID);
+                console.log('Tree data fetched:', treeData);
+                create(treeData);
+            };
+            fetchData();
+        } catch (error) {
+            console.error('Error creating family tree chart:', error); 
+        }
         
-        fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        })
-        .then(async (response) => {
-            if (response.ok) {
-                let treeData = await response.json();
-                const parsedData = JSON.parse(treeData.object);
-                console.log("Tree data: ", parsedData);
-                create(parsedData);
-            } else {
-                console.error('Error in Loading Tree Data:', response.json().error);
-                window.alert('Failed to load family tree data. Please try again.');
-            }
-        });
+        
     }, [currentAccountID, contRef]);
 
     return <div className="f3 f3-cont" id="FamilyChart" ref={contRef}></div>;
