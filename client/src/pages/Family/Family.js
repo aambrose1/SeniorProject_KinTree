@@ -167,7 +167,7 @@ function Family() {
                                 {member["firstname"]} {member["lastname"]}
                             </div>
                             <div>
-                                <Link to={`/account/${member["userid"]}`} style={styles.MemberLinkStyle}>
+                                <Link to={`/account/${member["memberuserid"] ? member["memberuserid"] : member["id"]}`} style={styles.MemberLinkStyle}>
                                     View
                                 </Link>
                             </div>

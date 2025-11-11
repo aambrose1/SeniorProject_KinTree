@@ -105,6 +105,25 @@ export const familyTreeService = {
     },
     /**
      * 
+     * @param {int} id 
+     * @returns the treeMember object by id
+     */
+    async getFamilyMemberByFamilyMemberId(id) {
+        const response = await fetch(`http://localhost:5000/api/family-members/member/${id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const responseData = await response.json();
+        if (!response.ok) {
+            console.error('Failed to fetch family member:', responseData.error);
+            throw new Error(responseData.error || 'Failed to fetch family member');
+        }
+        return responseData;
+    },
+    /**
+     * 
      * @returns JSON Array of all registered users
      */
     async getRegisteredUsers() {

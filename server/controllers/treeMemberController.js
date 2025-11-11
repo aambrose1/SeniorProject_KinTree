@@ -221,13 +221,27 @@ const getActiveMemberId = async (req, res) => {
         }
         const member = await treeMember.getActiveMemberId(userId);
         // If none found, return empty object to avoid frontend JSON parse errors
-        if (!member) return res.status(200).json({});
+        if (!member) return res.status(404).json({});
         res.status(200).json(member);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error fetching family member', details: error.message });
     }
-}
+};
 
-module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId };  
+const getMemberbyMemberId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const member = await treeMember.getMemberbyMemberId(id);
+            if (!member) {
+                return res.status(404).json({ error: 'Family member not found' });
+            }
+            res.status(200).json(member);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching family member' });
+    }
+};
+
+module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId, getMemberbyMemberId };  
 

@@ -4,6 +4,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
 import AddToTreePopup from '../../components/AddToTree/AddToTree';
 import { useCurrentUser } from '../../CurrentUserProvider';
+import { set } from 'react-hook-form';
+
+const requestOptions = {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+};
 
 function Account() {
     const navigate = useNavigate(); // used to change route without refreshing page, used to prevent infinite refreshes
@@ -11,7 +17,7 @@ function Account() {
     const [existsInTree, setExistsInTree] = useState(false); // will be retrieved
     const [relationshipType, setRelationshipType] = useState(''); // will be retrieved
 
-    const { currentUserID, supabaseUser, loading } = useCurrentUser();
+    const { currentUserID, CurrentAccountID, supabaseUser, loading } = useCurrentUser();
     
     // Redirect to login if not authenticated
     useEffect(() => {
@@ -22,6 +28,7 @@ function Account() {
     // takes id from url path
     let { id } = useParams();
 
+    
     // if no id is provided, retrieve current user's id and show that page
     useEffect(() => {
         if (!id && supabaseUser?.id) {
@@ -51,74 +58,94 @@ function Account() {
     // Fetch user info - check if it's a Supabase user or family member
     useEffect(() => {
         if (!id) return;
-
-        // Check if this is the current Supabase user
-        if (id === supabaseUser?.id) {
-            console.log('Supabase user data:', supabaseUser);
-            console.log('User metadata:', supabaseUser.user_metadata);
-            
-            setUserData({
-                id: supabaseUser.id,
-                firstName: supabaseUser.user_metadata?.first_name || 'User',
-                lastName: supabaseUser.user_metadata?.last_name || '',
-                email: supabaseUser.email,
-                birthdate: supabaseUser.user_metadata?.birthdate || '',
-                address: supabaseUser.user_metadata?.address || '',
-                city: supabaseUser.user_metadata?.city || '',
-                state: supabaseUser.user_metadata?.state || '',
-                country: supabaseUser.user_metadata?.country || '',
-                phone_number: supabaseUser.user_metadata?.phone_number || '',
-                zipcode: supabaseUser.user_metadata?.zipcode || '',
-                gender: supabaseUser.user_metadata?.gender || ''
-            });
-            setOwnAccount(true);
-            return;
-        }
-
-        // Otherwise, try to fetch from family members API
-        const requestOptions = {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        };
-
-        fetch(`http://localhost:5000/api/family-members/${id}`, requestOptions)
-            .then(async (response) => {
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserData(data);
-                } else {
-                    console.error('Error fetching user data:', response);
-                    // If family member not found, show basic info
+        const fetchUserData = async () => {
+            try {
+                const user = await fetch(`http://localhost:5000/api/auth/user/${id}`); // if the memberuserid matches a user in user db
+                if (user.status === 404) { // user not found, so it must be a manually added member
+                    // Fetch manually added member data
+                    const member = await fetch(`http://localhost:5000/api/family-members/member/${id}`);
+                    const memberData = await member.json();
                     setUserData({
                         id: id,
-                        firstName: 'Unknown',
-                        lastName: 'User',
-                        email: '',
+                        firstName: memberData.firstname,
+                        lastName: memberData.lastname,
+                        email: memberData.email || '',
+                        birthdate: memberData.birthdate || '',
+                        address: memberData.address || '', 
+                        city: memberData.city || '',
+                        state: memberData.state || '',
+                        country: memberData.country || '',
+                        phone_number: memberData.phonenumber || '',
+                        zipcode: memberData.zipcode || '',
+                        gender: memberData.gender || 'Unspecified'
+                    });
+                } else if (user.ok) { // user found in user db
+                    const userData = await user.json();
+                    if (userData.auth_uid) {
+                        checkOwnAccount();
+                        console.log('Checked own account for auth_uid:', userData.auth_uid, 'vs', supabaseUser?.id);
+                    }
+                    console.log('Fetched Supabase user data', userData);
+                    // TODO: add fields in db for address, phone, etc. since there are not available outside of logged in user_metadata
+                    setUserData({
+                        id: id,
+                        firstName: userData.firstname || 'User',
+                        lastName: userData.lastname || '',
+                        email: userData.email || '',
+                        birthdate: userData.birthdate || '',
+                        address: userData.address || '',
+                        city: userData.city || '',
+                        state: userData.state || '',
+                        country: userData.country || '',
+                        phone_number: userData.phone_number || '',
+                        zipcode: userData.zipcode || '',
+                        gender: userData.gender || 'Unspecified',
+                        auth_uid: userData.auth_uid || ''
                     });
                 }
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }, [id, supabaseUser]);
-        
-    useEffect(() => {
-        // Check if this is the current user's own account
-        if (id === supabaseUser?.id) {
-            setOwnAccount(true);
-            return;
-        }
-
-        // If it's not the current user, check relationships (only for family members)
-        if (!userData.memberUserId) {
-            setOwnAccount(false);
-            return;
-        }
-
-        const requestOptions = {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                setUserData({
+                    id: id,
+                    firstName: 'Unknown',
+                    lastName: 'User',
+                    email: '',
+                });
+            }
         };
+        const checkOwnAccount = () => {
+            // Check if this is the current logged in Account user
+            if (userData?.auth_uid === supabaseUser?.id) {
+                console.log('This is the own account');
+                console.log('Supabase user data:', supabaseUser);
+                console.log('User metadata:', supabaseUser.user_metadata);
+                setOwnAccount(true);
+                setUserData({
+                    id: supabaseUser.id,
+                    firstName: supabaseUser.user_metadata?.first_name || 'User',
+                    lastName: supabaseUser.user_metadata?.last_name || '',
+                    email: supabaseUser.email,
+                    birthdate: supabaseUser.user_metadata?.birthdate || '',
+                    address: supabaseUser.user_metadata?.address || '',
+                    city: supabaseUser.user_metadata?.city || '',
+                    state: supabaseUser.user_metadata?.state || '',
+                    country: supabaseUser.user_metadata?.country || '',
+                    phone_number: supabaseUser.user_metadata?.phone_number || '',
+                    zipcode: supabaseUser.user_metadata?.zipcode || '',
+                    gender: supabaseUser.user_metadata?.gender || ''
+                });
+            }
+            else {
+                console.log('This is NOT the own account');
+                setOwnAccount(false);
+            }
+        };
+        fetchUserData();
+
+    }, [id, supabaseUser, userData.auth_uid]);
+    
+    // determine relationship type
+    useEffect(() => {
         
         // if not self, determine relationship to user
         fetch(`http://localhost:5000/api/relationships/${id}`, requestOptions)
@@ -143,16 +170,11 @@ function Account() {
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
             });
-        }, [id, currentUserID, userData.id, userData.memberUserId, supabaseUser?.id]);
+        }, [id, currentUserID, userData.id, supabaseUser?.id]);
 
     // check if user exists in tree
     useEffect(() => {
         if (!id || !supabaseUser?.id) return;
-
-        const requestOptions = {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        };
 
         fetch(`http://localhost:5000/api/tree-info/${supabaseUser.id}`, requestOptions)
             .then(async (response) => {

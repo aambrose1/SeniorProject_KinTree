@@ -145,6 +145,16 @@ const treeMember = {
             .maybeSingle();
         if (error) throw error;
         return data;
+    },
+
+    getMemberbyMemberId: async (id) => {
+        const { data, error } = await supabase
+            .from('treemembers')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+        if (error) throw error;
+        return data;
     }
 };
 

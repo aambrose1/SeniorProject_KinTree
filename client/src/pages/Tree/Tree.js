@@ -47,7 +47,7 @@ function FamilyTree() {
                 .setStyle('imageCircle')
                 .setOnHoverPathToMain()
                 .setOnCardClick((e, data) => {
-                    window.location.href = `/account/${data.userid}`;
+                    window.location.href = `/account/${data.memberuserid}`;
                 });
 
             f3chart.updateTree({initial: true});
