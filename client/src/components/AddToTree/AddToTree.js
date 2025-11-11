@@ -113,11 +113,18 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
     }
 
     // populate filteredResults
-    filteredResults.current = results.current.filter((result) =>
-      treeData.map((person) => Number(person.id)).includes(Number(result.id))
-    );
-
-    console.log("Filtered Results:", filteredResults.current);
+    if (Array.isArray(treeData)) {
+      try {
+          const parsedData = JSON.parse(treeData);
+          filteredResults.current = results.current.filter((result) =>
+          parsedData.map((person) => Number(person.id)).includes(Number(result.id)));
+          console.log("Filtered Results:", filteredResults.current);
+        } catch (error) {
+            console.error("Error parsing treeData:", error);
+            return;
+        }
+      }
+      
   }, [treeData]);
 
     // form
