@@ -2,7 +2,7 @@ export const familyTreeService = {
     /**
      * 
      * @param {*} memberData 
-     * @returns treeMemberId
+     * @returns treeMember object
      */
     async createFamilyMember(memberData) {
         console.log('Creating family member with data:', memberData);
@@ -28,7 +28,7 @@ export const familyTreeService = {
             console.log('Failed to create family member:', responseData.error);
             throw new Error(responseData.error);
         }
-        return responseData; // returns memberId
+        return responseData; // returns member object
     },
     /**
      * 
@@ -86,10 +86,29 @@ export const familyTreeService = {
     },
     /**
      * 
+     * @param {*} userId 
+     * @returns the users primary treeMember object
+     */
+    async getFamilyMemberByUserId(userId) {
+        const response = await fetch(`http://localhost:5000/api/family-members/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const responseData = await response.json();
+        if (!response.ok) {
+            console.error('Failed to fetch family member:', responseData.error);
+            throw new Error(responseData.error || 'Failed to fetch family member');
+        }
+        return responseData;
+    },
+    /**
+     * 
      * @returns JSON Array of all registered users
      */
     async getRegisteredUsers() {
-        const response = await fetch(`http://localhost:5000/api/users/`, {
+        const response = await fetch(`http://localhost:5000/api/auth/users/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -120,7 +139,7 @@ export const familyTreeService = {
         }
         const parsedData = JSON.parse(responseData.object);
         console.log("Tree data: ", parsedData);
-        
+
         return parsedData;
     }
 };

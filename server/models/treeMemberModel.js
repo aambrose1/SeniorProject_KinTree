@@ -54,7 +54,7 @@ const treeMember = {
         const { data, error } = await supabase
             .from('treemembers')
             .select('*')
-            .eq('id', id);
+            .eq('userid', id);
         if (error) throw error;
         return data;
     },
@@ -63,7 +63,8 @@ const treeMember = {
         const { data, error } = await supabase
             .from('treemembers')
             .select('*')
-            .eq('id', id)
+            .eq('userid', id)
+            .eq('memberuserid', id)
             .single();
         if (error) throw error;
         return data;

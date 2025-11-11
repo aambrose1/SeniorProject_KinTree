@@ -1,5 +1,6 @@
 // authController.js - the main backend file for user registration, signin, etc
 const User = require('../models/userModel');  // now backed by Supabase
+const { get } = require('../routes/authRoutes');
 
 const deleteByUser = async (req,res) => {
   const { id } = req.params;
@@ -21,7 +22,11 @@ const deleteByUser = async (req,res) => {
 const findById = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findById(id);
+        const userId = await User.resolveUserIdFromAuthUid(id);
+        if (!userId) {
+            return res.status(500).json({ error: 'Error resolving user ID' });
+        }
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }

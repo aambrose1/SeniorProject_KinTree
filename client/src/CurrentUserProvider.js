@@ -62,7 +62,12 @@ export const CurrentUserProvider = ({ children }) => {
         
         if (session?.user) {
           setSupabaseUser(session.user);
-          setCurrentAccountIDState(session.user.id);
+          let response = await fetch(`http://localhost:5000/api/auth/user/${session.user.id}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          response = await response.json();
+          setCurrentAccountIDState(response.id);
           setCurrentUserNameState(session.user.email); // Use email as default username
         }
         
@@ -80,7 +85,12 @@ export const CurrentUserProvider = ({ children }) => {
       async (event, session) => {
         if (session?.user) {
           setSupabaseUser(session.user);
-          setCurrentAccountIDState(session.user.id);
+          let response = await fetch(`http://localhost:5000/api/auth/user/${session.user.id}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          response = await response.json();
+          setCurrentAccountIDState(response.id);
           setCurrentUserNameState(session.user.email);
           // Auto-sync profile into public.users using auth metadata when available
           try {

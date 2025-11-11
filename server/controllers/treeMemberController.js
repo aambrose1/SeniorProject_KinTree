@@ -194,7 +194,13 @@ const deleteByUser =  async (req, res) => {
 const getMemberById = async (req, res) => {
     try {
         const { id } = req.params;
-        const member = await treeMember.getMemberById(id);
+        // Resolve UUID to integer user ID first
+        const userId = await User.resolveUserIdFromAuthUid(id);
+        console.log('getMemberById resolved userId:', userId);
+        if (!userId) {
+            return res.status(200).json({});
+        }
+        const member = await treeMember.getMemberById(userId);
         if (!member) {
             return res.status(404).json({ error: 'Family member not found' });
         }
