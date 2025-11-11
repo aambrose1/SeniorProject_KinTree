@@ -19,6 +19,7 @@ function Account() {
 
     const { currentUserID, CurrentAccountID, supabaseUser, loading } = useCurrentUser();
     
+
     // Redirect to login if not authenticated
     useEffect(() => {
         if (!loading && !supabaseUser) {
@@ -28,20 +29,8 @@ function Account() {
     // takes id from url path
     let { id } = useParams();
 
-    
-    // if no id is provided, retrieve current user's id and show that page
-    useEffect(() => {
-        if (!id && supabaseUser?.id) {
-          setOwnAccount(true);
-          navigate(`/account/${supabaseUser.id}`, { replace: true });
-        }
-      }, [id, supabaseUser?.id, navigate]);
-
-    // TODO: query for data of account user & verify that userID of logged in user matches
-    
-
     const [userData, setUserData] = useState({
-        id: id,
+        id: '',
         firstName: 'Loading...',
         lastName: '',
         email: '',
@@ -52,9 +41,26 @@ function Account() {
         country: '',
         phone_number: '',
         zipcode: '',
-        gender: ''
+        gender: '',
+        auth_uid: ''
     })
 
+    // if no id is provided, retrieve current user's id and show that page
+    useEffect(() => {
+        if (!id && supabaseUser?.id) {
+            // Fetch current user's data
+            const fetchOwnUserData = async () => {
+                const user = await fetch(`http://localhost:5000/api/auth/user/${supabaseUser.id}`);
+                const userData = await user.json();
+                setUserData(userData);
+                setOwnAccount(true);
+                navigate(`/account/${userData.id}`, { replace: true });
+            }
+            fetchOwnUserData();
+        }
+      }, [id, supabaseUser?.id, navigate]);
+
+    
     // Fetch user info - check if it's a Supabase user or family member
     useEffect(() => {
         if (!id) return;
@@ -81,9 +87,11 @@ function Account() {
                     });
                 } else if (user.ok) { // user found in user db
                     const userData = await user.json();
+                    setUserData(userData);
                     if (userData.auth_uid) {
                         checkOwnAccount();
                         console.log('Checked own account for auth_uid:', userData.auth_uid, 'vs', supabaseUser?.id);
+                        if (ownAccount) return;
                     }
                     console.log('Fetched Supabase user data', userData);
                     // TODO: add fields in db for address, phone, etc. since there are not available outside of logged in user_metadata
@@ -118,10 +126,9 @@ function Account() {
             if (userData?.auth_uid === supabaseUser?.id) {
                 console.log('This is the own account');
                 console.log('Supabase user data:', supabaseUser);
-                console.log('User metadata:', supabaseUser.user_metadata);
                 setOwnAccount(true);
                 setUserData({
-                    id: supabaseUser.id,
+                    id: userData.id,
                     firstName: supabaseUser.user_metadata?.first_name || 'User',
                     lastName: supabaseUser.user_metadata?.last_name || '',
                     email: supabaseUser.email,
@@ -132,7 +139,8 @@ function Account() {
                     country: supabaseUser.user_metadata?.country || '',
                     phone_number: supabaseUser.user_metadata?.phone_number || '',
                     zipcode: supabaseUser.user_metadata?.zipcode || '',
-                    gender: supabaseUser.user_metadata?.gender || ''
+                    gender: supabaseUser.user_metadata?.gender || '',
+                    auth_uid: supabaseUser.id
                 });
             }
             else {
