@@ -7,76 +7,82 @@ import { ReactComponent as PlusSign } from '../../assets/plus-sign.svg';
 import AddFamilyMemberPopup from '../../components/AddFamilyMember/AddFamilyMember';
 import NavBar from '../../components/NavBar/NavBar';
 import { useLocation, Outlet } from 'react-router-dom';
-import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
-
+import { useCurrentUser, supabaseUser } from '../../CurrentUserProvider'; // import the context
 // FamilyTree class structure derived from family-chart package sample code
 // see https://github.com/donatso/family-chart/
 
 function FamilyTree() {
-    const contRef = React.createRef();
+    const contRef = React.useRef();
     const { currentAccountID } = useCurrentUser();
 
+    
     useEffect(() => {
-        if (!contRef.current) return;
-
-        let chart = null;
-
         function create(data) {
+            if (!Array.isArray(data) || data.length === 0) {
+                console.error('Invalid data for createChart:', data);
+                return;
+            }
+
             // Clean up any existing chart first
             const existingChart = document.querySelector('#FamilyChart');
             if (existingChart) {
                 existingChart.innerHTML = '';
             }
 
-            chart = f3.default.createChart('#FamilyChart', data)
-                .setTransitionTime(500)
+            if (!contRef.current) return;
+
+            try{
+                const f3chart = f3.createChart('#FamilyChart', data)
+                .setTransitionTime(1000)
                 .setCardXSpacing(250)
                 .setCardYSpacing(150)
-                .setSingleParentEmptyCard(false, {label: ''})
+                .setSingleParentEmptyCard(true, {label: 'ADD'})
                 .setShowSiblingsOfMain(true)
                 .setOrientationVertical()
-                
-            
-            chart.setCardHtml()
-                .setCardDisplay([["first name"],[]])
-                .setCardDim({})
-                .setMiniTree(false)
-                .setStyle('imageCircle')
-                .setOnCardClick((e, data) => {
-                    window.location.href = `/account/${data.data.id}`;
-                });
 
-            chart.updateTree({initial: true});
+                const f3Card = f3chart.setCardHtml()
+                    .setCardDisplay([["first name"],[]])
+                    .setCardDim({})
+                    .setMiniTree(true)
+                    .setStyle('imageCircle')
+                    .setOnHoverPathToMain()
+                    .setOnCardClick((e, data) => {
+                        window.location.href = `/account/${data.data.id}`;
+                    });
+
+                f3chart.updateTree({initial: true});
+            } catch (error) {
+                console.error('Error creating family tree chart:', error); 
+            }
+            
         }
 
-        let getRequestOptions = {
+        
+        fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
-        };
-
-        fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, getRequestOptions)
-            .then(async (response) => {
-                if (response.ok) {
-                    let treeData = await response.json();
-                    const parsedData = treeData.object;
-                    console.log("Tree data: ", parsedData);
-                    create(parsedData);
-                } else {
-                    console.error('Error in Loading Tree Data:', response);
-                }
-            });
-
-        
-    }, [contRef, currentAccountID]);
+        })
+        .then(async (response) => {
+            if (response.ok) {
+                let treeData = await response.json();
+                const parsedData = JSON.parse(treeData.object);
+                console.log("Tree data: ", parsedData);
+                create(parsedData);
+            } else {
+                console.error('Error in Loading Tree Data:', response.json().error);
+                window.alert('Failed to load family tree data. Please try again.');
+            }
+        });
+    }, [currentAccountID, contRef]);
 
     return <div className="f3 f3-cont" id="FamilyChart" ref={contRef}></div>;
+    
 }
 
 // builds the actual page
 function Tree() {
-    const { currentAccountID, currentUserName, fetchCurrentUserID } = useCurrentUser(); // Use the hook in the function component
-    fetchCurrentUserID();
     const location = useLocation();
+    const { currentAccountID, supabaseUser } = useCurrentUser();
     const isTreePage = location.pathname === '/tree';
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
@@ -97,7 +103,7 @@ function Tree() {
                             width: '200px',
                             borderColor : '#000000'
                         }}/>
-                        <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {currentUserName?.split(" ")[1]} Family</h2> 
+                        <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {supabaseUser?.user_metadata?.last_name} Family</h2> 
                     </div>
                     {/* add family member button */}
                     <div style={{ display: 'flex', alignItems: 'center' }}>

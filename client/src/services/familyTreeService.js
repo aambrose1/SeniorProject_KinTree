@@ -48,13 +48,11 @@ export const familyTreeService = {
                 object: [{
                     "id": memberId,
                     "data": {
-                        "first name": memberData.firstName,
-                        "last name": memberData.lastName,
+                        "first name": memberData.firstname,
+                        "last name": memberData.lastname,
                         "gender": memberData.gender,
                     },
                     "rels": {
-                        "children": [],
-                        "spouses": [],
                     }
                 }],
                 userid: userid, // who is creating the tree
