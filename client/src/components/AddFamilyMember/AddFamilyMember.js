@@ -126,7 +126,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         phonenumber: selectedUser.phonenumber || null,
         userid: currentAccountID, // The user adding the family member
         memberuserid: selectedUser.id, // Existing user's ID
-        gender: selectedUser.gender || "F" // default for now lol
+        gender: selectedUser.gender
       };
       
        // get account treemember id

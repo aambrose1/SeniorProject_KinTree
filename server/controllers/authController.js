@@ -67,11 +67,11 @@ module.exports = { deleteByUser, findById, findByEmail, getAllUsers };
 // Body: { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate }
 const syncAuthUser = async (req, res) => {
   try {
-    const { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate } = req.body || {};
+    const { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate, gender } = req.body || {};
     if (!auth_uid || !email) {
       return res.status(400).json({ error: 'auth_uid and email are required' });
     }
-    const user = await User.upsertByAuthUser({ auth_uid, email, username, firstName, lastName, phoneNumber, birthDate });
+    const user = await User.upsertByAuthUser({ auth_uid, email, username, firstName, lastName, phoneNumber, birthDate, gender });
     res.status(200).json(user);
   } catch (error) {
     console.error('Sync error:', error);
