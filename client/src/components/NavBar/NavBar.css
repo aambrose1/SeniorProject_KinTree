@@ -131,3 +131,58 @@
     border-bottom-width: flex;
     border-bottom-color: #ccc;
 }
+
+/* Dark Mode Styles */
+.dark-mode .navbar {
+    background-color: #2d2d2d;
+}
+
+.dark-mode .nav-item {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.dark-mode .nav-item:hover {
+    background-color: #3a3a3a;
+}
+
+.dark-mode .nav-item-active {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+}
+
+.dark-mode .nested-navbar {
+    background-color: #3a3a3a;
+}
+
+.dark-mode .nav-item-nested {
+    background-color: #3a3a3a;
+    color: #e0e0e0;
+}
+
+.dark-mode .nav-item-nested:hover {
+    background-color: #4a4a4a;
+}
+
+.dark-mode .nav-item-nested-active {
+    background-color: #4a4a4a;
+    color: #e0e0e0;
+}
+
+.dark-mode .settings-icon {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.dark-mode .settings-icon:hover {
+    color: #4CAF50;
+}
+
+.dark-mode .help-icon {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.dark-mode .help-icon:hover {
+    color: #4CAF50;
+}

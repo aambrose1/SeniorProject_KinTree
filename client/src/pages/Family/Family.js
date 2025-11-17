@@ -35,8 +35,15 @@ function Family() {
         fetchUserData(); // Call the async function
     }, [fetchCurrentUserID]);
 
-    document.body.style.overflow = 'hidden';
-    document.body.style.width = '100%'; 
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.body.style.width = '100%';
+        
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.width = '';
+        };
+    }, []);
 
     // const familyData = useMemo(() => [
     //     {
