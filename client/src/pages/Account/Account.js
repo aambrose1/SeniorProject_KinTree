@@ -5,6 +5,7 @@ import NavBar from '../../components/NavBar/NavBar';
 import AddToTreePopup from '../../components/AddToTree/AddToTree';
 import { useCurrentUser } from '../../CurrentUserProvider';
 import { set } from 'react-hook-form';
+import {familyTreeService} from '../../services/familyTreeService';
 
 const requestOptions = {
     method: 'GET',
@@ -16,16 +17,9 @@ function Account() {
     const [ownAccount, setOwnAccount] = useState(false); // will be retrieved
     const [existsInTree, setExistsInTree] = useState(false); // will be retrieved
     const [relationshipType, setRelationshipType] = useState(''); // will be retrieved
-
-    const { currentUserID, CurrentAccountID, supabaseUser, loading } = useCurrentUser();
+    const [errorMessage, setErrorMessage] = useState('');
+    const {currentAccountID, supabaseUser, loading } = useCurrentUser();
     
-
-    // Redirect to login if not authenticated
-    useEffect(() => {
-        if (!loading && !supabaseUser) {
-            navigate('/login');
-        }
-    }, [loading, supabaseUser, navigate]);
     // takes id from url path
     let { id } = useParams();
 
@@ -45,88 +39,93 @@ function Account() {
         auth_uid: ''
     })
 
-    // if no id is provided, retrieve current user's id and show that page
+    // // if no id is provided, retrieve current user's id and show that page
     useEffect(() => {
-        if (!id && supabaseUser?.id) {
+        setErrorMessage('');
+        console.log('Id params not passed in')
+        if (!id) {
             // Fetch current user's data
             const fetchOwnUserData = async () => {
                 const user = await fetch(`http://localhost:5000/api/auth/user/${supabaseUser.id}`);
-                const userData = await user.json();
-                setUserData(userData);
+                const fetchedUserData = await user.json();
+                setUserData(fetchedUserData);
                 setOwnAccount(true);
-                navigate(`/account/${userData.id}`, { replace: true });
+                navigate(`/account/${fetchedUserData.id}`, { replace: true });
             }
             fetchOwnUserData();
         }
       }, [id, supabaseUser?.id, navigate]);
 
-    
+    // Redirect to login if not authenticated
+    useEffect(() => {
+        if (!loading && !supabaseUser) {
+            navigate('/login');
+        }
+    }, [loading, supabaseUser, navigate]);
+
     // Fetch user info - check if it's a Supabase user or family member
     useEffect(() => {
-        if (!id) return;
+        if (!id || !currentAccountID) return;
+        console.log("current account id:", currentAccountID);
+        console.log("viewing account id:", id);
+        setErrorMessage('');
         const fetchUserData = async () => {
             try {
-                const user = await fetch(`http://localhost:5000/api/auth/user/${id}`); // if the memberuserid matches a user in user db
-                if (user.status === 404) { // user not found, so it must be a manually added member
-                    // Fetch manually added member data
-                    const member = await fetch(`http://localhost:5000/api/family-members/member/${id}`);
-                    const memberData = await member.json();
+                
+                const user = await fetch(`http://localhost:5000/api/auth/user/${id}`);
+
+                // manually added treemember
+                if (user.status === 404) {
+                    let memberData = await familyTreeService.getFamilyMemberByFamilyMemberId(id);
                     setUserData({
                         id: id,
-                        firstName: memberData.firstname,
-                        lastName: memberData.lastname,
-                        email: memberData.email || '',
-                        birthdate: memberData.birthdate || '',
-                        address: memberData.address || '', 
-                        city: memberData.city || '',
-                        state: memberData.state || '',
-                        country: memberData.country || '',
-                        phone_number: memberData.phonenumber || '',
-                        zipcode: memberData.zipcode || '',
-                        gender: memberData.gender || 'Unspecified'
+                        firstName: memberData.firstname || 'Family',
+                        lastName: memberData.lastname || 'Member',
+                        birthdate: memberData.birthdate || '', 
+                        gender: memberData.gender || 'Unspecified',
                     });
-                } else if (user.ok) { // user found in user db
-                    const userData = await user.json();
-                    setUserData(userData);
-                    if (userData.auth_uid) {
-                        checkOwnAccount();
-                        console.log('Checked own account for auth_uid:', userData.auth_uid, 'vs', supabaseUser?.id);
+                    setOwnAccount(false);
+                // user found in db
+                } else if (user.ok) { 
+                    const fetchedUserData = await user.json();
+                    if (fetchedUserData?.auth_uid) {
+                        await checkOwnAccount();
+                        console.log('Checked own account for auth_uid:', fetchedUserData.auth_uid, 'vs', supabaseUser?.id);
                         if (ownAccount) return;
                     }
-                    console.log('Fetched Supabase user data', userData);
-                    // TODO: add fields in db for address, phone, etc. since there are not available outside of logged in user_metadata
+
+                    // not the owner account
+                    console.log('Fetched Supabase existing user data', fetchedUserData);
                     setUserData({
                         id: id,
-                        firstName: userData.firstname || 'User',
-                        lastName: userData.lastname || '',
-                        email: userData.email || '',
-                        birthdate: userData.birthdate || '',
-                        address: userData.address || '',
-                        city: userData.city || '',
-                        state: userData.state || '',
-                        country: userData.country || '',
-                        phone_number: userData.phone_number || '',
-                        zipcode: userData.zipcode || '',
-                        gender: userData.gender || 'Unspecified',
-                        auth_uid: userData.auth_uid || ''
+                        firstName: fetchedUserData.firstname || 'User',
+                        lastName: fetchedUserData.lastname || '',
+                        email: fetchedUserData.email || '',
+                        birthdate: fetchedUserData.birthdate || '',
+                        gender: fetchedUserData.gender || 'Unspecified',
+                        auth_uid: fetchedUserData.auth_uid || ''
                     });
                 }
+                else {
+                    throw new Error( user.json().error || 'User not found');
+                }
             } catch (error) {
-                console.error('Error fetching user data:', error);
+                console.error('Error fetching user data:', error.message);
+                setErrorMessage(error.message);
                 setUserData({
                     id: id,
                     firstName: 'Unknown',
                     lastName: 'User',
                     email: '',
                 });
+                setRelationshipType('No relationship found');
             }
         };
+
         const checkOwnAccount = () => {
             // Check if this is the current logged in Account user
             if (userData?.auth_uid === supabaseUser?.id) {
-                console.log('This is the own account');
-                console.log('Supabase user data:', supabaseUser);
-                setOwnAccount(true);
+                console.log('This is the owner account');
                 setUserData({
                     id: userData.id,
                     firstName: supabaseUser.user_metadata?.first_name || 'User',
@@ -142,79 +141,134 @@ function Account() {
                     gender: supabaseUser.user_metadata?.gender || '',
                     auth_uid: supabaseUser.id
                 });
+                setOwnAccount(true);
+                return;
             }
             else {
-                console.log('This is NOT the own account');
+                console.log('This is NOT the owner account');
                 setOwnAccount(false);
+                return;
             }
         };
+
         fetchUserData();
 
-    }, [id, supabaseUser, userData.auth_uid]);
+    }, [currentAccountID, id, ownAccount, supabaseUser, userData?.auth_uid, userData.id]);
     
     // determine relationship type
     useEffect(() => {
-        
-        // if not self, determine relationship to user
-        fetch(`http://localhost:5000/api/relationships/${id}`, requestOptions)
-            .then(async(response) => {
-                if (response.ok) {
-                    let relationships = await response.json(); // [{id: '', relationshipType: ''}, {}, {}]
-                    console.log("relationships", relationships);
-                    for (let i = 0; i < relationships.length; i++) {
-                        if(relationships[i].person1_id === parseInt(currentUserID) && relationships[i].person2_id === parseInt(id)) {
-                            // this is the relationship
-                            setRelationshipType(relationships[i].relationshipType);
-                            return;
-                        }
-                    }
-                } 
-                else {
-                    // print message in return body
-                    const errorData = await response.json();
-                    console.error('Error:', errorData.message);
-                }
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-        }, [id, currentUserID, userData.id, supabaseUser?.id]);
-
-    // check if user exists in tree
-    useEffect(() => {
         if (!id || !supabaseUser?.id) return;
+        if (ownAccount) setRelationshipType('You');
+        // if not self, determine relationship to user
+        // get current account's family treememberid and viewed account's family treememberid
+        const fetchRelationship = async () => {
+            let treeUserId = null;
+            let treeMemberId = null;
+            
+            try {
+                const treeData = await familyTreeService.getFamilyMembersByUserId(currentAccountID);
+                
+                for (let i = 0; i < treeData.length; i++) {
+                    if (treeData[i].userid === parseInt(currentAccountID) && treeData[i].memberuserid === parseInt(currentAccountID)) {
+                        treeUserId = treeData[i].id;
+                        console.log("treeUserId (current signed in user) found:", treeUserId);
+                    }
+                    if (treeData[i].memberuserid === parseInt(id) && treeData[i].userid === parseInt(currentAccountID)) {
+                        treeMemberId = treeData[i].id;
+                        console.log("treeMemberId (existing user) found:", treeMemberId);
+                    }
+                    if (treeData[i].id === parseInt(id) && treeData[i].userid === parseInt(currentAccountID)) {
+                        treeMemberId = treeData[i].id;
+                        console.log("treeMemberId (manual member) found:", treeMemberId);
+                    }
+                }
+                
+                if (!treeUserId || !treeMemberId) {
+                    console.log("Could not find both tree member IDs");
+                    return;
+                }
 
-        fetch(`http://localhost:5000/api/tree-info/${supabaseUser.id}`, requestOptions)
-            .then(async (response) => {
+                console.log("treeUserId:", treeUserId, "treeMemberId:", treeMemberId);
+
+                const response = await fetch(`http://localhost:5000/api/relationships/user/${currentAccountID}`, requestOptions);
+                
                 if (response.ok) {
-                    console.log("tree info response");
-                    const treeMembers = await response.json(); // {id: accountID, object: []}
-                    console.log(treeMembers);
-                    for (let i = 0; i < treeMembers.object.length; i++) {
-                        if (treeMembers.object[i].id === id) {
-                            console.log("account exists in user's tree");
-                            setExistsInTree(true);
+                    let relationships = await response.json();
+                    console.log("relationships", relationships);
+                    
+                    for (let i = 0; i < relationships.length; i++) {
+                        if(relationships[i].person1_id === parseInt(treeUserId) && relationships[i].person2_id === parseInt(treeMemberId)) {
+                            // this is the relationship
+                            setRelationshipType(relationships[i].relationshiptype);
                             return;
                         }
                     }
                 } else {
-                    const errorData = await response.json();
-                    console.error('Error fetching tree info:', errorData.message);
+                    setErrorMessage('Error fetching relationships');
+                    setRelationshipType('No relationship found');
+                    console.log('Error fetching relationships:', response.error);
                 }
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }, [id, supabaseUser?.id]);
+            } catch (error) {
+                setErrorMessage(error.message);
+                console.error('Error in fetchRelationship:', error.message);
+            }
+        };
+
+        fetchRelationship();
+
+        }, [id, currentAccountID, userData.id, supabaseUser?.id, ownAccount]);
+
+    // check if user exists in tree
+    useEffect(() => {
+        if (!id || !supabaseUser?.id) return;
+        setErrorMessage('');
+
+        const checkExistsInTree = async () => {
+            try {
+                const treeData = await familyTreeService.getFamilyTreeByUserId(currentAccountID)
+
+                for (let i = 0; i < treeData.length; i++) {
+                    if (Number(treeData[i].id) === Number(id)) {
+                        console.log("account exists in user's tree");
+                        setExistsInTree(true);
+                        return;
+                    }
+                    else {
+                        setExistsInTree(false);
+                        console.log("account does not exist in user's tree");
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking if account exists in tree:", error);
+            }
+        }
+        checkExistsInTree();
+    }, [currentAccountID, id, supabaseUser?.id]);
 
     return (
         <div style={styles.DefaultStyle}>
             <NavBar />
             <div style={{width: '150px'}}></div>
-
             <div style={styles.RightSide}>
+                
             <div style={styles.ContainerStyle}>
+                {/* Error message display */}
+                  {errorMessage && (
+                    <div style={{ 
+                      backgroundColor: '#ffebee', 
+                      color: '#c62828', 
+                      padding: '10px', 
+                      borderRadius: '5px', 
+                      margin: '10px',
+                      textAlign: 'center',
+                      fontFamily: 'Alata',
+                      border: '1px solid #ef5350'
+                    }}>
+                      {errorMessage}
+                    </div>
+                  )}
                 <div style={styles.HeadingContentStyle}>
+                    
                     <div style={{display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-end'}}>
                         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
                             <h1 style={styles.HeaderStyle}>{userData?.firstName} {userData?.lastName}</h1>
@@ -224,7 +278,14 @@ function Account() {
                         {/* if someone else's account, show buttons */}
                         {!ownAccount && (
                             <div style={styles.ButtonGroupStyle}>
-                                <AddToTreePopup trigger={<button style={existsInTree ? styles.DisabledGreenButtonStyle : styles.GreenButtonStyle} disabled={existsInTree}>Add To Tree</button>} accountUserName={userData.firstName} accountUserId={id} userId={supabaseUser?.id} currentUserAccountRelationshipType={relationshipType} />
+                                <AddToTreePopup trigger={<button style={existsInTree ? styles.DisabledGreenButtonStyle : styles.GreenButtonStyle} 
+                                                disabled={existsInTree}>Add To Tree</button>} 
+                                                accountUserName={`${userData.firstName} ${userData.lastName}`} 
+                                                accountUserId={id} 
+                                                userId={currentAccountID} 
+                                                currentUserAccountRelationshipType={relationshipType}
+                                                gender={userData.gender} 
+                                            />
                                 <button style={existsInTree ? styles.GreenButtonStyle : styles.DisabledGreenButtonStyle}>Remove from Tree</button>
                             </div>
                         )}
@@ -264,7 +325,7 @@ function Account() {
                     </div>
 
                     {/* Show message if no additional info is available */}
-                    {!userData?.birthdate && !userData?.phone_number && !userData?.address && !userData?.city && !userData?.state && !userData?.zipcode && !userData?.country && (
+                    {ownAccount && !userData?.birthdate && !userData?.phone_number && !userData?.address && !userData?.city && !userData?.state && !userData?.zipcode && !userData?.country && (
                         <div style={{textAlign: 'center', padding: '20px', color: '#666', fontStyle: 'italic'}}>
                             No additional profile information available. Update your profile to add more details.
                         </div>

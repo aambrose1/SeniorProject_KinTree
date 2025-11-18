@@ -1,7 +1,7 @@
 import { React, useState, useEffect, useRef } from 'react';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
-import { useForm } from 'react-hook-form';
+import { set, useForm } from 'react-hook-form';
 import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
@@ -11,60 +11,49 @@ import { addRelationship }from '../../utils/relationUtil.js';
 import { familyTreeService } from '../../services/familyTreeService';
 
 //                                 john              jane            parent                  jane is john's mom
-function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelationship, accountUserName, treeData, results, currentAccountID) {
+async function AddTreeMember (userId, accountUserId, relativeUserId, relativeRelationship, accountUserName, treeData, results, currentAccountID, gender) {
   const treeIndex = Object.fromEntries(treeData.map(person => [person.id, person]));
-
   // maybe - check if account user is already in tree, return error if they are (user will need to delete them and re-add)
-
+  console.log(treeIndex);
   // Link relative to user; 
-  console.log("relative " + relativeUserId);
-  console.log("account " + accountUserId);
-  console.log(results.current.find(result => Number(result.id) === Number(accountUserId)))
+  console.log("relative id" + relativeUserId);
+  console.log("account id" + accountUserId);
+  console.log("Initializing treeIndex:", treeIndex);
 
+  if (treeIndex[`${accountUserId}`]) {
+    throw new Error(`${accountUserName} is already in your family tree.`); // Re-throw the error to be caught by onSubmit
+  }
   // Initialize user in tree
   treeIndex[`${accountUserId}`] = {
       "id": `${accountUserId}`,
-      "rels": {
-        "children": [],
-        "spouses": [],
-      },
       "data": {
         "first name": `${accountUserName.split(" ")[0]}`,
-        "gender": `${results.current.find(result => Number(result.id) === Number(accountUserId))["gender"]}`
-      }
-    }
+        "last name": `${accountUserName.split(" ")[1]}`,
+        "gender": `${gender}`
+      },
+      "rels": {}
+    };
 
-  // Add the primary relationship
   try {
-    addRelationship(treeIndex, accountUserId, relativeUserId, relativeRelationship);
+    // Add the primary relationship
+    // TODO: Figure out if this is necessary given that family-chart does this automatically
+    await addRelationship(treeIndex, accountUserId, relativeUserId, relativeRelationship);
+    
+    // Update the tree info in the database in order of addition
+    let updatedTreeData = [...treeData];
+    const newAccountUser = treeIndex[`${accountUserId}`];
+    updatedTreeData.push(newAccountUser);
+
+    console.log("Updated tree data after adding relationship:", updatedTreeData);
+    await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
   } catch (error) {
-    throw new Error(error.message); // Re-throw the error to be caught by onSubmit
+    console.error("Error updating tree info:", error.message);
+    throw new Error("Error updating your tree."); // Re-throw the error to be caught by onSubmit
   }
-
-  let updatedTreeData = Object.values(treeIndex);
-  console.log(treeData);
-  console.log(updatedTreeData);
-
-  let requestOptions = {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updatedTreeData)
-  };
-
-  return fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`, requestOptions)
-    .then(async(response) => {
-        if (response.ok) {
-          console.log("Tree object updated successfully");
-          return true;
-        }
-        else{
-          console.error('Error:', response);
-          return false;
-        }
-    });
 }
 
-function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAccountRelationshipType, userId }) {
+                          // populated from Account.js
+function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAccountRelationshipType, userId, gender }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -77,31 +66,19 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
   // retrieve a list of all family members that are within the tree object
   useEffect(() => {
     const fetchResults = async () => {
-      fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`)
-        .then(async(response) => {
-          if (response.ok) {
-            results.current = await response.json();
-            console.log('AddToTree Current Family Members:', results.current);
-          }
-          else {
-            console.log('Error:', response);
-          }
-        })
-        .then(() => {
-        // grab tree object
-        fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`)
-          .then(async(response) => {
-            if (response.ok) {
-              let responseData = await response.json();
-              console.log('AddToTree Current Tree Object Data:', responseData.object);
-              setTreeData(responseData.object);
-            }
-            else {
-              console.error('Error:', response);
-              throw new Error('Error fetching tree data');
-            }
-          });
-      })
+      try { 
+        // get family members
+        results.current = await familyTreeService.getFamilyMembersByUserId(currentAccountID)
+        console.log("Results.current members:", results.current);
+      
+        // get tree data
+        const data = await familyTreeService.getFamilyTreeByUserId(currentAccountID);
+        setTreeData(data);
+        console.log("Fetched tree data:", data);
+      } catch (error) {
+        setErrorMessage("Error getting tree data: " + error.message);
+        return;
+      }
     }
     fetchResults();
   }, [currentAccountID]);
@@ -115,9 +92,9 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
     // populate filteredResults
     if (Array.isArray(treeData)) {
       try {
-          const parsedData = JSON.parse(treeData);
-          filteredResults.current = results.current.filter((result) =>
-          parsedData.map((person) => Number(person.id)).includes(Number(result.id)));
+          filteredResults.current = results.current.filter(obj1 =>
+              treeData.some(obj2 => Number(obj2.id) === (Number(obj1.memberuserid) || Number(obj1.id)))
+          );
           console.log("Filtered Results:", filteredResults.current);
         } catch (error) {
             console.error("Error parsing treeData:", error);
@@ -142,44 +119,37 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
         setErrorMessage(""); // Clear any previous error messages
         
         try {
-            const result = await AddTreeMember(userId, accountUserId, data.selectedMember, data.memberRelationshipType, accountUserName, treeData, results, currentAccountID);
-            if (!result) {
-                setErrorMessage("Failed to update tree data.");
-                return;
-            }
+            await AddTreeMember(userId, accountUserId, data.selectedMember, data.memberRelationshipType, accountUserName, treeData, results, currentAccountID, gender);
             reset();
             close();
             return window.location.href = `/tree`;
         } catch (error) {
             console.error("Error adding member to tree:", error.message);
-            setErrorMessage(error.message || "Failed to add member to tree.");
+            setErrorMessage(error.message || "Failed to add member to tree." );
             return;
         }
     };
 
     // populate search results
     useEffect(() => {
-        if (searchTerm === "") {
-          setSearchResults([]);
-          reset({ selectedMember: "" });
-          return;
-        }
-    
         const fetchResults = () => {
           const filtered = filteredResults.current.filter(member => 
-              member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-              member.lastName.toLowerCase().includes(searchTerm.toLowerCase())
+              member.firstname.toLowerCase().includes(searchTerm.toLowerCase()) || 
+              member.lastname.toLowerCase().includes(searchTerm.toLowerCase())
           );
           setSearchResults(filtered); // update searchResults with the filtered array
           // console.log("Filtered Search Results:", filtered);
       };
     
         fetchResults();
-      }, [searchTerm, reset, selectedMember, accountUserId]);
+      }, [searchTerm, selectedMember, accountUserId]);
 
-      useEffect(() => {
-        reset({ selectedMember: "" });
-      }, [reset, searchTerm]);
+    useEffect(() => {
+      reset({ selectedMember: "" });
+      setSearchResults([]);
+      setErrorMessage("");
+      setSearchTerm("");
+    }, [reset]);
 
   return (
     <Popup trigger={trigger} modal>
@@ -217,16 +187,16 @@ function AddToTreePopup({ trigger, accountUserName, accountUserId, currentUserAc
                 <div style={styles.AddOptionsStyle}>
                   {searchResults.length > 0 ? (
                     searchResults.map(result => (
-                      <div key={result?.id} style={styles.ListingStyle}>
+                      <div key={result?.memberuserid ? result?.memberuserid : result.id} style={styles.ListingStyle}>
                         <label>
                           <input
                             type="radio"
                             name="selectedMember"
-                            value={result?.id}
+                            value={result?.memberuserid ? result?.memberuserid : result.id}
                             {...register("selectedMember", { required: true })}
                           />
-                          <Link to={`/account/${result.id}`} style={{ marginLeft: '10px' }}>
-                            {result.firstName} {result.lastName}
+                          <Link to={`/account/${result?.memberuserid ? result?.memberuserid : result.id}`} style={{ marginLeft: '10px' }}>
+                            {result.firstname} {result.lastname}
                           </Link>
                         </label>
                       </div>

@@ -32,12 +32,25 @@ export const familyTreeService = {
     },
     /**
      * 
-     * @param {*} memberId 
+     * @param {*} memberId either treeMemberId for manual members or corresponding memberUserId for registered users
      * @param {*} memberData 
      * @param {*} userId 
      * @returns treeInfo Object
      */
     async initializeTreeInfo(memberId, memberData, userid) {
+        // get resolved user id for member if needed
+        if (memberId.includes('-')) {
+            const memberResponse = await fetch(`http://localhost:5000/api/auth/user/${memberId}`, {
+                method: 'GET',
+            });
+            const member = await memberResponse.json();
+            if (!memberResponse.ok) {
+                console.error('Failed to resolve member user ID:', member.error);
+                throw new Error(member.error);
+            }
+            memberId = member.id;
+        }
+       
         console.log('Initializing tree info for memberId:', memberId, 'with data:', memberData, 'for userId:', userid);
         const response = await fetch(`http://localhost:5000/api/tree-info/`, {
             method: 'POST',
@@ -46,14 +59,13 @@ export const familyTreeService = {
             },
             body: JSON.stringify({
                 object: [{
-                    "id": memberId,
+                    "id": `${memberId}`,
                     "data": {
                         "first name": memberData.firstname,
                         "last name": memberData.lastname,
                         "gender": memberData.gender,
                     },
-                    "rels": {
-                    }
+                    "rels": {}
                 }],
                 userid: userid, // who is creating the tree
             }),
@@ -68,7 +80,7 @@ export const familyTreeService = {
     /**
      * 
      * @param {int} userId 
-     * @returns JSON Object of the user's family members
+     * @returns JSON Object of ALL the user's family members
      */
     async getFamilyMembersByUserId(userId) {
         const response = await fetch(`http://localhost:5000/api/family-members/user/${userId}`, {
@@ -87,10 +99,10 @@ export const familyTreeService = {
     /**
      * 
      * @param {*} userId 
-     * @returns the users primary treeMember object
+     * @returns the single users primary treeMember object
      */
     async getFamilyMemberByUserId(userId) {
-        const response = await fetch(`http://localhost:5000/api/family-members/${userId}`, {
+        const response = await fetch(`http://localhost:5000/api/family-members/active/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -105,8 +117,8 @@ export const familyTreeService = {
     },
     /**
      * 
-     * @param {int} id 
-     * @returns the treeMember object by id
+     * @param {*} id 
+     * @returns a treeMember object by treememberid
      */
     async getFamilyMemberByFamilyMemberId(id) {
         const response = await fetch(`http://localhost:5000/api/family-members/member/${id}`, {
@@ -142,9 +154,9 @@ export const familyTreeService = {
         return responseData;
     },
     /**
-     * 
+     * Fetches the current tree 
      * @param {int} userId 
-     * @returns Array of the user's treeInfo Object
+     * @returns Array of the user's treeInfo Object [{object: [Object]}]
      */
     async getFamilyTreeByUserId(userId) {
         const response = await fetch(`http://localhost:5000/api/tree-info/${userId}`, {
@@ -156,9 +168,45 @@ export const familyTreeService = {
             console.error('Error in Loading Tree Data:', responseData.error);
             throw new Error(responseData.error || 'Failed to load family tree data');
         }
-        const parsedData = JSON.parse(responseData.object);
-        console.log("Tree data: ", parsedData);
-
-        return parsedData;
-    }
+        console.log("Fetched tree-info data:", responseData.object);
+        // type check
+        if (Array.isArray(responseData.object)) {
+            console.log("Array returned");
+            return responseData.object;
+        }
+        else {
+            console.log("JSON parse needed");
+            return JSON.parse(responseData.object);
+        }
+    },
+    /**
+     * @param {int} userId Int or UUID
+     * @param {Array} updatedData Array of updated treeInfo objects
+     * @returns Array of updated treeInfo Object [{ ...}, { ... }]
+     */
+    async updateTreeInfo(userId, updatedData) {
+        console.log('Updating tree info for userId:', userId, 'with data:', updatedData);
+        const response = await fetch(`http://localhost:5000/api/tree-info/${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedData),
+        });
+        let responseData = await response.json();
+        if (!response.ok) {
+            console.error('Failed to update tree info:', responseData.error);
+            throw new Error(responseData.error || 'Failed to update tree info');
+        }
+        console.log("Updated tree-info data:", responseData.object.object);
+        // type check
+        if (Array.isArray(responseData.object.object)) {
+            console.log("Array returned");
+            return responseData.object.object;
+        }
+        else {
+            console.log("JSON parse needed");
+            return JSON.parse(responseData.object.object);
+        }
+    },
 };

@@ -33,11 +33,21 @@ const addObject = async (req, res) => {
 };
 const updateObject = async (req, res) => {
     try {
-        const { id } = req.params;
-        const updateData = req.body;
-
+        const userid = await req.params.id;
+        const updateData = await req.body;
+        // Resolve UUID to integer user ID first
+        console.log('updateObject called with userid param:', userid);
+        const userIdInt = await User.resolveUserIdFromAuthUid(userid);
+        console.log('Resolved userIdInt:', userIdInt);
+        
+        if (!userIdInt) {
+            return res.status(400).json({
+                error: 'Invalid user ID. User not found in database.',
+                received: userid
+            });
+        }
         // check if the family member exists
-        const existingObject = await treeInfo.getObject(id);
+        const existingObject = await treeInfo.getObject(userIdInt);
 
         if (!existingObject) {
             return res.status(404).json({
@@ -46,19 +56,21 @@ const updateObject = async (req, res) => {
         }
 
         // delete empty or undefined fields from updateData
-        // for (let key in updateData) {
-        //     if (updateData[key] === '' || updateData[key] === undefined) {
-        //         delete updateData[key];
-        //     }
-        // }
+        for (let key in updateData) {
+            if (updateData[key] === '' || updateData[key] === undefined) {
+                delete updateData[key];
+            }
+        }
 
         if (Object.keys(updateData).length === 0) {
             return res.status(400).json({
                 error: "No new data to update"
             });
         }
+        
 
-        const updatedObject = await treeInfo.updateObject(id, {object : JSON.stringify(updateData)});
+        const updatedObject = await treeInfo.updateObject(userIdInt, {object: JSON.stringify(updateData)});
+        console.log('Updated object:', updatedObject);
         res.status(200).json({  // Changed to 200 status code
             message: 'Object updated successfully',
             object: updatedObject
