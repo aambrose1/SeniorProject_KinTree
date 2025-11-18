@@ -231,14 +231,14 @@ const getActiveMemberId = async (req, res) => {
 
 const getMemberbyMemberId = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = await req.params.id;
         const member = await treeMember.getMemberbyMemberId(id);
             if (!member) {
                 return res.status(404).json({ error: 'Family member not found' });
             }
             res.status(200).json(member);
     } catch (error) {
-        console.error(error);
+        console.error("Error in fetching family member by member id:", error);
         res.status(500).json({ error: 'Error fetching family member' });
     }
 };

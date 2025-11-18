@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 
-const { addTreeMember, editTreeMember,getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId  } = require('../controllers/treeMemberController');
-const { getMemberbyMemberId } = require('../models/treeMemberModel');
+const { addTreeMember, editTreeMember,getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId, getMemberbyMemberId } = require('../controllers/treeMemberController');
 
 router.post('/', addTreeMember);
 router.put('/:id', editTreeMember);

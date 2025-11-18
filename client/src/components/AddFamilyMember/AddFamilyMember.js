@@ -67,6 +67,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       // get family members of current user
       try {
         family.current = await familyTreeService.getFamilyMembersByUserId(currentAccountID);
+        console.log('Family members for user', currentAccountID, ':', family.current);
       } catch (error) {
         console.error('Error fetching family members for user', currentAccountID, error.message);
         setErrorMessage(error.message)
@@ -79,7 +80,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         console.log('Registered users:', responseData);
         users.current = responseData.filter(user => 
           user.username.toLowerCase().includes(searchTerm.toLowerCase()) && 
-          !family.current.some(member => member.memberUserId === user.id));
+          !family.current.some(member => member.id === user.id));
         setSearchResults(users.current);
       } catch (error) {
         console.error('Error fetching users:', error.message);
@@ -110,10 +111,22 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     setErrorMessage("");
     try {
       const selectedUser = users.current.find(user => user.id === Number(data.selectedMember));
-      // TODO : fetch metadata for user and add user data to treemember data
-      
+
+      if (selectedUser.id === currentAccountID) {
+        setErrorMessage("You cannot add yourself as a family member.");
+        console.error("Attempted to add self as family member");
+        return;
+      }
+
+      if (selectedUser && family.current.some(member => member.memberuserid === selectedUser.id)) {
+        setErrorMessage("This user is already in your family tree.");
+        console.error("Attempted to add existing family member:", selectedUser.username);
+        return;
+      }
+
       if (!selectedUser) {
         setErrorMessage("Selected user not found");
+        console.error("Selected user not found in users list");
         return;
       }
 
@@ -179,35 +192,30 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     
     try {
       // add new member to family members table
-      let requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          "firstName": data.firstName,
-          "lastName": data.lastName,
-          "birthDate": data.birthDate,
-          "deathDate": data.deathDate,
-          "location": data.location || null,
-          "phoneNumber": data.phoneNumber || null,
-          "userId": currentUserID, // The user adding the family member
-          "memberUserId": null, // manually added members do not have associated user accounts
-          "gender": data.gender 
-        })
-      };
+      let memberData = {
+          firstname: data.firstName,
+          lastname: data.lastName,
+          birthdate: data.birthDate,
+          deathdate: data.deathDate,
+          location: data.location || null,
+          phonenumber: data.phoneNumber || null,
+          userid: currentAccountID, // The user adding the family member
+          memberuserid: null, // manually added members do not have associated user accounts
+          gender: data.gender 
+        }
 
-      let treeUserId = currentUserID; // TODO: will retrieve this from a service or something
-      let treeMemberId;
+       // get account treemember id
+      let treeUser = await familyTreeService.getFamilyMemberByUserId(currentAccountID);
+      const treeUserId = treeUser.id;
+      console.log(treeUserId, 'user treemember id');
+      console.log('current Account ID', currentAccountID);
 
-      const memberResponse = await fetch(`http://localhost:5000/api/family-members/`, requestOptions);
-      const memberData = await memberResponse.json();
-      
-      if (!memberResponse.ok) {
-        throw new Error(memberData.error || 'Failed to add family member');
-      }
-      
-      console.log(memberData.message);
-      treeMemberId = memberData.member;
+      // add new member to treemembers table
+      const treeMember = await familyTreeService.createFamilyMember(memberData);
+      const treeMemberId = treeMember.member.id;
+      console.log('added user treeMemberId', treeMemberId);
 
+      // add relationship to relationship table
       const relResponse = await fetch(`http://localhost:5000/api/relationships/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -222,11 +230,9 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       });
       
       const relData = await relResponse.json();
-      
       if (!relResponse.ok) {
         throw new Error(relData.error || 'Failed to add relationship');
       }
-      
       console.log(relData.message);
       reset();
       close();

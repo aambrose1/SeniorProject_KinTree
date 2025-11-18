@@ -21,7 +21,7 @@ const deleteByUser = async (req,res) => {
 
 const findById = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id } = await req.params;
         const userId = await User.resolveUserIdFromAuthUid(id);
         if (!userId) {
             return res.status(500).json({ error: 'Error resolving user ID' });

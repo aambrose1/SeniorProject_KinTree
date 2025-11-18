@@ -19,12 +19,13 @@ const getRelationships = async (req, res) => {
 
 const getRelationshipsByUser = async (req,res) => {
     try {
-        const {userId} = req.params;
+        const userId = await req.params.id;
+        console.log('Fetching relationships for userId:', userId);
         const relationships = await Relationship.getRelationshipByUser(userId);
         res.status(200).json(relationships);
     }
     catch(error){
-        console.error(error);
+        console.error('Error in relationship fetch for user, ' + req.params.id + ':', error);
         res.status(500).json({
             error: 'Error fetching relationships'
         });

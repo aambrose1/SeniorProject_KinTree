@@ -79,7 +79,7 @@ const treeMember = {
         return data;
     },
 
-    getMembeByOtherUser: async (userId) => {
+    getMembersByOtherUser: async (userId) => {
         const { data, error } = await supabase
             .from('treemembers')
             .select('*')
