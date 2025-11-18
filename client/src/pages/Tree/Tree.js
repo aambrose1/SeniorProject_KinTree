@@ -77,8 +77,17 @@ function Tree() {
     fetchCurrentUserID();
     const location = useLocation();
     const isTreePage = location.pathname === '/tree';
-    document.body.style.overflow = 'hidden';
-    document.body.style.width = '100%'; 
+    
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.body.style.width = '100%';
+        
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.width = '';
+        };
+    }, []);
+    
     return (
         <div style={styles.DefaultStyle}>
             <NavBar />

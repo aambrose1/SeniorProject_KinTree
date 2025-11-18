@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { buildSyncPayload } from './metadataHelpers';
 
 // These functions are used to handle the authentication of the user, but only the pure login, logout, etc functionality. 
 // It should not include frontend logic like redirects.
@@ -13,30 +14,38 @@ export async function registerUser(email, password, metadata = {}) {
       emailRedirectTo: `${window.location.origin}/login`
     }
   });
-  if (error) throw error;
+  
+  if (error) {
+    throw error;
+  }
+
+  // Check if user was created (some Supabase configs require email confirmation)
+  if (!data?.user) {
+    throw new Error('User registration failed: No user was created');
+  }
 
   // After successful signup, upsert the profile into public.users via backend
   try {
-    const user = data?.user || (await supabase.auth.getUser()).data?.user;
-    if (user) {
-      await fetch('http://localhost:5000/api/auth/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          auth_uid: user.id,
-          email: user.email,
-          username: user.email,
-          // Map possible metadata key variants
-          firstName: metadata.firstName || metadata.first_name || null,
-          lastName: metadata.lastName || metadata.last_name || null,
-          phoneNumber: metadata.phoneNumber || metadata.phone_number || metadata.phonenum || null,
-          birthDate: metadata.birthDate || metadata.birthdate || null,
-        })
-      });
+    const user = data.user;
+    if (!user || !user.id) {
+      throw new Error('User object is missing or invalid');
+    }
+
+    const syncPayload = buildSyncPayload(user.id, user.email, metadata);
+    
+    const syncResponse = await fetch('http://localhost:5000/api/auth/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(syncPayload)
+    });
+    
+    if (!syncResponse.ok) {
+      // Don't throw here - Auth user is created, database sync can be retried
+      console.warn('Registration: Database sync failed, but user can still log in');
     }
   } catch (e) {
     // Non-fatal: keep signup success even if sync fails
-    console.warn('Profile sync skipped:', e?.message || e);
+    console.warn('Registration: Profile sync error (non-fatal):', e?.message || e);
   }
 
   return data;

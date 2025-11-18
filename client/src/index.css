@@ -1,3 +1,21 @@
+:root {
+  --bg-color: #E7F2D8;
+  --text-color: #000000;
+  --card-bg: #ffffff;
+  --border-color: #ddd;
+  --input-bg: #ffffff;
+  --input-border: #ccc;
+}
+
+.dark-mode {
+  --bg-color: #1a1a1a;
+  --text-color: #e0e0e0;
+  --card-bg: #2d2d2d;
+  --border-color: #444;
+  --input-bg: #3a3a3a;
+  --input-border: #555;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,7 +23,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #E7F2D8;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 code {

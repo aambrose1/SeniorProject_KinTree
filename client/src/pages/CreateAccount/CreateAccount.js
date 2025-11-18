@@ -22,11 +22,17 @@ const yupValidation = yup.object().shape(
         state: yup.string(),
         country: yup.string().required("Country of residence is a required field."),
         phonenum: yup.string()
-            .matches(
-                /^(\+\d{1,2}\s?)?1?-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
-                , "Invalid phone number format."
-            ),
-        zipcode: yup.string().matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
+            .nullable()
+            .test('phone-format', 'Invalid phone number format.', function(value) {
+                if (!value || value.trim() === '') return true; // Allow empty
+                return /^(\+\d{1,2}\s?)?1?-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(value);
+            }),
+        zipcode: yup.string()
+            .nullable()
+            .test('zipcode-format', 'Invalid zip code format.', function(value) {
+                if (!value || value.trim() === '') return true; // Allow empty
+                return /^\d{5}(?:[-\s]\d{4})?$/.test(value);
+            }),
         password: yup.string().required("Password is required")
             .matches(
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/,
@@ -43,7 +49,9 @@ const CreateAccount = () => {
     const onSubmit = async (data) => {
         setErrorMessage(""); // clear previous errors
         try {
-            const user = await handleRegister(data.email, data.password, {
+            console.log('Starting registration with data:', { email: data.email, hasPassword: !!data.password });
+            
+            const metadata = {
                 first_name: data.firstname,
                 last_name: data.lastname,
                 birthdate: data.birthdate,
@@ -53,31 +61,19 @@ const CreateAccount = () => {
                 country: data.country,
                 phone_number: data.phonenum,
                 zipcode: data.zipcode
-            }); // frontend Supabase registration
-
-            // TODO: store additional info in mysqldatabase later
-            // await fetch('http://localhost:5000/api/users', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({
-            //       userId: user.id,
-            //       firstname: data.firstname,
-            //       lastname: data.lastname,
-            //       birthdate: data.birthdate,
-            //       address: data.address,
-            //       city: data.city,
-            //       state: data.state,
-            //       zipcode: data.zipcode,
-            //       country: data.country,
-            //       phonenum: data.phonenum
-            //     })
-            //   });
+            };
+            
+            console.log('Registering with metadata:', metadata);
+            
+            const user = await handleRegister(data.email, data.password, metadata);
 
             console.log('Registration successful:', user);
+            
+            // Redirect to login - email verification can be done later from account page
             window.location.href = '/login'; // redirect after registration to login
         } catch (error) {
-          setErrorMessage(error.message);
-          console.error('Password:', data.password);
+          console.error('Registration error:', error);
+          setErrorMessage(error.message || 'Registration failed. Please check your information and try again.');
         }
       };
 
@@ -157,8 +153,8 @@ const CreateAccount = () => {
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Phone</label>
-                        <input id="phone" {...register("phone")} style={styles.FieldStyle}/>
-                        {errors.phone && <p>{errors.phone.message}</p>}
+                        <input id="phonenum" {...register("phonenum")} style={styles.FieldStyle} placeholder="XXX-XXX-XXXX"/>
+                        {errors.phonenum && <p>{errors.phonenum.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Password</label>

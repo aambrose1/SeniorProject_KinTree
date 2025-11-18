@@ -17,6 +17,7 @@ import Dashboard from './components/UserActivityDashboard/UserActivityDash';
 import WebsiteSettings from './pages/WebsiteSettings/WebsiteSettings';
 // import Register from './pages/Register/Register';
 import { CurrentUserProvider } from './CurrentUserProvider';
+import { ThemeProvider } from './ThemeProvider';
 import Help from './pages/Help/Help';
 import Chat from './pages/Chat/Chat';
 import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
@@ -155,13 +156,15 @@ const router = createBrowserRouter([
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <CurrentUserProvider>
-  <React.StrictMode>
-    <RouterProvider router={router}>
-      <App />
-    </RouterProvider>
-  </React.StrictMode>
-  </CurrentUserProvider>
+  <ThemeProvider>
+    <CurrentUserProvider>
+      <React.StrictMode>
+        <RouterProvider router={router}>
+          <App />
+        </RouterProvider>
+      </React.StrictMode>
+    </CurrentUserProvider>
+  </ThemeProvider>
 );
 
 
