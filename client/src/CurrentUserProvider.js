@@ -62,7 +62,7 @@ export const CurrentUserProvider = ({ children }) => {
         
         if (session?.user) {
           setSupabaseUser(session.user);
-          setCurrentAccountIDState(session.user.id); // logged in user's user.id
+          setCurrentAccountIDState(session.user.id);
           setCurrentUserNameState(session.user.email); // Use email as default username
         }
         

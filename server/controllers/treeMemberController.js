@@ -1,5 +1,6 @@
 const treeMember = require('../models/treeMemberModel');
 const relationship = require('../models/relationshipModel');
+const User = require('../models/userModel');
 
 // format dates to YYYY-MM-DD
 const formatDate = (dateValue) => {
@@ -40,6 +41,25 @@ const addTreeMember = async (req, res) => {
 
         const formattedBirthDate = formatDate(birthdate);
         const formattedDeathDate = formatDate(deathdate);
+
+        // Resolve UUIDs to integer user IDs - CRITICAL: database requires integers, not UUIDs
+        console.log('addTreeMember received userId:', userId, typeof userId);
+        const userIdInt = await User.resolveUserIdFromAuthUid(userId);
+        console.log('Resolved userIdInt:', userIdInt, typeof userIdInt);
+        if (!userIdInt) {
+            return res.status(400).json({ 
+                error: 'Invalid user ID. User not found in database. Please sync your account first.',
+                received: userId
+            });
+        }
+        
+        const memberUserIdInt = memberUserId ? await User.resolveUserIdFromAuthUid(memberUserId) : null;
+        if (memberUserId && !memberUserIdInt) {
+            return res.status(400).json({ 
+                error: 'Invalid member user ID. User not found in database.',
+                received: memberUserId
+            });
+        }
 
         // ensure all necessary fields are passed in the request body
         const newMember = await treeMember.addMember({
