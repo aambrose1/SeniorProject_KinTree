@@ -13,7 +13,7 @@ export const ListStyle = {
     fontFamily: 'Alata',
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-end',
+    textAlign: 'left',
     marginRight: '15%'
 };
 
