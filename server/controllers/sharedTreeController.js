@@ -48,8 +48,8 @@ const getSharedTreeByToken = async (req, res) => {
 const getSharedTreeBySender = async (req, res) => {
     try{
         const { id} = req.params;
-        const relationships = await sharedTrees.getSharedTreebySender(id);
-        res.status(200).json(sharedTrees);
+        const trees = await sharedTrees.getSharedTreebySender(id);
+        res.status(200).json(trees);
     }
     catch(error){
         console.error(error);

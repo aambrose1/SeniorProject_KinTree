@@ -8,13 +8,17 @@ const backupInfo = require('../models/backupModel');
 const backupUser = async (req, res) => {
     try{
         const { id } = req.params;
-        const user = await userInfo.findById(id);
+        // Resolve UUID to integer if needed
+        const User = require('../models/userModel');
+        const userIdInt = await User.resolveUserIdFromAuthUid(id) || id;
+        
+        const user = await userInfo.findById(userIdInt);
         if(!user) {
-            return { error: "User not found"};
+            return res.status(404).json({ error: "User not found"});
         }
-        const tree = await treeMember.getAllMembersbyId(id);
-        const relationships = await relationship.getRelationships(id);
-        const sharedTree = await sharedTrees.getSharedTreebySender(id);
+        const tree = await treeMember.getMembersByUser(userIdInt);
+        const relationships = await relationship.getRelationshipByUser(userIdInt);
+        const sharedTree = await sharedTrees.getSharedTreebySender(userIdInt);
 
         const data = {
             user, 
@@ -23,7 +27,7 @@ const backupUser = async (req, res) => {
             sharedTree
         };
 
-        await backupInfo.addBackup(id, JSON.stringify(data));
+        await backupInfo.addBackup(userIdInt, JSON.stringify(data));
         res.json({
             message: 'Backup completed'
         });
@@ -31,7 +35,8 @@ const backupUser = async (req, res) => {
     catch (error){
         console.error(error);
         res.status(500).json({
-            error: 'Error backing up data'
+            error: 'Error backing up data',
+            details: error.message
         });
     }
 };
@@ -39,21 +44,25 @@ const backupUser = async (req, res) => {
 const restoreUser = async (req, res) => {
     try{
         const {id} = req.params;
-        const existingUser = await userInfo.findById(id);
+        // Resolve UUID to integer if needed
+        const User = require('../models/userModel');
+        const userIdInt = await User.resolveUserIdFromAuthUid(id) || id;
+        
+        const existingUser = await userInfo.findById(userIdInt);
         if(!existingUser){
             return res.status(404).json({
                 error: "User not found. No data to restore"
             })
         }
 
-        const backup = await backupInfo.getLatestBackup(id);
+        const backup = await backupInfo.getLatestBackup(userIdInt);
         if(!backup) {
             return res.status(404).json({
                 error: "No backup available"
             })
         }
         
-        const backupData = backup.backupData
+        const backupData = JSON.parse(backup.backupdata || backup.backupData);
 
         for( const member of backupData.tree) {
             const exists= await treeMember.getMemberById(member.id)

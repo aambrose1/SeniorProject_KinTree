@@ -8,7 +8,7 @@ import CreateEventPopup from '../../components/CreateEvent/CreateEvent';
 import CreateMemoryPopup from '../../components/CreateMemory/CreateMemory';
 import NavBar from '../../components/NavBar/NavBar';
 
-function Home() {
+function Home() {    
     document.body.style.overflow = 'hidden';
     document.body.style.width = '100%'; 
     return (

@@ -1,75 +1,5 @@
-// authController.js
-const bcrypt = require('bcryptjs');
-const User = require('../models/userModel'); 
-
-const register = async (req, res) => {
-    console.log('Regiater function called');
-  try {
-    const { username, email, password } = req.body;
-
-    if (!email || !password || !username) {
-        return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    const existingUser = await User.findByEmail(email);
-    if (existingUser) return res.status(400).json({
-      error: 'Email already in use'
-    });
-
-    const saltRounds = 12;
-    const salt = await bcrypt.genSalt(saltRounds);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const [newUser] = await User.register({
-      username,  
-      email,
-      password: hashedPassword
-    });
-
-    res.status(201).json({
-      message: 'User registered successfully', user: newUser
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error: 'Registration failed'
-    });
-  }
-};
-
-const login = async(req,res) => {
-  try{
-    const { email, password } = req.body;
-    if(!email || !password){
-      return res.status(400).json({
-        message: 'Missing an email or password'
-      });
-    }
-    const existingUser = await User.findByEmail(email);
-    if(!existingUser){
-      return res.status(401).json({
-        message: 'User is not found. Please register!'
-      });
-    }
-    const passwordCompare = await bcrypt.compare(password, existingUser.password)
-    if(!passwordCompare){
-      return res.status(401).json({
-        message: "Invalid credentials"
-      });
-    }
-
-    res.status(200).json({
-      message: "You are logged in!"
-    });
-  }
-  catch (error){
-    console.error(error);
-    res.status(500).json({
-      error: 'Registration failed'
-    });
-
-  }
-};
+// authController.js - the main backend file for user registration, signin, etc
+const User = require('../models/userModel');  // now backed by Supabase
 
 const deleteByUser = async (req,res) => {
   const { id } = req.params;
@@ -84,7 +14,15 @@ const deleteByUser = async (req,res) => {
   }
   catch (error){
     console.error(error);
+<<<<<<< Updated upstream
     res.status(500);json({error:"Error deleting user"})
+=======
+<<<<<<< HEAD
+    res.status(500); json({ error: "Error deleting user" });
+=======
+    res.status(500).json({error:"Error deleting user"})
+>>>>>>> 5315e049f5602a4d1eb3fed3abe518fd4b3917f5
+>>>>>>> Stashed changes
   }
 }
 
@@ -126,4 +64,26 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-module.exports = { register,login, deleteByUser, findById, findByEmail, getAllUsers };
+module.exports = { deleteByUser, findById, findByEmail, getAllUsers };
+ 
+// Add a sync endpoint: POST /api/auth/sync
+// Body: { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate }
+const syncAuthUser = async (req, res) => {
+  try {
+    const { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate } = req.body || {};
+    if (!auth_uid || !email) {
+      return res.status(400).json({ error: 'auth_uid and email are required' });
+    }
+    const user = await User.upsertByAuthUser({ auth_uid, email, username, firstName, lastName, phoneNumber, birthDate });
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Sync error:', error);
+    res.status(500).json({ 
+      error: 'Error syncing auth user',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+module.exports.syncAuthUser = syncAuthUser;

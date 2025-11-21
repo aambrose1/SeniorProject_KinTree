@@ -10,10 +10,19 @@ The current KinTree project team as of Spring 2025 includes Owen Adams, Kennedi 
 
 ### Prerequisites
 
+<<<<<<< Updated upstream
 Node.js (install the correct version for your own OS [here](https://nodejs.org/en))
 MySQL Install (https://dev.mysql.com/downloads/mysql/)
+=======
+Node.js (install the correct version for your own OS [here](https://nodejs.org/en)) and get your Supabase URL, CLIENT KEY, and SERVICE KEY from your project dashboard [here](https://supabase.com/)
+>>>>>>> Stashed changes
 
-### Setup
+### Database Setup
+
+In the /server/ folder, add an .env file with variables `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. 
+In the /client/ folder, add an .env file with variables `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY`.
+
+### Web Application Setup
 
 To set up the KinTree codebase on your own machine, start by cloning the repository to your local file system.
 
@@ -35,6 +44,7 @@ Then, from the same directory, run the following command to run the server/API:
 
 `node server.js`
 
+<<<<<<< Updated upstream
 ### Database Setup
 
 Run the command `npm install knex mysql2`
@@ -48,3 +58,5 @@ Run the command `knex:migrate status` to ensure proper migration files are loade
 Run the command `knex migrate:latest` to create existing database tables. 
 
 
+=======
+>>>>>>> Stashed changes

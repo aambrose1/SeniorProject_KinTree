@@ -1,53 +1,65 @@
-const db = require('../db/knex');
-const Relationships = require('./relationshipModel');
+// sharedTreeModel.js - the model for the sharedTrees table
+// this file was replaced with the supabase model
+const supabase = require('../lib/supabase');
 
-const sharedTrees ={
-    addSharedTree: async(data) => {
-        return db('sharedTrees').insert(data, ['id', 'token'])
+// all functions for the sharedTree to interact with the database
+const sharedTrees = {
+    addSharedTree: async (data) => {
+        // Table and column names are lowercase in Postgres
+        const { data: inserted, error } = await supabase
+            .from('sharedtrees')
+            .insert([ data ])
+            .select('*')
+            .single();
+        if (error) throw error;
+        return inserted;
     },
 
     getALLSharedTree: async () => {
-        return db('sharedTrees').select('*');
-    },
-    
-
-    getSharedTreeById: async(id) =>{
-        return db('sharedTrees').where('sharedTreeID',id).first();
-    },
-
-    getSharedTreebySender: async(id) => {
-        return db('sharedTrees').where('senderId', id);
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .select('*');
+        if (error) throw error;
+        return data;
     },
 
-    getSharedTreebyReciever: async(id) => {
-        return db('sharedTrees').where({ recieverId: id }).select('*');
+    getSharedTreeById: async (id) => {
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .select('*')
+            .eq('sharedtreeid', id)
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
+    getSharedTreebySender: async (id) => {
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .select('*')
+            .eq('senderid', id);
+        if (error) throw error;
+        return data;
+    },
+
+    getSharedTreebyReciever: async (id) => {
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .select('*')
+            .eq('recieverid', id);
+        if (error) throw error;
+        return data;
     },
 
     getSharedTreeByToken: async (token) => {
-        return db('sharedTrees').where('token', token).first();
-    },
-
-    shareTree: async(data) => {
-        return db('relationship').where('person1_id', personId).andWhere('side','side');
-    },
-
-    mergeTree: async(id, data) => {
-        for (const member of data){
-            await db('treeMembers').insert({
-                owner_id: recieverID,
-                name : member.name,
-                relationship: member.relationship,
-            });
-        }
-        return {message: "Members merged successfully"};
-
-    },
-
-    getMemberstoMerge: async(senderId, recieverId) => {
-        return db('sharedTrees').where(senderId, senderId).select('*');
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .select('*')
+            .eq('token', token)
+            .maybeSingle();
+        if (error) throw error;
+        return data;
     }
-
-
 };
 
 module.exports = sharedTrees;
