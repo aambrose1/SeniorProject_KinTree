@@ -110,6 +110,66 @@ const addRelationship = async (req,res) =>{
     }
 }
 
+const editRelationship = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const { person1_id, person2_id, relationshipType, relationshipStatus, side } = req.body;
+
+    const relationship = await Relationship.findById(id);
+    if (!relationship) {
+      return res.status(404).json({ error: "Relationship not found" });
+    }
+
+    const updatedFields = {};
+
+    if (person1_id) updatedFields.person1_id = person1_id;
+    if (person2_id) updatedFields.person2_id = person2_id;
+    if (relationshipType) updatedFields.relationshipType = relationshipType;
+    if (relationshipStatus) updatedFields.relationshipStatus = relationshipStatus;
+
+    if (side) {
+      if (!["paternal", "maternal", "both"].includes(side)) {
+        return res.status(400).json({
+          error: "Invalid side. Must be 'paternal', 'maternal', or 'both'."
+        });
+      }
+      updatedFields.side = side;
+    }
+
+    if (Object.keys(updatedFields).length === 0) {
+      return res.status(400).json({
+        error: "No valid fields provided to update"
+      });
+    }
+
+    
+    if (updatedFields.person1_id || updatedFields.person2_id) {
+      const person1 = updatedFields.person1_id || relationship.person1_id;
+      const person2 = updatedFields.person2_id || relationship.person2_id;
+
+      const duplicate = await Relationship.findExisting(person1, person2);
+      if (duplicate && duplicate.id != id) {
+        return res.status(400).json({
+          error: "A relationship with these people already exists"
+        });
+      }
+    }
+
+    
+    const updatedRelationship = await Relationship.updateRelationship(id, updatedFields);
+
+    res.status(200).json({
+      message: "Relationship updated successfully",
+      relationship: updatedRelationship
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error updating relationship" });
+  }
+};
+
+
 const filterBySide = async (req,res) => {
     try{
         const {id} = req.params;
@@ -151,6 +211,4 @@ const deleteByUser =  async (req, res) => {
 }
 
 
-
-
-module.exports = {getRelationships,getRelationshipsByUser,getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser};
+module.exports = {getRelationships,getRelationshipsByUser, editRelationship, getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser};
