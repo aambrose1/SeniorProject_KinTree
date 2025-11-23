@@ -156,11 +156,9 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <CurrentUserProvider>
-  <React.StrictMode>
     <RouterProvider router={router}>
       <App />
     </RouterProvider>
-  </React.StrictMode>
   </CurrentUserProvider>
 );
 

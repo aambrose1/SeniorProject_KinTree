@@ -1,5 +1,6 @@
 // authController.js - the main backend file for user registration, signin, etc
 const User = require('../models/userModel');  // now backed by Supabase
+const { get } = require('../routes/authRoutes');
 
 const deleteByUser = async (req,res) => {
   const { id } = req.params;
@@ -20,8 +21,12 @@ const deleteByUser = async (req,res) => {
 
 const findById = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findById(id);
+        const { id } = await req.params;
+        const userId = await User.resolveUserIdFromAuthUid(id);
+        if (!userId) {
+            return res.status(500).json({ error: 'Error resolving user ID' });
+        }
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -62,11 +67,11 @@ module.exports = { deleteByUser, findById, findByEmail, getAllUsers };
 // Body: { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate }
 const syncAuthUser = async (req, res) => {
   try {
-    const { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate } = req.body || {};
+    const { auth_uid, email, username, firstName, lastName, phoneNumber, birthDate, gender } = req.body || {};
     if (!auth_uid || !email) {
       return res.status(400).json({ error: 'auth_uid and email are required' });
     }
-    const user = await User.upsertByAuthUser({ auth_uid, email, username, firstName, lastName, phoneNumber, birthDate });
+    const user = await User.upsertByAuthUser({ auth_uid, email, username, firstName, lastName, phoneNumber, birthDate, gender });
     res.status(200).json(user);
   } catch (error) {
     console.error('Sync error:', error);

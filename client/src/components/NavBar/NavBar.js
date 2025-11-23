@@ -11,7 +11,7 @@ import { useCurrentUser } from '../../CurrentUserProvider'; // import the contex
 function NavBar() {
 //useState used here for showing nested nav within the tree option
     const [showNestedNav, setShowNestedNav] = useState(false);
-    const { currentUserID } = useCurrentUser(); // get the current user ID from context
+    const { currentAccountID } = useCurrentUser(); // get the current user ID from context
     const { id } = useParams();
 
     return (
@@ -20,7 +20,7 @@ function NavBar() {
                 
                 <NavLink to="/account" 
                     className={({isActive}) => 
-                        isActive && Number(id) === Number(currentUserID) ? "nav-item-active" : "nav-item"} 
+                        isActive && Number(id) === Number(currentAccountID) ? "nav-item-active" : "nav-item"} 
                     onClick={() => setShowNestedNav(false)}> 
                     Account 
                 </NavLink>

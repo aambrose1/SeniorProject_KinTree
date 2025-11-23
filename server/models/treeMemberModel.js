@@ -5,6 +5,7 @@ const supabase = require('../lib/supabase');
 // all functions for the treeMember to interact with the database
 const treeMember = {
     addMember: async (data) => {
+        console.log('addMember received data:', data);
         // Map camelCase to lowercase column names for Postgres
         const mappedData = {
             firstname: data.firstName || data.firstname,
@@ -15,9 +16,10 @@ const treeMember = {
             phonenumber: data.phoneNumber || data.phonenumber,
             userid: data.userId || data.userid,
             memberuserid: data.memberUserId || data.memberuserid,
+            gender: data.gender
         };
-        // Remove undefined/null values
-        Object.keys(mappedData).forEach(key => mappedData[key] === undefined && delete mappedData[key]);
+        // // Remove undefined/null values
+        // Object.keys(mappedData).forEach(key => mappedData[key] === undefined && delete mappedData[key]);
         
         // Validate that userid is an integer (not a UUID)
         if (mappedData.userid && (typeof mappedData.userid === 'string' && mappedData.userid.includes('-'))) {
@@ -27,7 +29,7 @@ const treeMember = {
             throw new Error(`Invalid memberuserid: expected integer, got UUID: ${mappedData.memberuserid}`);
         }
         
-        console.log('addMember mappedData:', JSON.stringify(mappedData, null, 2));
+        console.log('addMember mappedData:', mappedData);
         const { data: inserted, error } = await supabase
             .from('treemembers')
             .insert([ mappedData ])
@@ -52,7 +54,7 @@ const treeMember = {
         const { data, error } = await supabase
             .from('treemembers')
             .select('*')
-            .eq('id', id);
+            .eq('userid', id);
         if (error) throw error;
         return data;
     },
@@ -61,7 +63,8 @@ const treeMember = {
         const { data, error } = await supabase
             .from('treemembers')
             .select('*')
-            .eq('id', id)
+            .eq('userid', id)
+            .eq('memberuserid', id)
             .single();
         if (error) throw error;
         return data;
@@ -76,7 +79,7 @@ const treeMember = {
         return data;
     },
 
-    getMembeByOtherUser: async (userId) => {
+    getMembersByOtherUser: async (userId) => {
         const { data, error } = await supabase
             .from('treemembers')
             .select('*')
@@ -139,6 +142,16 @@ const treeMember = {
             .select('*')
             .eq('userid', id)
             .eq('memberuserid', id)
+            .maybeSingle();
+        if (error) throw error;
+        return data;
+    },
+
+    getMemberbyMemberId: async (id) => {
+        const { data, error } = await supabase
+            .from('treemembers')
+            .select('*')
+            .eq('id', id)
             .maybeSingle();
         if (error) throw error;
         return data;

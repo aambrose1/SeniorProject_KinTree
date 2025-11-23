@@ -59,6 +59,7 @@ export const HeaderStyle = {
 export const FamilyTreeContainerStyle = { 
     width: '80%', 
     height: '90vh', 
+    margin: 'auto',
     borderStyle: 'double', 
     // maxWidth: '800px', 
     borderRadius: '30px' 
