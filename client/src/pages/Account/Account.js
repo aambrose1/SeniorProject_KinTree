@@ -17,25 +17,8 @@ function Account() {
 
     const { supabaseUser, loading } = useCurrentUser();
     
-    // Redirect to login if not authenticated
-    useEffect(() => {
-        if (!loading && !supabaseUser) {
-            navigate('/login');
-        }
-    }, [loading, supabaseUser, navigate]);
     // takes id from url path
     let { id } = useParams();
-
-    // if no id is provided, retrieve current user's id and show that page
-    useEffect(() => {
-        if (!id && supabaseUser?.id) {
-          setOwnAccount(true);
-          navigate(`/account/${supabaseUser.id}`, { replace: true });
-        }
-      }, [id, supabaseUser?.id, navigate]);
-
-    // TODO: query for data of account user & verify that userID of logged in user matches
-    
 
     const [userData, setUserData] = useState({
         id: id,
@@ -95,9 +78,22 @@ function Account() {
     const [emailVerificationStatus, setEmailVerificationStatus] = useState('');
     const [emailVerificationLoading, setEmailVerificationLoading] = useState(false);
 
-    // Fetch user info - check if it's a Supabase user or family member
+    // // if no id is provided, retrieve current user's id and show that page
     useEffect(() => {
-        if (!id) return;
+        setErrorMessage('');
+        console.log('Id params not passed in')
+        if (!id) {
+            // Fetch current user's data
+            const fetchOwnUserData = async () => {
+                const user = await fetch(`http://localhost:5000/api/auth/user/${supabaseUser.id}`);
+                const fetchedUserData = await user.json();
+                setUserData(fetchedUserData);
+                setOwnAccount(true);
+                navigate(`/account/${fetchedUserData.id}`, { replace: true });
+            }
+            fetchOwnUserData();
+        }
+      }, [id, supabaseUser?.id, navigate]);
 
         // Check if this is the current Supabase user
         if (id === supabaseUser?.id) {
@@ -169,12 +165,18 @@ function Account() {
             setOwnAccount(true);
             return;
         }
+    }, [loading, supabaseUser, navigate]);
 
-        // Otherwise, try to fetch from family members API
-        const requestOptions = {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        };
+    // Fetch user info - check if it's a Supabase user or family member
+    useEffect(() => {
+        if (!id || !currentAccountID) return;
+        console.log("current account id:", currentAccountID);
+        console.log("viewing account id:", id);
+        setErrorMessage('');
+        const fetchUserData = async () => {
+            try {
+                
+                const user = await fetch(`http://localhost:5000/api/auth/user/${id}`);
 
         fetch(`http://localhost:5000/api/family-members/${id}`, requestOptions)
             .then(async (response) => {
@@ -675,8 +677,8 @@ function Account() {
         <div style={styles.DefaultStyle}>
             <NavBar />
             <div style={{width: '150px'}}></div>
-
             <div style={styles.RightSide}>
+                
             <div style={styles.ContainerStyle}>
                 {/* User Information Section */}
                 <div style={{padding: '20px 0', width: '100%', display: 'flex', flexDirection: 'column', gap: '20px'}}>

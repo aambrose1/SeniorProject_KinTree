@@ -5,6 +5,7 @@ import { handleRegister } from '../../utils/authHandlers';
 import * as yup from "yup"
 import * as styles from './styles'
 import logo from '../../assets/kintreelogo-adobe.png';
+import { familyTreeService } from '../../services/familyTreeService';
 
 //validation functionality
 const yupValidation = yup.object().shape(
@@ -12,6 +13,7 @@ const yupValidation = yup.object().shape(
         firstname: yup.string().required("First name is a required field."),
         lastname: yup.string().required("Last name is a required field."),
         birthdate: yup.date().required("Birthdate is a required field."),
+        gender: yup.string().oneOf(['M', 'F'], 'Please select a valid option').required('Gender field is required'),
         email: yup.string().required("Email is a required field.")
             .matches(
                 "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
@@ -46,8 +48,9 @@ const CreateAccount = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [isHovering, setIsHovering] = useState(false);
 
-    const onSubmit = async (data) => {
+    const onSubmit = async (formData) => {
         setErrorMessage(""); // clear previous errors
+
         try {
             console.log('Starting registration with data:', { email: data.email, hasPassword: !!data.password });
             
@@ -118,8 +121,18 @@ const CreateAccount = () => {
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Birthdate</label>
-                        <input id="birthdate" {...register("birthdate")} style={styles.FieldStyle}/>
+                        <input id="birthdate" type="date" {...register("birthdate")} style={styles.FieldStyle}/>
                         {errors.birthdate && <p>{errors.birthdate.message}</p>}
+                    </div>
+                    <div style={styles.ItemStyle}>
+                        <label>Gender
+                        <select id="gender" {...register("gender")} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }}>
+                            <option value="" disabled hidden>Select</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                        </label>
+                        {errors.gender && <p>{errors.gender.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
                         <label>Email</label>

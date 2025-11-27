@@ -2,32 +2,34 @@
 const supabase = require('../lib/supabase');
 
 const treeInfo = {
-    addObject: async (data) => {
+    addObject: async (newData) => {
+        console.log('addObject called with userid:', newData.userid, 'and object:', newData.object);
         const { data: inserted, error } = await supabase
             .from('treeinfo')
-            .insert([ data ])
+            .insert(newData)
             .select('*')
             .single();
         if (error) throw error;
         return inserted;
     },
 
-    updateObject: async (userId, data) => {
-        const { data: updated, error } = await supabase
+    updateObject: async (userid, updateData) => {
+        console.log('updateObject called with userid:', userid, 'and data:', updateData);
+        const { data, error } = await supabase
             .from('treeinfo')
-            .update(data)
-            .eq('userid', userId)
-            .select('*')
+            .update(updateData)
+            .eq('userid', userid)
+            .select()
             .single();
         if (error) throw error;
-        return updated;
+        return data;
     },
 
-    getObject: async (userId) => {
+    getObject: async (userid) => {
         const { data, error } = await supabase
             .from('treeinfo')
             .select('*')
-            .eq('userid', userId)
+            .eq('userid', userid)
             .maybeSingle();
         if (error) throw error;
         return data;

@@ -3,17 +3,25 @@ const User = require('../models/userModel');
 
 const addObject = async (req, res) => {
     try {
-        const { object, userId } = req.body;
+        const { object, userid } = req.body;
         // Resolve UUID to integer user ID if needed
-        const userIdInt = await User.resolveUserIdFromAuthUid(userId) || userId;
+        const userIdInt = await User.resolveUserIdFromAuthUid(userid);
+        console.log('Resolved userIdInt:', userIdInt);
+        
+        if (!userIdInt) {
+            return res.status(400).json({
+                error: 'Invalid user ID. User not found in database.',
+                received: userid
+            });
+        }
 
         const newObject = await treeInfo.addObject({
             object: JSON.stringify(object),
-            userId: userIdInt
+            userid: userIdInt
         });
 
         res.status(201).json({
-            message: 'Tree object added successfully',
+            message: 'Tree object added successfully to DB',
             object: newObject
         });
     } catch (error) {
@@ -25,11 +33,21 @@ const addObject = async (req, res) => {
 };
 const updateObject = async (req, res) => {
     try {
-        const { id } = req.params;
-        const updateData = req.body;
-
+        const userid = await req.params.id;
+        const updateData = await req.body;
+        // Resolve UUID to integer user ID first
+        console.log('updateObject called with userid param:', userid);
+        const userIdInt = await User.resolveUserIdFromAuthUid(userid);
+        console.log('Resolved userIdInt:', userIdInt);
+        
+        if (!userIdInt) {
+            return res.status(400).json({
+                error: 'Invalid user ID. User not found in database.',
+                received: userid
+            });
+        }
         // check if the family member exists
-        const existingObject = await treeInfo.getObject(id);
+        const existingObject = await treeInfo.getObject(userIdInt);
 
         if (!existingObject) {
             return res.status(404).json({
@@ -38,19 +56,21 @@ const updateObject = async (req, res) => {
         }
 
         // delete empty or undefined fields from updateData
-        // for (let key in updateData) {
-        //     if (updateData[key] === '' || updateData[key] === undefined) {
-        //         delete updateData[key];
-        //     }
-        // }
+        for (let key in updateData) {
+            if (updateData[key] === '' || updateData[key] === undefined) {
+                delete updateData[key];
+            }
+        }
 
         if (Object.keys(updateData).length === 0) {
             return res.status(400).json({
                 error: "No new data to update"
             });
         }
+        
 
-        const updatedObject = await treeInfo.updateObject(id, {object : JSON.stringify(updateData)});
+        const updatedObject = await treeInfo.updateObject(userIdInt, {object: JSON.stringify(updateData)});
+        console.log('Updated object:', updatedObject);
         res.status(200).json({  // Changed to 200 status code
             message: 'Object updated successfully',
             object: updatedObject
@@ -77,7 +97,7 @@ const getObject = async (req, res) => {
                 error: 'Object not found'
             });
         }
-        console.log("Data sent from backend:", retrievedObject.object);
+        console.log("treeInfo getObject triggered. Data sent from backend:", retrievedObject.object);
         
         res.status(200).json(retrievedObject);
     } catch (error) {

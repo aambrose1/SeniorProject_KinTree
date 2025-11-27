@@ -29,7 +29,7 @@ const User = {
             .from('users')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
         if (error) throw error;
         return data;
     },
@@ -346,6 +346,7 @@ const User = {
 
 // Helper to resolve UUID (auth_uid) to integer user ID
 const resolveUserIdFromAuthUid = async (authUidOrIntId) => {
+    try {
     // If it's already an integer, return it
     if (!isNaN(authUidOrIntId) && !authUidOrIntId.toString().includes('-')) {
         return parseInt(authUidOrIntId);
@@ -354,6 +355,10 @@ const resolveUserIdFromAuthUid = async (authUidOrIntId) => {
     const user = await User.findByAuthUid(authUidOrIntId);
     if (!user) return null;
     return user.id;
+    } catch (error) {
+        console.error('Error resolving user ID from auth_uid:', error);
+        return null;
+    }
 };
 
 User.resolveUserIdFromAuthUid = resolveUserIdFromAuthUid;

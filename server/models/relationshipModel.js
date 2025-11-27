@@ -55,11 +55,11 @@ const Relationships = {
         return data;
     },
 
-    getRelationshipByUser: async (userId) => {
+    getRelationshipByUser: async (userid) => {
         const { data, error } = await supabase
             .from('relationships')
             .select('*')
-            .eq('userid', userId);
+            .eq('userid', userid);
         if (error) throw error;
         return data;
     },
