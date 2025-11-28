@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import logo from '../../assets/kintreelogo-adobe.png';
 import { Link } from 'react-router-dom';
 import * as styles from './styles';
@@ -9,8 +9,16 @@ import CreateMemoryPopup from '../../components/CreateMemory/CreateMemory';
 import NavBar from '../../components/NavBar/NavBar';
 
 function Home() {    
-    document.body.style.overflow = 'hidden';
-    document.body.style.width = '100%'; 
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.body.style.width = '100%';
+        
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.width = '';
+        };
+    }, []);
+    
     return (
         <div style={styles.DefaultStyle}>
             <NavBar />

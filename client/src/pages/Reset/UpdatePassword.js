@@ -7,16 +7,49 @@ import logo from '../../assets/kintreelogo-adobe.png';
 export default function UpdatePassword() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
+
+  const validatePassword = (pwd) => {
+    if (!pwd) {
+      setPasswordError("Password is required");
+      return false;
+    }
+    // Same validation as registration: 8 chars, uppercase, lowercase, number, special char
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/;
+    if (!passwordRegex.test(pwd)) {
+      setPasswordError("Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    if (newPassword) {
+      validatePassword(newPassword);
+    } else {
+      setPasswordError("");
+    }
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setPasswordError("");
+    
+    if (!validatePassword(password)) {
+      return;
+    }
+
     try {
       await handleUpdatePassword(password);
       setMessage("Password updated. Redirecting to login...");
       setTimeout(() => navigate('/login'), 1200);
     } catch (error) {
       // message handled by handler alert
+      setPasswordError(error.message || "Failed to update password");
     }
   };
 
@@ -38,10 +71,15 @@ export default function UpdatePassword() {
                 type="password"
                 placeholder="New password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 style={styles.FieldStyle}
                 required
               />
+              {passwordError && (
+                <p style={{ color: 'red', fontSize: '0.9em', marginTop: '5px', marginBottom: '0' }}>
+                  {passwordError}
+                </p>
+              )}
             </li>
           </ul>
           <div style={styles.ButtonDivStyle}>

@@ -12,28 +12,29 @@ export const SettingsContainer = {
   width: '60%',
   margin: 'auto',
   padding: '20px',
-  background:' #f9f9f9',
+  background: 'var(--card-bg, #f9f9f9)',
   borderRadius: '10px',
   boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
   fontFamily: 'Alata',
-  overflow: 'scroll'
+  color: 'var(--text-color, #333)',
+  transition: 'background-color 0.3s ease, color 0.3s ease'
 };
 
 export const Section = {
   marginBottom: '20px',
   padding: '15px',
-  borderBottom: '1px solid #ddd',
+  borderBottom: '1px solid var(--border-color, #ddd)',
 };
 
 export const Title = {
   textAlign: 'left',
-  color: '#333',
+  color: 'var(--text-color, #333)',
   fontFamily: 'Aboreto',
   marginLeft: '10px',
 };
 
 export const SubTitle = {
-  color: '#444',
+  color: 'var(--text-color, #444)',
   marginBottom: '10px'
 };
 
@@ -56,13 +57,48 @@ export const Input = {
   padding: '8px',
   marginTop: '5px',
   marginLeft: '10px',
-  border: '1px solid #ccc',
-  borderRadius: '5px'
+  border: '1px solid var(--input-border, #ccc)',
+  borderRadius: '5px',
+  backgroundColor: 'var(--input-bg, #ffffff)',
+  color: 'var(--text-color, #000)',
+  transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease'
+};
+
+export const ToggleSwitchContainer = {
+  position: 'relative',
+  display: 'inline-block',
+  width: '50px',
+  height: '24px'
 };
 
 export const ToggleSwitch = {
-  marginLeft: '10px',
-  transform: 'scale(1.2)'
+  opacity: 0,
+  width: 0,
+  height: 0,
+  position: 'absolute'
+};
+
+export const ToggleSwitchSlider = {
+  position: 'absolute',
+  cursor: 'pointer',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: '#ccc',
+  transition: '0.3s',
+  borderRadius: '24px',
+  '&:before': {
+    position: 'absolute',
+    content: '""',
+    height: '18px',
+    width: '18px',
+    left: '3px',
+    bottom: '3px',
+    backgroundColor: 'white',
+    transition: '0.3s',
+    borderRadius: '50%'
+  }
 };
 
 export const SignOutContainer = {
@@ -70,7 +106,7 @@ export const SignOutContainer = {
   justifyContent: 'flex-end',
   padding: '20px',
   marginTop: '30px',
-  borderTop: '1px solid #e0e0e0'
+  borderTop: '1px solid var(--border-color, #e0e0e0)'
 };
 
 export const SignOutButton = {

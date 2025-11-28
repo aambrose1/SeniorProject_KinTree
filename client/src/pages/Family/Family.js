@@ -20,8 +20,101 @@ function Family() {
 
     const { supabaseUser, currentAccountID } = useCurrentUser();
 
-    document.body.style.overflow = 'hidden';
-    document.body.style.width = '100%'; 
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.body.style.width = '100%';
+        
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.width = '';
+        };
+    }, []);
+
+    // const familyData = useMemo(() => [
+    //     {
+    //     "id": "0",
+    //     "rels": {
+    //         "father": "1",
+    //         "mother": "2",
+    //         "children": ["5"]
+    //     },
+    //     "data": {
+    //         "first name": "Ronald",
+    //         "last name": "Smith",
+    //         "avatar": "https://i.imgur.com/mfojszj.png"
+    //     }
+    //     },
+    //     {
+    //     "id": "1",
+    //     "rels": {
+    //         "father": "3",
+    //         "mother": "4",
+    //         "spouses": [
+    //             "2"
+    //         ],
+    //         "children": [
+    //             "0"
+    //         ]
+    //         },
+    //     "data": {
+    //         "first name": "John",
+    //         "last name": "Smith",
+    //         "flag": "paternal"
+    //         }
+    //     },
+    //     {
+    //         "id": "2",
+    //         "rels": {
+    //             "spouses": [
+    //                 "1"
+    //             ],
+    //             "children": [
+    //                 "0"
+    //             ]
+    //             },
+    //         "data": {
+    //             "first name": "Jane",
+    //             "last name": "Smith",
+    //             "flag": "maternal"
+    //             }
+    //     },
+    //     {
+    //         "id": "3",
+    //         "rels": {
+    //             "children": ["1"],
+    //             "spouses": ["4"]
+    //         },
+    //         "data": {
+    //             "first name": "Alice",
+    //             "last name": "Smith",
+    //             "flag": "paternal"
+    //         }
+    //     },
+    //     {
+    //         "id": "4",
+    //         "rels": {
+    //             "children": ["1"],
+    //             "spouses": ["3"]
+    //         },
+    //         "data": {
+    //             "first name": "Bob",
+    //             "last name": "Smith",
+    //             "flag": "paternal"
+    //         }
+    //     },
+    //     {
+    //         "id": "5",
+    //         "rels": {
+    //             "father": "0",
+    //         },
+    //         "data": {
+    //             "first name": "Tom",
+    //             "last name": "Smith"
+    //         }
+    //     },
+    // ], []);
+
+    // fetch family data from API
     
     useEffect(() => {
         const fetchFamilyData = async () => {
