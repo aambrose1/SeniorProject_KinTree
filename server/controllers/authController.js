@@ -1,12 +1,12 @@
-<<<<<<< Updated upstream
+
 // authController.js - the main backend file for user registration, signin, etc
 const User = require('../models/userModel');  // now backed by Supabase
-=======
+
 // authController.js
 const bcrypt = require('bcryptjs');
 const User = require('../models/userModel'); 
 const FamilyMember = require('../models/familyMemberModel');
->>>>>>> Stashed changes
+
 
 const deleteByUser = async (req,res) => {
   const { id } = req.params;
@@ -21,12 +21,9 @@ const deleteByUser = async (req,res) => {
   }
   catch (error){
     console.error(error);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     res.status(500);json({error:"Error deleting user"})
-=======
-<<<<<<< HEAD
-=======
+
+
     res.status(500).json({
       error: 'Registration failed'
     });
@@ -89,12 +86,12 @@ async function deleteByUser(req, res) {
   }
   catch (error) {
     console.error(error);
->>>>>>> Stashed changes
+
     res.status(500); json({ error: "Error deleting user" });
-=======
+
     res.status(500).json({error:"Error deleting user"})
->>>>>>> 5315e049f5602a4d1eb3fed3abe518fd4b3917f5
->>>>>>> Stashed changes
+
+
   }
 }
 
@@ -136,7 +133,6 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-<<<<<<< Updated upstream
 module.exports = { deleteByUser, findById, findByEmail, getAllUsers };
  
 // Add a sync endpoint: POST /api/auth/sync
@@ -160,6 +156,5 @@ const syncAuthUser = async (req, res) => {
 };
 
 module.exports.syncAuthUser = syncAuthUser;
-=======
 module.exports = { register, login, editByUser, deleteByUser, findById, findByEmail, getAllUsers };
->>>>>>> Stashed changes
+
