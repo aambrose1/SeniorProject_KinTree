@@ -8,6 +8,7 @@ const relationshipRoutes = require('./routes/relationshipRoutes');
 const sharedTreeRoutes = require('./routes/sharedTreeRoutes');
 const backupRoutes = require('./routes/backupRoutes');
 const treeInfoRoutes = require('./routes/treeInfoRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api/relationships', relationshipRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/tree-info', treeInfoRoutes);
+app.use('/api/events', eventRoutes); 
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
