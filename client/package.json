@@ -22,7 +22,7 @@
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
-        "test": "vitest",
+        "test:unit": "vitest --config=vitest.unit.config.js",
         "test:ui": "vitest --ui",
         "test:run": "vitest run",
         "test:jest": "react-scripts test",

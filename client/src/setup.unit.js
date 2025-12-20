@@ -24,3 +24,8 @@ vi.mock('./utils/supabaseClient', () => ({
     }),
   },
 }));
+
+// Mock NavBar for tests
+vi.mock('../../components/NavBar/NavBar', () => ({
+  default: () => <nav data-testid="navbar">NavBar</nav>,
+}));
