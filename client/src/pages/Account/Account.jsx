@@ -89,7 +89,7 @@ function Account() {
                 } else if (user.ok) { 
                     const fetchedUserData = await user.json();
                     if (fetchedUserData?.auth_uid) {
-                        await checkOwnAccount();
+                        await checkOwnAccount(fetchedUserData.auth_uid);
                         console.log('Checked own account for auth_uid:', fetchedUserData.auth_uid, 'vs', supabaseUser?.id);
                         if (ownAccount) return;
                     }
@@ -122,9 +122,9 @@ function Account() {
             }
         };
 
-        const checkOwnAccount = () => {
+        const checkOwnAccount = (test_id) => {
             // Check if this is the current logged in Account user
-            if (userData?.auth_uid === supabaseUser?.id) {
+            if (test_id === supabaseUser?.id) {
                 console.log('This is the owner account');
                 setUserData({
                     id: userData.id,
@@ -153,15 +153,20 @@ function Account() {
 
         fetchUserData();
 
-    }, [currentAccountID, id, ownAccount, supabaseUser, userData?.auth_uid, userData.id]);
+    }, [currentAccountID, id, supabaseUser]);
     
     // determine relationship type
     useEffect(() => {
         if (!id || !supabaseUser?.id) return;
-        if (ownAccount) setRelationshipType('You');
+        
         // if not self, determine relationship to user
         // get current account's family treememberid and viewed account's family treememberid
         const fetchRelationship = async () => {
+            if (ownAccount) {
+                setRelationshipType('You'); 
+                return;
+            };
+            
             let treeUserId = null;
             let treeMemberId = null;
             
@@ -216,7 +221,7 @@ function Account() {
 
         fetchRelationship();
 
-        }, [id, currentAccountID, userData.id, supabaseUser?.id, ownAccount]);
+        }, [id, currentAccountID, userData.id, ownAccount]);
 
     // check if user exists in tree
     useEffect(() => {
