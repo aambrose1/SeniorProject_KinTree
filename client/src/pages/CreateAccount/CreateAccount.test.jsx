@@ -78,6 +78,13 @@ describe('CreateAccount', () => {
       expect(screen.getByText(/Already have an account?/i)).toBeInTheDocument();
       expect(screen.getByText(/Login here/i)).toBeInTheDocument();
     });
+
+    it('login link navigates to /login', () => {
+      render(<CreateAccount />);
+      
+      const loginLink = screen.getByText(/Login here/i).closest('a');
+      expect(loginLink).toHaveAttribute('href', '/login');
+    });
   });
 
   describe('form validation', () => {
@@ -324,10 +331,29 @@ describe('CreateAccount', () => {
       expect(handleRegister).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('redirects to /login on successful account creation', async () => {
+    const user = userEvent.setup();
+    const mockResponse = { 
+      user: { id: 'auth-redirect' },
+      data: { user: { id: 'auth-redirect' } }
+    };
+    handleRegister.mockResolvedValue(mockResponse);
+    familyTreeService.createFamilyMember.mockResolvedValue({});
+    familyTreeService.initializeTreeInfo.mockResolvedValue({});
+
+    render(<CreateAccount />);
+
+    await fillRequiredFields(user);
+    await user.click(screen.getByRole('button', { name: /Create Account/i }));
+
+    await waitFor(() => {
+      expect(window.location.href).toBe('/login');
+    });
+  });
   });
 
   describe('error handling', () => {
-
 
     it('displays error message when registration fails', async () => {
       const user = userEvent.setup();
