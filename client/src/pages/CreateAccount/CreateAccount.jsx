@@ -12,23 +12,30 @@ const yupValidation = yup.object().shape(
     {
         firstname: yup.string().required("First name is a required field."),
         lastname: yup.string().required("Last name is a required field."),
-        birthdate: yup.date().required("Birthdate is a required field."),
-        gender: yup.string().oneOf(['M', 'F'], 'Please select a valid option').required('Gender field is required'),
+        birthdate: yup.date()
+            .typeError("Please enter a valid date.") // null or invalid date
+            .required("Birthdate is a required field."),
+        gender: yup.string()
+            .required('Gender field is required')
+            .oneOf(['M', 'F'], 'Please select a valid option'),
         email: yup.string().required("Email is a required field.")
             .matches(
                 "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
                 , "Invalid email format."
             ),
-        address: yup.string(),
-        city: yup.string(),
-        state: yup.string(),
+        address: yup.string().optional(),
+        city: yup.string().optional(),
+        state: yup.string().optional(),
         country: yup.string().required("Country of residence is a required field."),
-        phonenum: yup.string()
+        phonenum: yup.string().optional()
+            .transform((value) => value || undefined) // Convert empty string to undefined
             .matches(
                 /^(\+\d{1,2}\s?)?1?-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/
                 , "Invalid phone number format."
             ),
-        zipcode: yup.string().matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
+        zipcode: yup.string().optional()
+            .transform((value) => value || undefined) // Convert empty string to undefined
+            .matches(/^\d{5}(?:[-\s]\d{4})?$/, "Invalid zip code format."),
         password: yup.string().required("Password is required")
             .matches(
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/,
@@ -64,7 +71,7 @@ const CreateAccount = () => {
                 firstname: formData.firstname,
                 lastname: formData.lastname,
                 birthdate: formData.birthdate,
-                location: `${formData.city}, ${formData.state}, ${formData.country}`,
+                location: [formData.city, formData.state, formData.country].filter(Boolean).join(', '),
                 phonenumber: formData.phonenum,
                 userid: data.user.id,
                 memberuserid: data.user.id,
@@ -112,67 +119,66 @@ const CreateAccount = () => {
                 
                 <div style={styles.ListStyle}>
                     <div style={styles.ItemStyle}>
-                        <label>First Name</label>
+                        <label htmlFor="firstname">First Name</label>
                         <input id="firstname" {...register("firstname")} style={styles.FieldStyle}/>
                         {errors.firstname && <p>{errors.firstname.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Last Name</label>
+                        <label htmlFor="lastname">Last Name</label>
                         <input id="lastname" {...register("lastname")} style={styles.FieldStyle}/>
                         {errors.lastname && <p>{errors.lastname.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Birthdate</label>
+                        <label htmlFor="birthdate">Birthdate</label>
                         <input id="birthdate" type="date" {...register("birthdate")} style={styles.FieldStyle}/>
                         {errors.birthdate && <p>{errors.birthdate.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Gender
-                        <select id="gender" {...register("gender")} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }}>
+                        <label htmlFor="gender">Gender</label>
+                        <select id="gender" defaultValue="" {...register("gender")} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }}>
                             <option value="" disabled hidden>Select</option>
                             <option value="M">Male</option>
                             <option value="F">Female</option>
                         </select>
-                        </label>
                         {errors.gender && <p>{errors.gender.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Email</label>
+                        <label htmlFor="email">Email</label>
                         <input id="email" {...register("email")} style={styles.FieldStyle}/>
                         {errors.email && <p>{errors.email.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Address</label>
+                        <label htmlFor="address">Address</label>
                         <input id="address" {...register("address")} style={styles.FieldStyle}/>
                         {errors.address && <p>{errors.address.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>City</label>
+                        <label htmlFor="city">City</label>
                         <input id="city" {...register("city")} style={styles.FieldStyle}/>
                         {errors.city && <p>{errors.city.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>State</label>
+                        <label htmlFor="state">State</label>
                         <input id="state" {...register("state")} style={styles.FieldStyle}/>
                         {errors.state && <p>{errors.state.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Country</label>
+                        <label htmlFor="country">Country</label>
                         <input id="country" {...register("country")} style={styles.FieldStyle}/>
                         {errors.country && <p>{errors.country.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Zip Code</label>
+                        <label htmlFor="zipcode">Zip Code</label>
                         <input id="zipcode" {...register("zipcode")} style={styles.FieldStyle}/>
                         {errors.zipcode && <p>{errors.zipcode.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Phone</label>
+                        <label htmlFor="phone">Phone</label>
                         <input id="phone" {...register("phonenum")} style={styles.FieldStyle}/>
                         {errors.phonenum && <p>{errors.phonenum.message}</p>}
                     </div>
                     <div style={styles.ItemStyle}>
-                        <label>Password</label>
+                        <label htmlFor="password">Password</label>
                         <input id="password" {...register("password")} style={styles.FieldStyle}/>
                         {errors.password && <p>{errors.password.message}</p>}
                     </div>
