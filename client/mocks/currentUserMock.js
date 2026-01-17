@@ -8,8 +8,8 @@ export const defaultCurrentUserContext = {
       id: 'auth-uid-123', 
       email: 'john@example.com',
       user_metadata: {
-        firstName: 'John',
-        lastName: 'Doe',
+        first_name: 'John',
+        last_name: 'Doe',
         email: 'john@example.com',
         birthdate: '1990-01-01',
         address: '123 Main St',
