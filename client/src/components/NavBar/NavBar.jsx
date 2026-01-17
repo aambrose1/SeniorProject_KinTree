@@ -15,7 +15,7 @@ function NavBar() {
     const { id } = useParams();
 
     return (
-        <nav className="navbar">
+        <nav className="navbar" data-testid="navbar">
             <ul className="nav-options-list">
                 
                 <NavLink to="/account" 
