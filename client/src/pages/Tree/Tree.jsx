@@ -84,6 +84,7 @@ function FamilyTree() {
 }
 
 // builds the actual page
+// TODO: add error message ui, rn no place looks good to put it
 function Tree() {
     const location = useLocation();
     const { currentAccountID, supabaseUser } = useCurrentUser();
