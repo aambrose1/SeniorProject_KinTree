@@ -1,4 +1,4 @@
-import { React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as styles from './styles';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../../components/NavBar/NavBar';
@@ -15,8 +15,8 @@ function Account() {
     const [saveSuccess, setSaveSuccess] = useState('');
     const fileInputRef = useRef(null);
 
-    const { supabaseUser, loading } = useCurrentUser();
-    
+    const { supabaseUser } = useCurrentUser();
+
     // takes id from url path
     let { id } = useParams();
 
@@ -80,7 +80,7 @@ function Account() {
 
     // // if no id is provided, retrieve current user's id and show that page
     useEffect(() => {
-        setErrorMessage('');
+        setSaveError('');
         console.log('Id params not passed in')
         if (!id) {
             // Fetch current user's data
@@ -93,9 +93,12 @@ function Account() {
             }
             fetchOwnUserData();
         }
-      }, [id, supabaseUser?.id, navigate]);
+    }, [id, supabaseUser?.id, navigate]);
 
-        // Check if this is the current Supabase user
+    // Check if this is the current Supabase user
+    useEffect(() => {
+        if (!id || !supabaseUser) return;
+
         if (id === supabaseUser?.id) {
             // Database is source of truth - fetch from database first
             fetch(`http://localhost:5000/api/auth/user/email/${encodeURIComponent(supabaseUser.email)}`)
@@ -165,18 +168,18 @@ function Account() {
             setOwnAccount(true);
             return;
         }
-    }, [loading, supabaseUser, navigate]);
+    }, [id, supabaseUser, navigate]);
 
     // Fetch user info - check if it's a Supabase user or family member
     useEffect(() => {
-        if (!id || !currentAccountID) return;
-        console.log("current account id:", currentAccountID);
+        if (!id || !supabaseUser?.id) return;
+        console.log("current account id:", supabaseUser.id);
         console.log("viewing account id:", id);
-        setErrorMessage('');
-        const fetchUserData = async () => {
-            try {
-                
-                const user = await fetch(`http://localhost:5000/api/auth/user/${id}`);
+        setSaveError('');
+        const requestOptions = {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        };
 
         fetch(`http://localhost:5000/api/family-members/${id}`, requestOptions)
             .then(async (response) => {
@@ -215,7 +218,7 @@ function Account() {
                 console.error('There was a problem with the fetch operation:', error);
             });
     }, [id, supabaseUser]);
-        
+
     useEffect(() => {
         if (editingSection === null) {
             setFormValues({
@@ -491,8 +494,8 @@ function Account() {
             }
             if (totpFactorId && !totpVerified) {
                 setTotpStatus('A setup is pending. Enter the code below or start over.');
-                            return;
-                        }
+                return;
+            }
             const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
             if (error) throw error;
             setTotpFactorId(data.id);
@@ -651,9 +654,9 @@ function Account() {
             const response = await fetch(`http://localhost:5000/api/auth/remove/${apiUserId}`, {
                 method: 'DELETE'
             });
-            
+
             console.log('Delete account response status:', response.status);
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 console.error('Delete account error response:', errorData);
@@ -676,567 +679,567 @@ function Account() {
     return (
         <div style={styles.DefaultStyle}>
             <NavBar />
-            <div style={{width: '150px'}}></div>
+            <div style={{ width: '150px' }}></div>
             <div style={styles.RightSide}>
-                
-            <div style={styles.ContainerStyle}>
-                {/* User Information Section */}
-                <div style={{padding: '20px 0', width: '100%', display: 'flex', flexDirection: 'column', gap: '20px'}}>
-                    <section style={styles.CardStyle}>
-                        <div style={styles.CardHeader}>
-                            <div>
-                                <h2 style={styles.CardTitle}>My Profile</h2>
-                                <p style={styles.CardSubtitle}>Your public profile details</p>
-                            </div>
-                            {ownAccount && (
-                                editingSection === 'profile' ? (
-                                    <div style={styles.HeaderActionGroup}>
-                                        <button
-                                            type="button"
-                                            onClick={handleCancelEditing}
-                                            disabled={isSaving}
-                                            style={{...styles.TertiaryButton, opacity: isSaving ? 0.7 : 1}}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={handleSaveProfile}
-                                            disabled={isSaving}
-                                            style={{...styles.PrimaryButton, opacity: isSaving ? 0.7 : 1}}
-                                        >
-                                            {isSaving ? 'Saving…' : 'Save'}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => handleStartEditing('profile')}
-                                        style={styles.EditButton}
-                                    >
-                                        Edit
-                                    </button>
-                                )
-                            )}
-                        </div>
-                        <div style={styles.ProfileCardBody}>
-                            <div style={styles.AvatarBlock}>
-                                <div style={styles.AvatarWrapper}>
-                                    {profilePicturePreview || userData.profilePictureUrl ? (
-                                        <img
-                                            src={profilePicturePreview || userData.profilePictureUrl}
-                                            alt={`${displayName} avatar`}
-                                            style={styles.AvatarImage}
-                                        />
-                                    ) : (
-                                        <div style={styles.AvatarFallback}>
-                                            {displayName?.charAt(0)?.toUpperCase() || '?'}
-                                        </div>
-                                    )}
-                                    {ownAccount && editingSection === 'profile' && (
-                                        <>
+
+                <div style={styles.ContainerStyle}>
+                    {/* User Information Section */}
+                    <div style={{ padding: '20px 0', width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                        <section style={styles.CardStyle}>
+                            <div style={styles.CardHeader}>
+                                <div>
+                                    <h2 style={styles.CardTitle}>My Profile</h2>
+                                    <p style={styles.CardSubtitle}>Your public profile details</p>
+                                </div>
+                                {ownAccount && (
+                                    editingSection === 'profile' ? (
+                                        <div style={styles.HeaderActionGroup}>
                                             <button
                                                 type="button"
-                                                onClick={handleProfileImageClick}
-                                                style={styles.AvatarAction}
+                                                onClick={handleCancelEditing}
+                                                disabled={isSaving}
+                                                style={{ ...styles.TertiaryButton, opacity: isSaving ? 0.7 : 1 }}
                                             >
-                                                Change Photo
+                                                Cancel
                                             </button>
-                                            {(userData.profilePictureUrl || profilePicturePreview) && (
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveProfile}
+                                                disabled={isSaving}
+                                                style={{ ...styles.PrimaryButton, opacity: isSaving ? 0.7 : 1 }}
+                                            >
+                                                {isSaving ? 'Saving…' : 'Save'}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleStartEditing('profile')}
+                                            style={styles.EditButton}
+                                        >
+                                            Edit
+                                        </button>
+                                    )
+                                )}
+                            </div>
+                            <div style={styles.ProfileCardBody}>
+                                <div style={styles.AvatarBlock}>
+                                    <div style={styles.AvatarWrapper}>
+                                        {profilePicturePreview || userData.profilePictureUrl ? (
+                                            <img
+                                                src={profilePicturePreview || userData.profilePictureUrl}
+                                                alt={`${displayName} avatar`}
+                                                style={styles.AvatarImage}
+                                            />
+                                        ) : (
+                                            <div style={styles.AvatarFallback}>
+                                                {displayName?.charAt(0)?.toUpperCase() || '?'}
+                                            </div>
+                                        )}
+                                        {ownAccount && editingSection === 'profile' && (
+                                            <>
                                                 <button
                                                     type="button"
-                                                    onClick={handleRemoveProfileImage}
-                                                    style={{...styles.AvatarAction, backgroundColor: '#fde8e8', color: '#9b1c1c'}}
+                                                    onClick={handleProfileImageClick}
+                                                    style={styles.AvatarAction}
                                                 >
-                                                    Remove
+                                                    Change Photo
                                                 </button>
-                                            )}
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleProfileImageChange}
-                                                style={{display: 'none'}}
-                                            />
-                                        </>
-                                    )}
-                                </div>
-                                <div style={styles.ProfileSummary}>
-                                    {editingSection === 'profile' ? (
-                                        <div style={styles.FieldColumn}>
-                                            <label style={styles.FieldLabel}>Display name</label>
-                                            <input
-                                                type="text"
-                                                value={formValues.displayName}
-                                                onChange={(e) => handleFieldChange('displayName', e.target.value)}
-                                                style={styles.FieldStyle}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <h3 style={styles.ProfileName}>{displayName}</h3>
-                                        </div>
-                                    )}
-                                    <div style={styles.ProfileMeta}>
-                                        {summaryLocation && <span>{summaryLocation}</span>}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section style={styles.CardStyle}>
-                        <div style={styles.CardHeader}>
-                            <div>
-                                <h2 style={styles.CardTitle}>Personal information</h2>
-                                <p style={styles.CardSubtitle}>Basics about you</p>
-                            </div>
-                            {ownAccount && (
-                                editingSection === 'personal' ? (
-                                    <div style={styles.HeaderActionGroup}>
-                                        <button
-                                            type="button"
-                                            onClick={handleCancelEditing}
-                                            disabled={isSaving}
-                                            style={{...styles.TertiaryButton, opacity: isSaving ? 0.7 : 1}}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={handleSaveProfile}
-                                            disabled={isSaving}
-                                            style={{...styles.PrimaryButton, opacity: isSaving ? 0.7 : 1}}
-                                        >
-                                            {isSaving ? 'Saving…' : 'Save'}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => handleStartEditing('personal')}
-                                        style={styles.EditButton}
-                                    >
-                                        Edit
-                                    </button>
-                                )
-                        )}
-                    </div>
-
-                        {editingSection === 'personal' ? (
-                            <form onSubmit={handleSaveProfile} style={styles.FormGrid}>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>First Name</label>
-                                    <input
-                                        type="text"
-                                        value={formValues.firstName}
-                                        onChange={(e) => handleFieldChange('firstName', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>Last Name</label>
-                                    <input
-                                        type="text"
-                                        value={formValues.lastName}
-                                        onChange={(e) => handleFieldChange('lastName', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>Email Address</label>
-                                    <input
-                                        type="email"
-                                        value={userData.email}
-                                        disabled
-                                        style={{...styles.FieldStyle, backgroundColor: '#f5f5f5', cursor: 'not-allowed'}}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>Phone</label>
-                                    <input
-                                        type="tel"
-                                        value={formValues.phone_number}
-                                        onChange={(e) => handleFieldChange('phone_number', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>Birthdate</label>
-                                    <input
-                                        type="date"
-                                        value={formValues.birthdate}
-                                        onChange={(e) => handleFieldChange('birthdate', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumnFull}>
-                                    <label style={styles.FieldLabel}>Bio</label>
-                                    <textarea
-                                        value={formValues.bio}
-                                        onChange={(e) => handleFieldChange('bio', e.target.value)}
-                                        style={{...styles.FieldStyle, minHeight: '90px', resize: 'vertical'}}
-                                        placeholder="Tell others about yourself"
-                                    />
-                                </div>
-                            </form>
-                        ) : (
-                            <div style={styles.ReadOnlyGrid}>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>First Name</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.firstName || '—'}</span>
-                                </div>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>Last Name</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.lastName || '—'}</span>
-                                </div>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>Email Address</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.email || '—'}</span>
-                                </div>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>Phone</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.phone_number || '—'}</span>
-                                </div>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>Birthdate</span>
-                                    <span style={styles.ReadOnlyValue}>
-                                        {userData.birthdate ? (() => {
-                                            const dateStr = userData.birthdate.split('T')[0];
-                                            const [year, month, day] = dateStr.split('-');
-                                            return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString();
-                                        })() : '—'}
-                                    </span>
-                                </div>
-                                <div style={styles.ReadOnlyColumnFull}>
-                                    <span style={styles.ReadOnlyLabel}>Bio</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.bio || '—'}</span>
-                                </div>
-                </div>
-                        )}
-                    </section>
-
-                    <section style={styles.CardStyle}>
-                        <div style={styles.CardHeader}>
-                            <div>
-                                <h2 style={styles.CardTitle}>Address</h2>
-                                <p style={styles.CardSubtitle}>Where you call home</p>
-                            </div>
-                            {ownAccount && (
-                                editingSection === 'address' ? (
-                                    <div style={styles.HeaderActionGroup}>
-                                        <button
-                                            type="button"
-                                            onClick={handleCancelEditing}
-                                            disabled={isSaving}
-                                            style={{...styles.TertiaryButton, opacity: isSaving ? 0.7 : 1}}
-                                        >
-                                            Cancel
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={handleSaveProfile}
-                                            disabled={isSaving}
-                                            style={{...styles.PrimaryButton, opacity: isSaving ? 0.7 : 1}}
-                                        >
-                                            {isSaving ? 'Saving…' : 'Save'}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => handleStartEditing('address')}
-                                        style={styles.EditButton}
-                                    >
-                                        Edit
-                                    </button>
-                                )
-                            )}
-                        </div>
-
-                        {editingSection === 'address' ? (
-                            <form onSubmit={handleSaveProfile} style={styles.FormGrid}>
-                                <div style={styles.FieldColumnFull}>
-                                    <label style={styles.FieldLabel}>Street address</label>
-                                    <input
-                                        type="text"
-                                        value={formValues.address}
-                                        onChange={(e) => handleFieldChange('address', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>City</label>
-                                    <input
-                                        type="text"
-                                        value={formValues.city}
-                                        onChange={(e) => handleFieldChange('city', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>State / Region</label>
-                                    <input
-                                        type="text"
-                                        value={formValues.state}
-                                        onChange={(e) => handleFieldChange('state', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>ZIP / Postal Code</label>
-                                    <input
-                                        type="text"
-                                        value={formValues.zipcode}
-                                        onChange={(e) => handleFieldChange('zipcode', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                                <div style={styles.FieldColumn}>
-                                    <label style={styles.FieldLabel}>Country</label>
-                                    <input
-                                        type="text"
-                                        value={formValues.country}
-                                        onChange={(e) => handleFieldChange('country', e.target.value)}
-                                        style={styles.FieldStyle}
-                                    />
-                                </div>
-                            </form>
-                        ) : (
-                            <div style={styles.ReadOnlyGrid}>
-                                <div style={styles.ReadOnlyColumnFull}>
-                                    <span style={styles.ReadOnlyLabel}>Street address</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.address || '—'}</span>
-                                </div>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>City</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.city || '—'}</span>
-                                </div>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>State / Region</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.state || '—'}</span>
-                                </div>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>ZIP / Postal Code</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.zipcode || '—'}</span>
-                                </div>
-                                <div style={styles.ReadOnlyColumn}>
-                                    <span style={styles.ReadOnlyLabel}>Country</span>
-                                    <span style={styles.ReadOnlyValue}>{userData.country || '—'}</span>
-                                </div>
-                            </div>
-                        )}
-                    </section>
-
-                    <section style={styles.CardStyle}>
-                        <div style={styles.CardHeader}>
-                            <div>
-                                <h2 style={styles.CardTitle}>Account security</h2>
-                                <p style={styles.CardSubtitle}>Protect your KinTree account</p>
-                            </div>
-                        </div>
-                        {ownAccount ? (
-                            <div style={styles.SecurityContent}>
-                                <div style={styles.SecurityBlock}>
-                                    <div style={styles.SecurityHeadingRow}>
-                                        <h3 style={styles.SecurityTitle}>Authenticator app</h3>
-                                        <span style={totpVerified ? styles.StatusPillSuccess : styles.StatusPillMuted}>
-                                            {totpVerified ? 'Enabled' : 'Not enabled'}
-                                        </span>
-                                    </div>
-                                    <p style={styles.HelpText}>
-                                        Add a time-based one-time password (TOTP) authenticator for an extra layer of security.
-                                    </p>
-                                    {totpVerified ? (
-                                        <div style={styles.SecurityActions}>
-                                            <button
-                                                type="button"
-                                                onClick={disableTotp}
-                                                disabled={totpLoading}
-                                                style={{...styles.SecondaryButton, opacity: totpLoading ? 0.7 : 1}}
-                                            >
-                                                {totpLoading ? 'Working…' : 'Disable authenticator'}
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            {!totpFactorId && (
-                                                <div style={styles.SecurityActions}>
+                                                {(userData.profilePictureUrl || profilePicturePreview) && (
                                                     <button
                                                         type="button"
-                                                        onClick={startTotpEnroll}
-                                                        disabled={totpLoading}
-                                                        style={{...styles.PrimaryButton, opacity: totpLoading ? 0.7 : 1}}
+                                                        onClick={handleRemoveProfileImage}
+                                                        style={{ ...styles.AvatarAction, backgroundColor: '#fde8e8', color: '#9b1c1c' }}
                                                     >
-                                                        {totpLoading ? 'Starting…' : 'Set up authenticator'}
+                                                        Remove
                                                     </button>
-                                                </div>
-                                            )}
-                                            {totpFactorId && totpQr && (
-                                                <div style={styles.SecuritySteps}>
-                                                    <img alt="Authenticator QR code" src={totpQr} style={styles.TotpQr} />
-                                                    <p style={styles.HelpText}>
-                                                        Scan the QR code with Google Authenticator, Duo, or another TOTP app. Enter the 6-digit code to finish setup.
-                                                    </p>
-                                                    <input
-                                                        type="text"
-                                                        inputMode="numeric"
-                                                        placeholder="123456"
-                                                        value={totpCode}
-                                                        onChange={(e) => setTotpCode(e.target.value)}
-                                                        style={{...styles.FieldStyle, width: '220px', textAlign: 'center', fontSize: '18px', letterSpacing: '4px'}}
-                                                    />
-                                                    <div style={styles.SecurityActions}>
-                                                        <button
-                                                            type="button"
-                                                            onClick={verifyTotp}
-                                                            disabled={totpLoading || !totpCode}
-                                                            style={{...styles.PrimaryButton, opacity: totpLoading ? 0.7 : 1}}
-                                                        >
-                                                            {totpLoading ? 'Verifying…' : 'Verify code'}
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={restartTotpEnroll}
-                                                            disabled={totpLoading}
-                                                            style={{...styles.TertiaryButton, opacity: totpLoading ? 0.7 : 1}}
-                                                        >
-                                                            Start over
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {totpFactorId && !totpQr && (
-                                                <div style={styles.SecuritySteps}>
-                                                    <p style={styles.HelpText}>
-                                                        Enter a 6-digit code from your authenticator app to complete setup.
-                                                    </p>
-                                                    <input
-                                                        type="text"
-                                                        inputMode="numeric"
-                                                        placeholder="123456"
-                                                        value={totpCode}
-                                                        onChange={(e) => setTotpCode(e.target.value)}
-                                                        style={{...styles.FieldStyle, width: '220px', textAlign: 'center', fontSize: '18px', letterSpacing: '4px'}}
-                                                    />
-                                                    <div style={styles.SecurityActions}>
-                                                        <button
-                                                            type="button"
-                                                            onClick={verifyTotp}
-                                                            disabled={totpLoading || !totpCode}
-                                                            style={{...styles.PrimaryButton, opacity: totpLoading ? 0.7 : 1}}
-                                                        >
-                                                            {totpLoading ? 'Verifying…' : 'Verify code'}
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={restartTotpEnroll}
-                                                            disabled={totpLoading}
-                                                            style={{...styles.TertiaryButton, opacity: totpLoading ? 0.7 : 1}}
-                                                        >
-                                                            Start over
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                    {totpStatus && (
-                                        <div style={totpStatusIsError ? styles.ErrorBanner : styles.SuccessBanner}>
-                                            {totpStatus}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div style={styles.SecurityBlock}>
-                                    <div style={styles.SecurityHeadingRow}>
-                                        <h3 style={styles.SecurityTitle}>Email verification</h3>
-                                        <span style={emailVerified ? styles.StatusPillSuccess : styles.StatusPillMuted}>
-                                            {emailVerified ? 'Verified' : 'Not verified'}
-                                        </span>
+                                                )}
+                                                <input
+                                                    ref={fileInputRef}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleProfileImageChange}
+                                                    style={{ display: 'none' }}
+                                                />
+                                            </>
+                                        )}
                                     </div>
-                                    <p style={styles.HelpText}>
-                                        {emailVerified 
-                                            ? 'Your email address has been verified. This helps secure your account.'
-                                            : 'Verify your email address to help secure your account and receive important notifications.'}
-                                    </p>
-                                    {!emailVerified && (
-                                        <div style={styles.SecurityActions}>
-                                            <button
-                                                type="button"
-                                                onClick={resendVerificationEmail}
-                                                disabled={emailVerificationLoading}
-                                                style={{...styles.PrimaryButton, opacity: emailVerificationLoading ? 0.7 : 1}}
-                                            >
-                                                {emailVerificationLoading ? 'Sending…' : 'Send verification email'}
-                                            </button>
+                                    <div style={styles.ProfileSummary}>
+                                        {editingSection === 'profile' ? (
+                                            <div style={styles.FieldColumn}>
+                                                <label style={styles.FieldLabel}>Display name</label>
+                                                <input
+                                                    type="text"
+                                                    value={formValues.displayName}
+                                                    onChange={(e) => handleFieldChange('displayName', e.target.value)}
+                                                    style={styles.FieldStyle}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <h3 style={styles.ProfileName}>{displayName}</h3>
+                                            </div>
+                                        )}
+                                        <div style={styles.ProfileMeta}>
+                                            {summaryLocation && <span>{summaryLocation}</span>}
                                         </div>
-                                    )}
-                                    {emailVerificationStatus && (
-                                        <div style={emailVerificationStatus.toLowerCase().includes('sent') ? styles.SuccessBanner : styles.ErrorBanner}>
-                                            {emailVerificationStatus}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div style={styles.SecurityBlock}>
-                                    <div style={styles.SecurityHeadingRow}>
-                                        <h3 style={styles.SecurityTitle}>Sign out</h3>
                                     </div>
-                                    <p style={styles.HelpText}>Sign out of KinTree on this device.</p>
-                                    <button
-                                        type="button"
-                                        onClick={handleSignOut}
-                                        style={styles.SecondaryButton}
-                                    >
-                                        Sign out
-                                    </button>
-                    </div>
-
-                                <div style={styles.SecurityBlock}>
-                                    <div style={styles.SecurityHeadingRow}>
-                                        <h3 style={styles.SecurityTitle}>Delete account</h3>
-                                    </div>
-                                    <p style={styles.DangerNote}>
-                                        Permanently remove your KinTree account and personal data. This cannot be undone.
-                                    </p>
-                                    {deleteState.error && (
-                                        <div style={styles.ErrorBanner}>{deleteState.error}</div>
-                                    )}
-                                    {deleteState.success && (
-                                        <div style={styles.SuccessBanner}>{deleteState.success}</div>
-                                    )}
-                                    <button
-                                        type="button"
-                                        onClick={handleDeleteAccountClick}
-                                        disabled={deleteState.loading}
-                                        style={{...styles.DangerButton, opacity: deleteState.loading ? 0.7 : 1}}
-                                    >
-                                        {deleteState.loading ? 'Deleting…' : 'Delete account'}
-                                    </button>
                                 </div>
                             </div>
-                        ) : (
-                            <p style={styles.HelpText}>Only the account owner can manage security settings.</p>
-                        )}
-                    </section>
+                        </section>
 
-                    {(saveError || saveSuccess) && (
-                        <div style={{marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
-                            {saveError && (
-                                <div style={styles.ErrorBanner}>
-                                    {saveError}
+                        <section style={styles.CardStyle}>
+                            <div style={styles.CardHeader}>
+                                <div>
+                                    <h2 style={styles.CardTitle}>Personal information</h2>
+                                    <p style={styles.CardSubtitle}>Basics about you</p>
+                                </div>
+                                {ownAccount && (
+                                    editingSection === 'personal' ? (
+                                        <div style={styles.HeaderActionGroup}>
+                                            <button
+                                                type="button"
+                                                onClick={handleCancelEditing}
+                                                disabled={isSaving}
+                                                style={{ ...styles.TertiaryButton, opacity: isSaving ? 0.7 : 1 }}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveProfile}
+                                                disabled={isSaving}
+                                                style={{ ...styles.PrimaryButton, opacity: isSaving ? 0.7 : 1 }}
+                                            >
+                                                {isSaving ? 'Saving…' : 'Save'}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleStartEditing('personal')}
+                                            style={styles.EditButton}
+                                        >
+                                            Edit
+                                        </button>
+                                    )
+                                )}
+                            </div>
+
+                            {editingSection === 'personal' ? (
+                                <form onSubmit={handleSaveProfile} style={styles.FormGrid}>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>First Name</label>
+                                        <input
+                                            type="text"
+                                            value={formValues.firstName}
+                                            onChange={(e) => handleFieldChange('firstName', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>Last Name</label>
+                                        <input
+                                            type="text"
+                                            value={formValues.lastName}
+                                            onChange={(e) => handleFieldChange('lastName', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>Email Address</label>
+                                        <input
+                                            type="email"
+                                            value={userData.email}
+                                            disabled
+                                            style={{ ...styles.FieldStyle, backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>Phone</label>
+                                        <input
+                                            type="tel"
+                                            value={formValues.phone_number}
+                                            onChange={(e) => handleFieldChange('phone_number', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>Birthdate</label>
+                                        <input
+                                            type="date"
+                                            value={formValues.birthdate}
+                                            onChange={(e) => handleFieldChange('birthdate', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumnFull}>
+                                        <label style={styles.FieldLabel}>Bio</label>
+                                        <textarea
+                                            value={formValues.bio}
+                                            onChange={(e) => handleFieldChange('bio', e.target.value)}
+                                            style={{ ...styles.FieldStyle, minHeight: '90px', resize: 'vertical' }}
+                                            placeholder="Tell others about yourself"
+                                        />
+                                    </div>
+                                </form>
+                            ) : (
+                                <div style={styles.ReadOnlyGrid}>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>First Name</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.firstName || '—'}</span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>Last Name</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.lastName || '—'}</span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>Email Address</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.email || '—'}</span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>Phone</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.phone_number || '—'}</span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>Birthdate</span>
+                                        <span style={styles.ReadOnlyValue}>
+                                            {userData.birthdate ? (() => {
+                                                const dateStr = userData.birthdate.split('T')[0];
+                                                const [year, month, day] = dateStr.split('-');
+                                                return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString();
+                                            })() : '—'}
+                                        </span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumnFull}>
+                                        <span style={styles.ReadOnlyLabel}>Bio</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.bio || '—'}</span>
+                                    </div>
                                 </div>
                             )}
-                            {saveSuccess && (
-                                <div style={styles.SuccessBanner}>
-                                    {saveSuccess}
+                        </section>
+
+                        <section style={styles.CardStyle}>
+                            <div style={styles.CardHeader}>
+                                <div>
+                                    <h2 style={styles.CardTitle}>Address</h2>
+                                    <p style={styles.CardSubtitle}>Where you call home</p>
+                                </div>
+                                {ownAccount && (
+                                    editingSection === 'address' ? (
+                                        <div style={styles.HeaderActionGroup}>
+                                            <button
+                                                type="button"
+                                                onClick={handleCancelEditing}
+                                                disabled={isSaving}
+                                                style={{ ...styles.TertiaryButton, opacity: isSaving ? 0.7 : 1 }}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveProfile}
+                                                disabled={isSaving}
+                                                style={{ ...styles.PrimaryButton, opacity: isSaving ? 0.7 : 1 }}
+                                            >
+                                                {isSaving ? 'Saving…' : 'Save'}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleStartEditing('address')}
+                                            style={styles.EditButton}
+                                        >
+                                            Edit
+                                        </button>
+                                    )
+                                )}
+                            </div>
+
+                            {editingSection === 'address' ? (
+                                <form onSubmit={handleSaveProfile} style={styles.FormGrid}>
+                                    <div style={styles.FieldColumnFull}>
+                                        <label style={styles.FieldLabel}>Street address</label>
+                                        <input
+                                            type="text"
+                                            value={formValues.address}
+                                            onChange={(e) => handleFieldChange('address', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>City</label>
+                                        <input
+                                            type="text"
+                                            value={formValues.city}
+                                            onChange={(e) => handleFieldChange('city', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>State / Region</label>
+                                        <input
+                                            type="text"
+                                            value={formValues.state}
+                                            onChange={(e) => handleFieldChange('state', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>ZIP / Postal Code</label>
+                                        <input
+                                            type="text"
+                                            value={formValues.zipcode}
+                                            onChange={(e) => handleFieldChange('zipcode', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                    <div style={styles.FieldColumn}>
+                                        <label style={styles.FieldLabel}>Country</label>
+                                        <input
+                                            type="text"
+                                            value={formValues.country}
+                                            onChange={(e) => handleFieldChange('country', e.target.value)}
+                                            style={styles.FieldStyle}
+                                        />
+                                    </div>
+                                </form>
+                            ) : (
+                                <div style={styles.ReadOnlyGrid}>
+                                    <div style={styles.ReadOnlyColumnFull}>
+                                        <span style={styles.ReadOnlyLabel}>Street address</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.address || '—'}</span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>City</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.city || '—'}</span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>State / Region</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.state || '—'}</span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>ZIP / Postal Code</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.zipcode || '—'}</span>
+                                    </div>
+                                    <div style={styles.ReadOnlyColumn}>
+                                        <span style={styles.ReadOnlyLabel}>Country</span>
+                                        <span style={styles.ReadOnlyValue}>{userData.country || '—'}</span>
+                                    </div>
                                 </div>
                             )}
-                        </div>
-                    )}
+                        </section>
+
+                        <section style={styles.CardStyle}>
+                            <div style={styles.CardHeader}>
+                                <div>
+                                    <h2 style={styles.CardTitle}>Account security</h2>
+                                    <p style={styles.CardSubtitle}>Protect your KinTree account</p>
+                                </div>
+                            </div>
+                            {ownAccount ? (
+                                <div style={styles.SecurityContent}>
+                                    <div style={styles.SecurityBlock}>
+                                        <div style={styles.SecurityHeadingRow}>
+                                            <h3 style={styles.SecurityTitle}>Authenticator app</h3>
+                                            <span style={totpVerified ? styles.StatusPillSuccess : styles.StatusPillMuted}>
+                                                {totpVerified ? 'Enabled' : 'Not enabled'}
+                                            </span>
+                                        </div>
+                                        <p style={styles.HelpText}>
+                                            Add a time-based one-time password (TOTP) authenticator for an extra layer of security.
+                                        </p>
+                                        {totpVerified ? (
+                                            <div style={styles.SecurityActions}>
+                                                <button
+                                                    type="button"
+                                                    onClick={disableTotp}
+                                                    disabled={totpLoading}
+                                                    style={{ ...styles.SecondaryButton, opacity: totpLoading ? 0.7 : 1 }}
+                                                >
+                                                    {totpLoading ? 'Working…' : 'Disable authenticator'}
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {!totpFactorId && (
+                                                    <div style={styles.SecurityActions}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={startTotpEnroll}
+                                                            disabled={totpLoading}
+                                                            style={{ ...styles.PrimaryButton, opacity: totpLoading ? 0.7 : 1 }}
+                                                        >
+                                                            {totpLoading ? 'Starting…' : 'Set up authenticator'}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {totpFactorId && totpQr && (
+                                                    <div style={styles.SecuritySteps}>
+                                                        <img alt="Authenticator QR code" src={totpQr} style={styles.TotpQr} />
+                                                        <p style={styles.HelpText}>
+                                                            Scan the QR code with Google Authenticator, Duo, or another TOTP app. Enter the 6-digit code to finish setup.
+                                                        </p>
+                                                        <input
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            placeholder="123456"
+                                                            value={totpCode}
+                                                            onChange={(e) => setTotpCode(e.target.value)}
+                                                            style={{ ...styles.FieldStyle, width: '220px', textAlign: 'center', fontSize: '18px', letterSpacing: '4px' }}
+                                                        />
+                                                        <div style={styles.SecurityActions}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={verifyTotp}
+                                                                disabled={totpLoading || !totpCode}
+                                                                style={{ ...styles.PrimaryButton, opacity: totpLoading ? 0.7 : 1 }}
+                                                            >
+                                                                {totpLoading ? 'Verifying…' : 'Verify code'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={restartTotpEnroll}
+                                                                disabled={totpLoading}
+                                                                style={{ ...styles.TertiaryButton, opacity: totpLoading ? 0.7 : 1 }}
+                                                            >
+                                                                Start over
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {totpFactorId && !totpQr && (
+                                                    <div style={styles.SecuritySteps}>
+                                                        <p style={styles.HelpText}>
+                                                            Enter a 6-digit code from your authenticator app to complete setup.
+                                                        </p>
+                                                        <input
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            placeholder="123456"
+                                                            value={totpCode}
+                                                            onChange={(e) => setTotpCode(e.target.value)}
+                                                            style={{ ...styles.FieldStyle, width: '220px', textAlign: 'center', fontSize: '18px', letterSpacing: '4px' }}
+                                                        />
+                                                        <div style={styles.SecurityActions}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={verifyTotp}
+                                                                disabled={totpLoading || !totpCode}
+                                                                style={{ ...styles.PrimaryButton, opacity: totpLoading ? 0.7 : 1 }}
+                                                            >
+                                                                {totpLoading ? 'Verifying…' : 'Verify code'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={restartTotpEnroll}
+                                                                disabled={totpLoading}
+                                                                style={{ ...styles.TertiaryButton, opacity: totpLoading ? 0.7 : 1 }}
+                                                            >
+                                                                Start over
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                        {totpStatus && (
+                                            <div style={totpStatusIsError ? styles.ErrorBanner : styles.SuccessBanner}>
+                                                {totpStatus}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div style={styles.SecurityBlock}>
+                                        <div style={styles.SecurityHeadingRow}>
+                                            <h3 style={styles.SecurityTitle}>Email verification</h3>
+                                            <span style={emailVerified ? styles.StatusPillSuccess : styles.StatusPillMuted}>
+                                                {emailVerified ? 'Verified' : 'Not verified'}
+                                            </span>
+                                        </div>
+                                        <p style={styles.HelpText}>
+                                            {emailVerified
+                                                ? 'Your email address has been verified. This helps secure your account.'
+                                                : 'Verify your email address to help secure your account and receive important notifications.'}
+                                        </p>
+                                        {!emailVerified && (
+                                            <div style={styles.SecurityActions}>
+                                                <button
+                                                    type="button"
+                                                    onClick={resendVerificationEmail}
+                                                    disabled={emailVerificationLoading}
+                                                    style={{ ...styles.PrimaryButton, opacity: emailVerificationLoading ? 0.7 : 1 }}
+                                                >
+                                                    {emailVerificationLoading ? 'Sending…' : 'Send verification email'}
+                                                </button>
+                                            </div>
+                                        )}
+                                        {emailVerificationStatus && (
+                                            <div style={emailVerificationStatus.toLowerCase().includes('sent') ? styles.SuccessBanner : styles.ErrorBanner}>
+                                                {emailVerificationStatus}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div style={styles.SecurityBlock}>
+                                        <div style={styles.SecurityHeadingRow}>
+                                            <h3 style={styles.SecurityTitle}>Sign out</h3>
+                                        </div>
+                                        <p style={styles.HelpText}>Sign out of KinTree on this device.</p>
+                                        <button
+                                            type="button"
+                                            onClick={handleSignOut}
+                                            style={styles.SecondaryButton}
+                                        >
+                                            Sign out
+                                        </button>
+                                    </div>
+
+                                    <div style={styles.SecurityBlock}>
+                                        <div style={styles.SecurityHeadingRow}>
+                                            <h3 style={styles.SecurityTitle}>Delete account</h3>
+                                        </div>
+                                        <p style={styles.DangerNote}>
+                                            Permanently remove your KinTree account and personal data. This cannot be undone.
+                                        </p>
+                                        {deleteState.error && (
+                                            <div style={styles.ErrorBanner}>{deleteState.error}</div>
+                                        )}
+                                        {deleteState.success && (
+                                            <div style={styles.SuccessBanner}>{deleteState.success}</div>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={handleDeleteAccountClick}
+                                            disabled={deleteState.loading}
+                                            style={{ ...styles.DangerButton, opacity: deleteState.loading ? 0.7 : 1 }}
+                                        >
+                                            {deleteState.loading ? 'Deleting…' : 'Delete account'}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p style={styles.HelpText}>Only the account owner can manage security settings.</p>
+                            )}
+                        </section>
+
+                        {(saveError || saveSuccess) && (
+                            <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {saveError && (
+                                    <div style={styles.ErrorBanner}>
+                                        {saveError}
+                                    </div>
+                                )}
+                                {saveSuccess && (
+                                    <div style={styles.SuccessBanner}>
+                                        {saveSuccess}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
             </div>
 
             {/* Delete Account Confirmation Dialog */}
@@ -1264,7 +1267,7 @@ function Account() {
                                 type="button"
                                 onClick={handleDeleteCancel}
                                 disabled={deleteState.loading}
-                                style={{...styles.TertiaryButton, opacity: deleteState.loading ? 0.7 : 1}}
+                                style={{ ...styles.TertiaryButton, opacity: deleteState.loading ? 0.7 : 1 }}
                             >
                                 Cancel
                             </button>
@@ -1272,7 +1275,7 @@ function Account() {
                                 type="button"
                                 onClick={handleDeleteAccount}
                                 disabled={deleteState.loading}
-                                style={{...styles.DangerButton, opacity: deleteState.loading ? 0.7 : 1}}
+                                style={{ ...styles.DangerButton, opacity: deleteState.loading ? 0.7 : 1 }}
                             >
                                 {deleteState.loading ? 'Deleting…' : 'Yes, delete my account'}
                             </button>
