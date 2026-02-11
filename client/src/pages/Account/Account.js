@@ -181,25 +181,25 @@ function Account() {
             headers: { 'Content-Type': 'application/json' },
         };
 
-        fetch(`http://localhost:5000/api/family-members/${id}`, requestOptions)
+        fetch(`http://localhost:5000/api/family-members/member/${id}`, requestOptions)
             .then(async (response) => {
                 if (response.ok) {
                     const data = await response.json();
                     setUserData({
-                        displayName: data.displayName || '',
-                        firstName: data.firstName,
-                        lastName: data.lastName,
+                        displayName: data.display_name || '',
+                        firstName: data.firstname,
+                        lastName: data.lastname,
                         email: data.email,
                         birthdate: data.birthdate,
                         address: data.address,
                         city: data.city,
                         state: data.state,
                         country: data.country,
-                        phone_number: data.phone_number,
+                        phone_number: data.phonenumber,
                         zipcode: data.zipcode,
                         id: data.id,
-                        memberUserId: data.memberUserId,
-                        profilePictureUrl: data.profilePictureUrl || '',
+                        memberUserId: data.memberuserid,
+                        profilePictureUrl: data.profile_picture_url || '',
                         bio: data.bio || ''
                     });
                 } else {
@@ -688,8 +688,8 @@ function Account() {
                         <section style={styles.CardStyle}>
                             <div style={styles.CardHeader}>
                                 <div>
-                                    <h2 style={styles.CardTitle}>My Profile</h2>
-                                    <p style={styles.CardSubtitle}>Your public profile details</p>
+                                    <h2 style={styles.CardTitle}>{ownAccount ? 'My Profile' : 'Profile'}</h2>
+                                    <p style={styles.CardSubtitle}>{ownAccount ? 'Your public profile details' : `Public profile details for ${displayName}`}</p>
                                 </div>
                                 {ownAccount && (
                                     editingSection === 'profile' ? (
