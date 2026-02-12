@@ -87,21 +87,34 @@ function Account() {
             const fetchOwnUserData = async () => {
                 const user = await fetch(`http://localhost:5000/api/auth/user/${supabaseUser.id}`);
                 const fetchedUserData = await user.json();
-                setUserData(fetchedUserData);
+                setUserData({
+                    id: fetchedUserData.id,
+                    displayName: fetchedUserData.display_name || '',
+                    firstName: fetchedUserData.firstname || fetchedUserData.firstName || 'User',
+                    lastName: fetchedUserData.lastname || fetchedUserData.lastName || '',
+                    email: fetchedUserData.email || supabaseUser.email,
+                    birthdate: fetchedUserData.birthdate || fetchedUserData.birthDate || '',
+                    address: fetchedUserData.address || '',
+                    city: fetchedUserData.city || '',
+                    state: fetchedUserData.state || '',
+                    country: fetchedUserData.country || '',
+                    phone_number: fetchedUserData.phonenumber || fetchedUserData.phoneNumber || '',
+                    zipcode: fetchedUserData.zipcode || '',
+                    bio: fetchedUserData.bio || '',
+                    profilePictureUrl: fetchedUserData.profile_picture_url || ''
+                });
                 setOwnAccount(true);
-                navigate(`/account/${fetchedUserData.id}`, { replace: true });
             }
             fetchOwnUserData();
         }
-    }, [id, supabaseUser?.id, navigate]);
+    }, [id, supabaseUser?.id, supabaseUser?.email]);
 
-    // Check if this is the current Supabase user
+    // Check if this is a Supabase user or manually added family member
     useEffect(() => {
         if (!id || !supabaseUser) return;
-
-        if (id === supabaseUser?.id) {
+        if (id) {
             // Database is source of truth - fetch from database first
-            fetch(`http://localhost:5000/api/auth/user/email/${encodeURIComponent(supabaseUser.email)}`)
+            fetch(`http://localhost:5000/api/auth/user/${Number(id)}`)
                 .then(async (response) => {
                     if (response.ok) {
                         const dbUser = await response.json();
@@ -123,30 +136,49 @@ function Account() {
                             profilePictureUrl: dbUser.profile_picture_url || ''
                         });
                     } else {
-                        // Fallback to auth metadata if database lookup fails
-                        console.warn('Database lookup failed, using auth metadata');
-                        const metadata = supabaseUser.user_metadata || {};
-                        setUserData({
-                            id: supabaseUser.id,
-                            displayName: metadata.display_name || '',
-                            firstName: metadata.first_name || 'User',
-                            lastName: metadata.last_name || '',
-                            email: supabaseUser.email,
-                            birthdate: metadata.birthdate || '',
-                            address: metadata.address || '',
-                            city: metadata.city || '',
-                            state: metadata.state || '',
-                            country: metadata.country || '',
-                            phone_number: metadata.phone_number || '',
-                            zipcode: metadata.zipcode || '',
-                            bio: metadata.bio || '',
-                            profilePictureUrl: metadata.profile_picture_url || ''
+                        const requestOptions = {
+                            method: 'GET',
+                            headers: { 'Content-Type': 'application/json' },
+                        };
+                        fetch(`http://localhost:5000/api/family-members/member/${Number(id)}`, requestOptions)
+                        .then(async (response) => {
+                            if (response.ok) {
+                                const data = await response.json();
+                                setUserData({
+                                    displayName: data.display_name || '',
+                                    firstName: data.firstname,
+                                    lastName: data.lastname,
+                                    email: data.email,
+                                    birthdate: data.birthdate,
+                                    address: data.address,
+                                    city: data.city,
+                                    state: data.state,
+                                    country: data.country,
+                                    phone_number: data.phonenumber,
+                                    zipcode: data.zipcode,
+                                    id: data.id,
+                                    memberUserId: data.memberuserid,
+                                    profilePictureUrl: data.profile_picture_url || '',
+                                    bio: data.bio || ''
+                                });
+                            } else {
+                                console.error('Error fetching user data:', response);
+                                // If family member not found, show basic info
+                                setUserData({
+                                    id: id,
+                                    displayName: '',
+                                    firstName: 'Unknown',
+                                    lastName: 'User',
+                                    email: '',
+                                });
+                            }
                         });
                     }
                 })
                 .catch((error) => {
                     console.error('Error fetching user from database:', error);
                     // Fallback to auth metadata
+                    console.warn('Falling back to auth metadata for user data');
                     const metadata = supabaseUser.user_metadata || {};
                     setUserData({
                         id: supabaseUser.id,
@@ -165,59 +197,10 @@ function Account() {
                         profilePictureUrl: metadata.profile_picture_url || ''
                     });
                 });
-            setOwnAccount(true);
+            setOwnAccount(false);
             return;
         }
     }, [id, supabaseUser, navigate]);
-
-    // Fetch user info - check if it's a Supabase user or family member
-    useEffect(() => {
-        if (!id || !supabaseUser?.id) return;
-        console.log("current account id:", supabaseUser.id);
-        console.log("viewing account id:", id);
-        setSaveError('');
-        const requestOptions = {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        };
-
-        fetch(`http://localhost:5000/api/family-members/member/${id}`, requestOptions)
-            .then(async (response) => {
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserData({
-                        displayName: data.display_name || '',
-                        firstName: data.firstname,
-                        lastName: data.lastname,
-                        email: data.email,
-                        birthdate: data.birthdate,
-                        address: data.address,
-                        city: data.city,
-                        state: data.state,
-                        country: data.country,
-                        phone_number: data.phonenumber,
-                        zipcode: data.zipcode,
-                        id: data.id,
-                        memberUserId: data.memberuserid,
-                        profilePictureUrl: data.profile_picture_url || '',
-                        bio: data.bio || ''
-                    });
-                } else {
-                    console.error('Error fetching user data:', response);
-                    // If family member not found, show basic info
-                    setUserData({
-                        id: id,
-                        displayName: '',
-                        firstName: 'Unknown',
-                        lastName: 'User',
-                        email: '',
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
-            });
-    }, [id, supabaseUser]);
 
     useEffect(() => {
         if (editingSection === null) {
