@@ -133,6 +133,7 @@ const getAllUsers = async (req, res) => {
     }
 }
 
+<<<<<<< Updated upstream
 module.exports = { deleteByUser, findById, findByEmail, getAllUsers };
  
 // Add a sync endpoint: POST /api/auth/sync
@@ -158,3 +159,6 @@ const syncAuthUser = async (req, res) => {
 module.exports.syncAuthUser = syncAuthUser;
 module.exports = { register, login, editByUser, deleteByUser, findById, findByEmail, getAllUsers };
 
+=======
+module.exports = { register, login, editByUser, deleteByUser, findById, findByEmail, getAllUsers };
+>>>>>>> Stashed changes
