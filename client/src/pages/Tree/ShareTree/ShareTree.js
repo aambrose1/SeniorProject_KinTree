@@ -173,7 +173,7 @@ function ShareTree() {
                         )}
                         </div>
                         </li>
-
+                        {/*TO DO: Add option to share with non-users by email. Will prompt them to register/log in */}
                         <li style={styles.ItemStyle}>
                             <label>
                                 Comments:

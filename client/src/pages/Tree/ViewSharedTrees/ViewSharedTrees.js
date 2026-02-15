@@ -71,6 +71,7 @@ function ViewSharedTrees() {
                                         {tree.sharedate ? new Date(tree.sharedate).toLocaleDateString() : ''}
                                     </span>
                                 </div>
+                                {/* TO DO: Make this tree page work */}
                                 <Link to={`/sharedtree/${tree.sharedtreeid}`} style={{ color: '#000' }}>
                                     View Tree
                                 </Link>
