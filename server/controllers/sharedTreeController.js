@@ -77,7 +77,7 @@ const getSharedTreebyReciever = async (req, res) => {
 
 const shareTree = async (req,res) => {
     try{
-        const {senderID, recieverID, perms, parentalSide, recieverEmail, treeInfo} = req.body;
+        const {senderID, receiverID, perms, parentalSide, treeInfo} = req.body;
 
         if (!["maternal", "paternal", "both"].includes(parentalSide)){
             return res.status(400).json({
@@ -127,9 +127,9 @@ const shareTree = async (req,res) => {
         //     // })
         // }
         if(1){
-            const [newSharedTree] = await sharedTrees.addSharedTree({
+            const newSharedTree = await sharedTrees.addSharedTree({
                 senderID,
-                recieverID,
+                receiverID,
                 perms,
                 parentalSide,
                 treeInfo,
@@ -137,7 +137,7 @@ const shareTree = async (req,res) => {
             });
             return res.status(201).json({
                 message: "Shared tree added. Reciever will be prompted to register/log in if needed.",
-                token: newSharedTree.token
+                object: newSharedTree
             })
 
         }

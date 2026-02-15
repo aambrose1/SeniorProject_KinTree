@@ -4,15 +4,26 @@ const supabase = require('../lib/supabase');
 
 // all functions for the sharedTree to interact with the database
 const sharedTrees = {
-    addSharedTree: async (data) => {
+    addSharedTree: async (treeData) => {
+        console.log('Adding shared tree with data:', treeData);
         // Table and column names are lowercase in Postgres
-        const { data: inserted, error } = await supabase
+        const { data, error } = await supabase
             .from('sharedtrees')
-            .insert([ data ])
+            .insert([
+                {
+                    senderid: treeData.senderID,
+                    receiverid: treeData.receiverID,
+                    perms: treeData.perms,
+                    parentalside: treeData.parentalSide,
+                    treeinfo: treeData.treeInfo,
+                    sharedate: new Date().toISOString(),
+                    comment: treeData.comment || null
+                }
+             ])
             .select('*')
             .single();
         if (error) throw error;
-        return inserted;
+        return data;
     },
 
     getALLSharedTree: async () => {
@@ -46,7 +57,7 @@ const sharedTrees = {
         const { data, error } = await supabase
             .from('sharedtrees')
             .select('*')
-            .eq('recieverid', id);
+            .eq('receiverid', id);
         if (error) throw error;
         return data;
     },

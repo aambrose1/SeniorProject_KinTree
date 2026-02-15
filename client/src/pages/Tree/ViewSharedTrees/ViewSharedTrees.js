@@ -8,11 +8,11 @@ import { useCurrentUser } from '../../../CurrentUserProvider';
 function ViewSharedTrees() {
     const [trees, setTrees] = useState([]);
     const [userData, setUserData] = useState([]);
-    const { currentUserID, currentAccountID } = useCurrentUser();
+    const { currentAccountID } = useCurrentUser();
 
     useEffect(() => {
-        async function fetchResults() {
-            const response = await fetch(`http://localhost:5000/api/share-trees/receiver/${currentUserID}`)
+        async function fetchTrees() {
+            const response = await fetch(`http://localhost:5000/api/share-trees/receiver/${currentAccountID}`)
             if (response.ok) {
                 let responseData = await response.json();
                 console.log(responseData);
@@ -36,13 +36,13 @@ function ViewSharedTrees() {
         }
 
         const fetchData = async () => {
-            const results = await fetchResults();
+            const results = await fetchTrees();
             setTrees(results);
             const userData = await fetchUserData();
             setUserData(userData);
         };
         fetchData();
-    }, [currentUserID]);
+    }, [currentAccountID]);
 
     return (
         <div style={styles.DefaultStyle}>
@@ -60,9 +60,18 @@ function ViewSharedTrees() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     {/* name */}
-                                    <span>{userData.find(user => user.id === tree.senderID)?.username}</span>
+                                    <span>{userData.find(user => user.id === tree.senderid)?.firstname + " " } 
+                                        {userData.find(user => user.id === tree.senderid)?.lastname}</span>
+                                    {/* comment */}
+                                    <span style={{ marginLeft: '10px', fontStyle: 'italic' }}>
+                                        {tree.comment ? `- "${tree.comment}"` : ''}
+                                    </span>
+                                    {/* timestamp */}
+                                    <span style={{ marginLeft: '10px', fontStyle: 'italic' }}>
+                                        {tree.sharedate ? new Date(tree.sharedate).toLocaleDateString() : ''}
+                                    </span>
                                 </div>
-                                <Link to={`/sharedtree/${tree.sharedTreeID}`} style={{ color: '#000' }}>
+                                <Link to={`/sharedtree/${tree.sharedtreeid}`} style={{ color: '#000' }}>
                                     View Tree
                                 </Link>
                             </div>

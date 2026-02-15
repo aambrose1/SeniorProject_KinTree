@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as styles from './styles';
 import { set, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
@@ -6,20 +6,19 @@ import { useCurrentUser } from '../../../CurrentUserProvider';
 
 function ShareTree() {
     const [searchTerm, setSearchTerm] = useState("");
-    const [allSearchResults, setAllSearchResults] = useState([]);
-    const [searchResults, setSearchResults] = useState([]);
-    const [userData, setUserData] = useState([]);
-    const [selectedMember, setSelectedMember] = useState(null);
-    // const [email, setEmail] = useState("");
-    const [treeInfo, setTreeInfo] = useState([]);
+    
+    // Use refs to store fetched data (fetch once, use many times)
+    const allMembersRef = useRef([]);
+    const userDataRef = useRef([]);
+    const treeInfoRef = useRef([]);
+    
     const { register, handleSubmit, setValue } = useForm();
-
-    const { currentUserID, currentAccountID } = useCurrentUser();
+    const { currentAccountID, currentUserName } = useCurrentUser();
 
     async function onSubmitForm (data){
         console.log('Form data:', data);
         console.log('Selected member:', data.selectedMember);
-        console.log('treeInfo:', treeInfo);
+        console.log('treeInfo:', treeInfoRef.current);
         fetch(`http://localhost:5000/api/share-trees/share`, {
             method: 'POST',
             headers: {
@@ -27,12 +26,11 @@ function ShareTree() {
             },
             body: JSON.stringify({
                 senderID: currentAccountID,
-                receiverID: data.selectedMember, // this will have to be a member ID
-                recieverEmail: data.email,
-                // comments: data.comments,
+                receiverID: Number(data.selectedMember), // this will have to be a member ID
                 perms: "view",
                 parentalSide: "both",
-                treeInfo: JSON.stringify(treeInfo),
+                treeInfo: JSON.stringify(treeInfoRef.current),
+                comment: data.comments || ""
             })})
         .then(async (response) => {
             if (response.ok) {
@@ -47,66 +45,78 @@ function ShareTree() {
         });
     }
 
+    // Fetch all data once on mount
     useEffect(() => {
-        if (searchTerm === "") {
-            setSearchResults([]);
-            setSelectedMember(null);
-            // setEmail("");
-            return;
-        }
-
-        // retrieve family members
-        const fetchResults = async () => {
+        const fetchData = async () => {
+            // Fetch family members
             fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`)
-            .then(async (response) => {
-                if (response.ok) {
-                    let responseData = await response.json();
-                    console.log(responseData);
-                    setAllSearchResults(responseData);
-                    setSearchResults(responseData?.filter(member => member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || member.lastName.toLowerCase().includes(searchTerm.toLowerCase())));
-                    setSelectedMember(null);
-                    // setEmail("");
-                } 
-                else {
-                    console.log('Error:', response);
-                }
-            });
+                .then(async (response) => {
+                    if (response.ok) {
+                        let responseData = await response.json();
+                        console.log('Family members:', responseData);
+                        // only other users
+                        allMembersRef.current = responseData?.filter(member => member.memberuserid) || [];
+                    } else {
+                        console.log('Error fetching family members:', response);
+                    }
+                });
 
+            // Fetch users
             fetch(`http://localhost:5000/api/auth/users`)
-            .then(async (response) => {
-                if (response.ok) {
-                    let responseData = await response.json();
-                    console.log(responseData);
-                    setUserData(responseData);
-                } 
-                else {
-                    console.log('Error:', response);
-                }
-            });
+                .then(async (response) => {
+                    if (response.ok) {
+                        let responseData = await response.json();
+                        userDataRef.current = responseData;
+                    } else {
+                        console.log('Error fetching users:', response);
+                    }
+                });
 
+            // Fetch tree info
             fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`)
-            .then(async (response) => {
-                if (response.ok) {
-                    let responseData = await response.json();
-                    console.log(responseData.object);
-                    setTreeInfo(responseData.object);
-                }
-                else {
-                    let errorData = await response.json();
-                    console.log('Error:', errorData);
-                }
-            });
+                .then(async (response) => {
+                    if (response.ok) {
+                        let responseData = await response.json();
+                        treeInfoRef.current = responseData.object;
+                    } else {
+                        let errorData = await response.json();
+                        console.log('Error fetching tree info:', errorData);
+                    }
+                });
         };
 
-        fetchResults();
+        fetchData();
+    }, [currentAccountID]);
+
+    // Compute filtered search results based on searchTerm
+    const searchResults = useMemo(() => {
+        if (searchTerm === "") {
+            return [];
+        }
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        return allMembersRef.current.filter(member => 
+            member.firstname?.toLowerCase().includes(lowerSearchTerm) || 
+            member.lastname?.toLowerCase().includes(lowerSearchTerm)
+        );
     }, [searchTerm]);
 
-    const handleRadioChange = (result) => {
-        const selectedUser = userData.find(user => Number(user.id) === Number(allSearchResults.find(member => Number(member.id) === Number(result))?.memberUserId));
+    // Reset selection when search term changes
+    useEffect(() => {
+        if (searchTerm === "") {
+            setValue("email", "");
+            setValue("selectedMember", null);
+        }
+    }, [searchTerm, setValue]);
+
+    const handleRadioChange = (resultId) => {
+        console.log('Selected member ID:', resultId);
+        const selectedUser = userDataRef.current.find(user => 
+            Number(user.id) === resultId);
+        console.log('Selected user:', selectedUser);
         if (selectedUser) {
             setValue("email", selectedUser.email);
-        } 
-        else {
+            setValue("selectedMember", selectedUser.id);
+        } else {
             setValue("email", "");
         }
     };
@@ -134,24 +144,24 @@ function ShareTree() {
                             />
                         </div>
 
-                        {/* search results */}
+                        {/* search results for active family members (users) */}
                         <div style={styles.AddOptionsStyle}>
                         {searchResults?.length > 0 ? (
                             searchResults.map(result => (
-                            <div key={result.id} style={styles.ListingStyle}>
+                            <div key={result.memberuserid} style={styles.ListingStyle}>
                                 <label>
                                 <input
                                     type="radio"
                                     name="selectedMember"
-                                    value={result.id}
+                                    value={result.memberuserid}
                                     {...register("selectedMember", {
                                         required: true,
-                                        onChange: (e) => handleRadioChange(e.target.value),
+                                        onChange: handleRadioChange(result?.memberuserid),
                                     })}
     
                                 />
-                                <Link to={`/account/${result.id}`} style={{ marginLeft: '10px' }}>
-                                    {result.firstName} {result.lastName}
+                                <Link to={`/account/${result?.memberuserid}`} style={{ marginLeft: '10px' }}>
+                                    {result.firstname} {result.lastname}
                                 </Link>
                                 </label>
                             </div>
@@ -162,18 +172,6 @@ function ShareTree() {
                             </div>
                         )}
                         </div>
-                        </li>
-
-                        <li style={styles.ItemStyle}>
-                            <label>Email Address:</label>
-                            <input
-                                {...register("email", { required: true })}
-                                type="text"
-                                defaultValue=""
-                                // value={email || ""} // Dynamically update the value
-                                // onChange={e => setEmail(e.target.value)} // Allow the user to edit the value
-                                style={styles.FieldStyle}
-                            />
                         </li>
 
                         <li style={styles.ItemStyle}>
