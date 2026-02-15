@@ -14,6 +14,7 @@ const Relationships = {
             side: data.side,
             userid: data.userId || data.userid,
         };
+
         // Remove undefined/null values
         Object.keys(mappedData).forEach(key => mappedData[key] === undefined && delete mappedData[key]);
         const { data: inserted, error } = await supabase
@@ -23,6 +24,34 @@ const Relationships = {
             .single();
         if (error) throw error;
         return inserted;
+    },
+
+    updateRelationship: async (person1Id, person2Id, updates) => {
+        // Map camelCase fields to database column names
+        const mappedUpdates = {
+            person1_id: updates.person1_id || updates.person1Id,
+            person2_id: updates.person2_id || updates.person2Id,
+            relationshiptype: updates.relationshipType || updates.relationshiptype,
+            relationshipstatus: updates.relationshipStatus || updates.relationshipstatus,
+            side: updates.side,
+            userid: updates.userId || updates.userid,
+        };
+
+        // Remove undefined values so we only update what is provided
+        Object.keys(mappedUpdates).forEach(
+            key => mappedUpdates[key] === undefined && delete mappedUpdates[key]
+        );
+
+        const { data, error } = await supabase
+            .from('relationships')
+            .update(mappedUpdates)
+            .eq('person1_id', person1Id)
+            .eq('person2_id', person2Id)
+            .select('*')
+            .single();
+
+        if (error) throw error;
+        return data;
     },
   
     getRelationships: async (personId) => {
