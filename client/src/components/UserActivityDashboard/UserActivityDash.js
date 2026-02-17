@@ -16,7 +16,9 @@ function Dashboard() {
   const [sortDate, setSortDate] = useState("newest");
   const [searchResults, setSearchResults] = useState([]);
   const [isHovering, setIsHovering] = useState(false);
-  const { currentUser } = useCurrentUser();
+
+  // 1. FIXED: Destructure the correct variable from context
+  const { currentAccountID, loading } = useCurrentUser();
 
   const ButtonStyle = {
     fontFamily: 'Alata',
@@ -33,26 +35,28 @@ function Dashboard() {
   };
 
   const fetchEvents = useCallback(async () => {
-    if (!currentUser) return;
+    // 2. FIXED: Use currentAccountID (the UUID)
+    if (!currentAccountID) return;
 
     const { data, error } = await supabase
       .from("event")
       .select("*")
-      .eq("userid", currentUser.auth_uid)
+      .eq("userid", currentAccountID) // Match the UUID in your database
       .order("date", { ascending: false });
 
     if (error) {
       console.error("Error fetching events:", error);
     } else {
-      setAllEvents(data);
+      setAllEvents(data || []);
     }
-  }, [currentUser]);
+  }, [currentAccountID]);
 
   useEffect(() => {
-    if (currentUser) {
+    // 3. Only fetch if we aren't loading and have an ID
+    if (!loading && currentAccountID) {
       fetchEvents();
     }
-  }, [currentUser, fetchEvents]);
+  }, [currentAccountID, loading, fetchEvents]);
 
   useEffect(() => {
     let sortedEvents = [...allEvents];
@@ -70,6 +74,9 @@ function Dashboard() {
 
     setSearchResults(searched);
   }, [searchItem, sortDate, allEvents]);
+
+  // Handle Loading state
+  if (loading) return <div style={styles.DefaultStyle}><NavBar /><p>Loading events...</p></div>;
 
   return (
     <div style={styles.DefaultStyle}>
@@ -98,7 +105,7 @@ function Dashboard() {
                   Create Event
                 </button>
               }
-              onEventCreated={fetchEvents}
+              onEventCreated={fetchEvents} // This will refresh the list after posting!
             />
 
             <button
@@ -113,17 +120,21 @@ function Dashboard() {
           </div>
 
           <div style={styles.ListStyle}>
-            {searchResults.map((event) => (
-              <div key={event.id}>
-                <div style={styles.CardContainer}>
-                  <h2>{event.title}</h2>
-                  <p style={styles.TextStyle}>
-                    Date: {new Date(event.date).toLocaleDateString()}
-                  </p>
-                  <p style={styles.TextStyle}>{event.description}</p>
+            {searchResults.length > 0 ? (
+              searchResults.map((event) => (
+                <div key={event.id}>
+                  <div style={styles.CardContainer}>
+                    <h2>{event.title}</h2>
+                    <p style={styles.TextStyle}>
+                      Date: {new Date(event.date).toLocaleDateString()}
+                    </p>
+                    <p style={styles.TextStyle}>{event.description}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p style={{ textAlign: 'center', marginTop: '20px' }}>No events found. Try creating one!</p>
+            )}
           </div>
         </div>
 

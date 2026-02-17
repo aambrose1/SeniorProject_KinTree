@@ -50,19 +50,21 @@ export const RightSide = {
   };
 
   export const CardContainer = {
-    display: 'flex',
-    flexDirection: 'column',
-    textAlign: 'center',
-    minWidth: '290px',
-    // width: '100%',
-    height: '80vh',
-    borderRadius: '20px',
-    backgroundColor: '#faf9f6',
-    padding: '20px 5vw',
-    marginTop: '2%',
-    boxShadow: 'gray 0px 10px 10px -8px',
-    border: '0.5px solid #000000'
-  };
+  display: 'flex',
+  flexDirection: 'column',
+  textAlign: 'center',
+  minWidth: '290px',
+  width: '100%',
+  height: 'auto',            // Dynamic height based on content
+  minHeight: '120px',
+  borderRadius: '20px',
+  backgroundColor: '#faf9f6',
+  padding: '20px 5vw',
+  marginTop: '20px',
+  boxShadow: 'gray 0px 10px 10px -8px',
+  border: '0.5px solid #000000',
+  boxSizing: 'border-box'
+};
   
   export const Logo = {
     width: '150px',
@@ -78,15 +80,14 @@ export const RightSide = {
     fontSize: '16px'
   };
   
-  export const ListStyle = {
-    listStyleType: 'none',
-    fontFamily: 'Alata',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    width: 'auto',
-    padding: '0'
-  };
+export const ListStyle = {
+  listStyleType: 'none',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  width: '100%',             // Ensures cards fill the center container
+  padding: '0'
+};
   
   export const FormStyle = {
     padding: '2vw',
@@ -146,9 +147,12 @@ export const RightSide = {
   };
   
   export const TextStyle = {
-    margin: '0',
-    fontSize: '0.7em',
-    textAlign: 'center'
+    margin: '10px 0',
+    fontSize: '0.9em',         // Slightly larger for readability
+    textAlign: 'center',
+    whiteSpace: 'pre-wrap',    // Important for multi-line descriptions
+    lineHeight: '1.5',
+    wordBreak: 'break-word'
   };
   
   export const LinkStyle = {
