@@ -1,19 +1,23 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as styles from './styles';
-import { set, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../../CurrentUserProvider';
 
 function ShareTree() {
     const [searchTerm, setSearchTerm] = useState("");
+    const [inviteEmail, setInviteEmail] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [memberError, setMemberError] = useState("");
     
     // Use refs to store fetched data (fetch once, use many times)
     const allMembersRef = useRef([]);
     const userDataRef = useRef([]);
     const treeInfoRef = useRef([]);
     
-    const { register, handleSubmit, setValue } = useForm();
-    const { currentAccountID, currentUserName } = useCurrentUser();
+    const { register, handleSubmit, setValue, watch } = useForm();
+    const { currentAccountID } = useCurrentUser();
+    const selectedMember = watch("selectedMember");
 
     async function onSubmitForm (data){
         console.log('Form data:', data);
@@ -105,19 +109,37 @@ function ShareTree() {
         if (searchTerm === "") {
             setValue("email", "");
             setValue("selectedMember", null);
+            setInviteEmail("");
+            setEmailError("");
+            setMemberError("");
         }
     }, [searchTerm, setValue]);
 
-    const handleRadioChange = (resultId) => {
-        console.log('Selected member ID:', resultId);
-        const selectedUser = userDataRef.current.find(user => 
-            Number(user.id) === resultId);
-        console.log('Selected user:', selectedUser);
-        if (selectedUser) {
-            setValue("email", selectedUser.email);
-            setValue("selectedMember", selectedUser.id);
-        } else {
+    // Clear invite email when a member is selected
+    useEffect(() => {
+        if (selectedMember) {
+            setInviteEmail("");
+            setEmailError("");
+            setMemberError("");
             setValue("email", "");
+        }
+    }, [selectedMember, setValue]);
+
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const handleInviteEmailChange = (e) => {
+        const email = e.target.value;
+        setInviteEmail(email);
+        
+        if (email && !validateEmail(email)) {
+            setEmailError("Please enter a valid email address");
+        } else {
+            setEmailError("");
+            setValue("email", email);
+            setValue("selectedMember", null);
         }
     };
 
@@ -156,7 +178,6 @@ function ShareTree() {
                                     value={result.memberuserid}
                                     {...register("selectedMember", {
                                         required: true,
-                                        onChange: handleRadioChange(result?.memberuserid),
                                     })}
     
                                 />
@@ -166,14 +187,34 @@ function ShareTree() {
                                 </label>
                             </div>
                             ))
-                        ) : (
+                        ) : searchTerm !== "" ? (
                             <div style={styles.ListingStyle}>
-                            No Results
+                                <label style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
+                                    User not found. Invite via email:
+                                    <input
+                                        type="email"
+                                        placeholder="Enter email address"
+                                        style={{ 
+                                            width: '95%', 
+                                            padding: '10px', 
+                                            borderRadius: '5px', 
+                                            border: emailError ? '1px solid red' : '1px solid #ccc', 
+                                            fontFamily: 'Alata', 
+                                            marginTop: '5px' 
+                                        }}
+                                        value={inviteEmail}
+                                        onChange={handleInviteEmailChange}
+                                    />
+                                    {emailError && (
+                                        <div style={{ color: 'red', fontSize: '12px', marginTop: '5px' }}>
+                                            {emailError}
+                                        </div>
+                                    )}
+                                </label>
                             </div>
-                        )}
+                        ) : null}
                         </div>
                         </li>
-                        {/*TO DO: Add option to share with non-users by email. Will prompt them to register/log in */}
                         <li style={styles.ItemStyle}>
                             <label>
                                 Comments:

@@ -10,6 +10,18 @@ function ViewSharedTrees() {
     const [userData, setUserData] = useState([]);
     const { currentAccountID } = useCurrentUser();
 
+    const getTimeAgo = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return '1 day ago';
+        return `${diffDays} days ago`;
+    };
+
     useEffect(() => {
         async function fetchTrees() {
             const response = await fetch(`http://localhost:5000/api/share-trees/receiver/${currentAccountID}`)
@@ -56,23 +68,29 @@ function ViewSharedTrees() {
                 {/* dynamic list of results */}
                 <ul style={styles.ListStyle}>
                     {trees?.map(tree => (
-                        <li key={tree.sharedTreeID} style={styles.ItemStyle}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    {/* name */}
-                                    <span>{userData.find(user => user.id === tree.senderid)?.firstname + " " } 
-                                        {userData.find(user => user.id === tree.senderid)?.lastname}</span>
+                        <li key={tree.sharedtreeid} style={styles.ItemStyle}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                    {/* name and timestamp */}
+                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                                        <span style={{ fontWeight: 'bold', marginRight: '10px' }}>
+                                            {userData.find(user => user.id === tree.senderid)?.firstname}{' '}
+                                            {userData.find(user => user.id === tree.senderid)?.lastname}
+                                        </span>
+                                        <span style={{ fontSize: '0.9em', color: '#666' }}>
+                                            {getTimeAgo(tree.sharedate)}
+                                        </span>
+                                    </div>
+                                    
                                     {/* comment */}
-                                    <span style={{ marginLeft: '10px', fontStyle: 'italic' }}>
-                                        {tree.comment ? `- "${tree.comment}"` : ''}
-                                    </span>
-                                    {/* timestamp */}
-                                    <span style={{ marginLeft: '10px', fontStyle: 'italic' }}>
-                                        {tree.sharedate ? new Date(tree.sharedate).toLocaleDateString() : ''}
-                                    </span>
+                                    {tree?.comment && (
+                                        <div style={{ color: '#333', lineHeight: '1.5' }}>
+                                            "{tree?.comment}"
+                                        </div>
+                                    )}
                                 </div>
                                 {/* TO DO: Make this tree page work */}
-                                <Link to={`/sharedtree/${tree.sharedtreeid}`} style={{ color: '#000' }}>
+                                <Link to={`/sharedtree/${tree.sharedtreeid}`} style={{ color: '#000', marginLeft: '15px', whiteSpace: 'nowrap' }}>
                                     View Tree
                                 </Link>
                             </div>

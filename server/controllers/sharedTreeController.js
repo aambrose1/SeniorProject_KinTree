@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 const getSharedTreeById = async (req, res) => {
     try{
-        const { id} = req.params;
+        const {id} = req.params;
         const trees = await sharedTrees.getSharedTreeById(id);
         res.status(200).json(trees);
     }
@@ -77,7 +77,7 @@ const getSharedTreebyReciever = async (req, res) => {
 
 const shareTree = async (req,res) => {
     try{
-        const {senderID, receiverID, perms, parentalSide, treeInfo} = req.body;
+        const {senderID, receiverID, perms, parentalSide, treeInfo, comment} = req.body;
 
         if (!["maternal", "paternal", "both"].includes(parentalSide)){
             return res.status(400).json({
@@ -133,6 +133,7 @@ const shareTree = async (req,res) => {
                 perms,
                 parentalSide,
                 treeInfo,
+                comment,
                 // token
             });
             return res.status(201).json({
