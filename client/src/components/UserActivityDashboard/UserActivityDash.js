@@ -2,7 +2,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import { ReactComponent as DropDown } from "../../assets/dropdown-arrow.svg";
 import NavBar from "../NavBar/NavBar";
 import * as styles from "./styles";
-import CreateEventPopup from "../CreateEvent/CreateEvent";
+
+import CreateEventPopup from "../UserEvents/CreateEvent";
+import { EventCard } from "../UserEvents/EventCard"; 
+
 import CreateMemoryPopup from "../CreateMemory/CreateMemory";
 import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
 import { useCurrentUser } from "../../CurrentUserProvider";
@@ -14,10 +17,9 @@ function Dashboard() {
   const [allEvents, setAllEvents] = useState([]);
   const [searchItem, setSearchItem] = useState("");
   const [sortDate, setSortDate] = useState("newest");
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState([]); 
   const [isHovering, setIsHovering] = useState(false);
 
-  // 1. FIXED: Destructure the correct variable from context
   const { currentAccountID, loading } = useCurrentUser();
 
   const ButtonStyle = {
@@ -35,67 +37,53 @@ function Dashboard() {
   };
 
   const fetchEvents = useCallback(async () => {
-    // 2. FIXED: Use currentAccountID (the UUID)
     if (!currentAccountID) return;
-
     const { data, error } = await supabase
       .from("event")
       .select("*")
-      .eq("userid", currentAccountID) // Match the UUID in your database
+      .eq("userid", currentAccountID)
       .order("date", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching events:", error);
-    } else {
-      setAllEvents(data || []);
-    }
+    if (!error) setAllEvents(data || []);
   }, [currentAccountID]);
 
   useEffect(() => {
-    // 3. Only fetch if we aren't loading and have an ID
-    if (!loading && currentAccountID) {
-      fetchEvents();
-    }
+    if (!loading && currentAccountID) fetchEvents();
   }, [currentAccountID, loading, fetchEvents]);
 
   useEffect(() => {
     let sortedEvents = [...allEvents];
-
     sortedEvents.sort((a, b) =>
-      sortDate === "newest"
-        ? new Date(b.date) - new Date(a.date)
-        : new Date(a.date) - new Date(b.date)
+      sortDate === "newest" ? new Date(b.date) - new Date(a.date) : new Date(a.date) - new Date(b.date)
     );
 
     const searched = sortedEvents.filter(event =>
       (event.title && event.title.toLowerCase().includes(searchItem.toLowerCase())) ||
       (event.date && event.date.includes(searchItem))
     );
-
     setSearchResults(searched);
   }, [searchItem, sortDate, allEvents]);
 
-  // Handle Loading state
-  if (loading) return <div style={styles.DefaultStyle}><NavBar /><p>Loading events...</p></div>;
+  if (loading) return <div style={styles.DefaultStyle}><NavBar /><p>Loading...</p></div>;
 
   return (
     <div style={styles.DefaultStyle}>
       <NavBar />
-
       <div style={styles.RightSide}>
         <div style={styles.Container}>
           <h1 style={styles.Header}>Family Events</h1>
-
-          <input
-            style={styles.SearchBar}
-            type="text"
-            placeholder="Search by title or date..."
-            value={searchItem}
-            onChange={(e) => setSearchItem(e.target.value)}
+          
+          <input 
+            style={styles.SearchBar} 
+            type="text" 
+            placeholder="Search by title or date..." 
+            value={searchItem} 
+            onChange={(e) => setSearchItem(e.target.value)} 
           />
 
           <div style={styles.ButtonDivStyle}>
             <CreateEventPopup
+              onEventCreated={fetchEvents}
               trigger={
                 <button
                   style={ButtonStyle}
@@ -105,14 +93,10 @@ function Dashboard() {
                   Create Event
                 </button>
               }
-              onEventCreated={fetchEvents} // This will refresh the list after posting!
             />
-
             <button
               style={{ margin: "10px" }}
-              onClick={() =>
-                setSortDate(sortDate === "newest" ? "oldest" : "newest")
-              }
+              onClick={() => setSortDate(sortDate === "newest" ? "oldest" : "newest")}
             >
               Sort by: {sortDate === "newest" ? "Newest First" : "Oldest First"}
               <DropDown style={{ width: "23px", height: "25px" }} />
@@ -122,22 +106,13 @@ function Dashboard() {
           <div style={styles.ListStyle}>
             {searchResults.length > 0 ? (
               searchResults.map((event) => (
-                <div key={event.id}>
-                  <div style={styles.CardContainer}>
-                    <h2>{event.title}</h2>
-                    <p style={styles.TextStyle}>
-                      Date: {new Date(event.date).toLocaleDateString()}
-                    </p>
-                    <p style={styles.TextStyle}>{event.description}</p>
-                  </div>
-                </div>
+                <EventCard key={event.id} event={event} onRefresh={fetchEvents}/>
               ))
             ) : (
-              <p style={{ textAlign: 'center', marginTop: '20px' }}>No events found. Try creating one!</p>
+              <p style={{ textAlign: 'center', marginTop: '20px' }}>No events found.</p>
             )}
           </div>
         </div>
-
         <CreateMemoryPopup trigger={<PlusIcon style={styles.PlusButton} />} />
       </div>
     </div>

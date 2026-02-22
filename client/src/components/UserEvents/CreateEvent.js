@@ -12,11 +12,11 @@ import supabase from "../../supabaseClient";
 function CreateEventPopup({ trigger, onEventCreated }) {
   const { register, handleSubmit, reset } = useForm();
   
-  // Grab currentAccountID (the UUID) from context
+  // Grab currentAccountID (UUID) from context
   const { currentAccountID, currentUserName, loading } = useCurrentUser();
 
   const onSubmit = async (formData, close) => {
-    // Check for currentAccountID because your table 'userid' column is a UUID
+    // Check for currentAccountID 
     if (!currentAccountID) {
       alert("User session not found. Please log in again.");
       return;
@@ -26,7 +26,7 @@ function CreateEventPopup({ trigger, onEventCreated }) {
       title: formData.title,
       date: formData.date,
       description: formData.description || null,
-      userid: currentAccountID, // Use the UUID to satisfy the database Foreign Key
+      userid: currentAccountID, 
     };
 
     const { data, error } = await supabase

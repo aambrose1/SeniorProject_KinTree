@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import * as styles from './styles';
 import { ReactComponent as CalendarIcon } from '../../assets/calendar.svg';
 import { ReactComponent as PlusIcon } from '../../assets/plus-sign.svg';
-import CreateEventPopup from '../../components/CreateEvent/CreateEvent';
+import CreateEventPopup from '../../components/UserEvents/CreateEvent';
 import CreateMemoryPopup from '../../components/CreateMemory/CreateMemory';
 import NavBar from '../../components/NavBar/NavBar';
 
