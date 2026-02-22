@@ -31,6 +31,7 @@ export async function registerUser(email, password, metadata = {}) {
           lastName: metadata.lastName || metadata.last_name || null,
           phoneNumber: metadata.phoneNumber || metadata.phone_number || metadata.phonenum || null,
           birthDate: metadata.birthDate || metadata.birthdate || null,
+          gender: metadata.gender || null,
         })
       });
     }

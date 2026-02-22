@@ -29,7 +29,7 @@ const User = {
             .from('users')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
         if (error) throw error;
         return data;
     },
@@ -71,7 +71,7 @@ const User = {
         return data;
     },
 
-    upsertByAuthUser: async ({ auth_uid, email, username, firstName, lastName, phoneNumber, birthDate }) => {
+    upsertByAuthUser: async ({ auth_uid, email, username, firstName, lastName, phoneNumber, birthDate, gender }) => {
         // Map to lowercase columns and drop null/undefined so we don't overwrite with nulls
         const rawPayload = {
             auth_uid,
@@ -81,6 +81,7 @@ const User = {
             lastname: lastName,
             phonenumber: phoneNumber,
             birthdate: birthDate,
+            gender: gender
         };
         const payload = Object.fromEntries(
             Object.entries(rawPayload).filter(([_, v]) => v !== undefined && v !== null && v !== '')
@@ -88,7 +89,7 @@ const User = {
         const { data, error } = await supabase
             .from('users')
             .upsert([ payload ], { onConflict: 'auth_uid' })
-            .select('id, auth_uid, email, username, firstname, lastname, phonenumber, birthdate')
+            .select('id, auth_uid, email, username, firstname, lastname, phonenumber, birthdate, gender')
             .single();
         if (error) throw error;
         return data;
@@ -97,6 +98,7 @@ const User = {
 
 // Helper to resolve UUID (auth_uid) to integer user ID
 const resolveUserIdFromAuthUid = async (authUidOrIntId) => {
+    try {
     // If it's already an integer, return it
     if (!isNaN(authUidOrIntId) && !authUidOrIntId.toString().includes('-')) {
         return parseInt(authUidOrIntId);
@@ -105,6 +107,10 @@ const resolveUserIdFromAuthUid = async (authUidOrIntId) => {
     const user = await User.findByAuthUid(authUidOrIntId);
     if (!user) return null;
     return user.id;
+    } catch (error) {
+        console.error('Error resolving user ID from auth_uid:', error);
+        return null;
+    }
 };
 
 User.resolveUserIdFromAuthUid = resolveUserIdFromAuthUid;
