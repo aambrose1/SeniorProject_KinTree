@@ -70,6 +70,17 @@ const sharedTrees = {
             .maybeSingle();
         if (error) throw error;
         return data;
+    },
+
+    deleteSharedTree: async (id) => {
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .delete()
+            .eq('sharedtreeid', id)
+            .select('*')
+            .single();
+        if (error) throw error;
+        return data;
     }
 };
 

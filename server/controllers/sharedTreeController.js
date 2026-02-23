@@ -240,5 +240,21 @@ const assignNewMemberRelationship = async (req, res) => {
 
 }
 
+const deleteSharedTree = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedTree = await sharedTrees.deleteSharedTree(id);
+        res.status(200).json({
+            message: 'Shared tree deleted successfully',
+            deletedTree
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: 'Error deleting shared tree'
+        });
+    }
+};
 
-module.exports = {getSharedTreeById, getSharedTreeByToken, getSharedTreeBySender, getSharedTreebyReciever,shareTree, assignNewMemberRelationship, mergeMembers }
+
+module.exports = {getSharedTreeById, getSharedTreeByToken, getSharedTreeBySender, getSharedTreebyReciever,shareTree, assignNewMemberRelationship, mergeMembers, deleteSharedTree }

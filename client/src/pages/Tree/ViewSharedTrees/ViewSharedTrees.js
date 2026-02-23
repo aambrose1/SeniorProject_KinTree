@@ -22,6 +22,31 @@ function ViewSharedTrees() {
         return `${diffDays} days ago`;
     };
 
+    const handleDeleteTree = async (sharedTreeId) => {
+        if (!window.confirm('Are you sure you want to delete this shared tree?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/share-trees/${sharedTreeId}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                // Remove the deleted tree from the state
+                setTrees(prevTrees => prevTrees.filter(tree => tree.sharedtreeid !== sharedTreeId));
+                console.log('Shared tree deleted successfully');
+            } else {
+                const errorData = await response.json();
+                console.error('Error deleting shared tree:', errorData);
+                alert('Failed to delete shared tree');
+            }
+        } catch (error) {
+            console.error('Error deleting shared tree:', error);
+            alert('Failed to delete shared tree');
+        }
+    };
+
     useEffect(() => {
         async function fetchTrees() {
             const response = await fetch(`http://localhost:5000/api/share-trees/receiver/${currentAccountID}`)
@@ -89,10 +114,29 @@ function ViewSharedTrees() {
                                         </div>
                                     )}
                                 </div>
-                                {/* TO DO: Make this tree page work */}
-                                <Link to={`/sharedtree/${tree.sharedtreeid}`} style={{ color: '#000', marginLeft: '15px', whiteSpace: 'nowrap' }}>
-                                    View Tree
-                                </Link>
+                                <div style={{ display: 'flex', gap: '10px', marginLeft: '15px', whiteSpace: 'nowrap' }}>
+                                    {/* view tree*/}
+                                    <Link to={`/sharedtree/${tree.sharedtreeid}`} style={{ color: '#000' }}>
+                                        View Tree
+                                    </Link>
+                                    {/* delete tree */}
+                                    <button 
+                                        onClick={() => handleDeleteTree(tree.sharedtreeid)}
+                                        style={{ 
+                                            background: 'none', 
+                                            border: 'none', 
+                                            color: '#d32f2f', 
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline',
+                                            padding: 0,
+                                            fontFamily: 'inherit',
+                                            fontSize: 'inherit'
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                    {/* TODO: merge tree button and functionality */}
+                                </div>
                             </div>
                         </li>
                     ))}
