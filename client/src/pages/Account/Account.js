@@ -176,46 +176,89 @@ function Account() {
         console.log("current account id:", supabaseUser.id);
         console.log("viewing account id:", id);
         setSaveError('');
-        const requestOptions = {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-        };
 
-        fetch(`http://localhost:5000/api/family-members/member/${id}`, requestOptions)
+        // Attempt fetching from the registered users table first (like bug/edit-acc)
+        fetch(`http://localhost:5000/api/auth/user/${id}`)
             .then(async (response) => {
                 if (response.ok) {
-                    const data = await response.json();
+                    const dbUser = await response.json();
                     setUserData({
-                        displayName: data.display_name || '',
-                        firstName: data.firstname,
-                        lastName: data.lastname,
-                        email: data.email,
-                        birthdate: data.birthdate,
-                        address: data.address,
-                        city: data.city,
-                        state: data.state,
-                        country: data.country,
-                        phone_number: data.phonenumber,
-                        zipcode: data.zipcode,
-                        id: data.id,
-                        memberUserId: data.memberuserid,
-                        profilePictureUrl: data.profile_picture_url || '',
-                        bio: data.bio || ''
+                        id: dbUser.id,
+                        displayName: dbUser.display_name || '',
+                        firstName: dbUser.firstname || dbUser.firstName || 'User',
+                        lastName: dbUser.lastname || dbUser.lastName || '',
+                        email: dbUser.email || '',
+                        birthdate: dbUser.birthdate || dbUser.birthDate || '',
+                        address: dbUser.address || '',
+                        city: dbUser.city || '',
+                        state: dbUser.state || '',
+                        country: dbUser.country || '',
+                        phone_number: dbUser.phonenumber || dbUser.phoneNumber || '',
+                        zipcode: dbUser.zipcode || '',
+                        bio: dbUser.bio || '',
+                        profilePictureUrl: dbUser.profile_picture_url || ''
                     });
                 } else {
-                    console.error('Error fetching user data:', response);
-                    // If family member not found, show basic info
-                    setUserData({
-                        id: id,
-                        displayName: '',
-                        firstName: 'Unknown',
-                        lastName: 'User',
-                        email: '',
-                    });
+                    // If not found as a regular user, fall back to the family members endpoint
+                    const requestOptions = {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' },
+                    };
+
+                    fetch(`http://localhost:5000/api/family-members/member/${id}`, requestOptions)
+                        .then(async (response) => {
+                            if (response.ok) {
+                                const data = await response.json();
+                                setUserData({
+                                    displayName: data.display_name || '',
+                                    firstName: data.firstname,
+                                    lastName: data.lastname,
+                                    email: data.email,
+                                    birthdate: data.birthdate,
+                                    address: data.address,
+                                    city: data.city,
+                                    state: data.state,
+                                    country: data.country,
+                                    phone_number: data.phonenumber,
+                                    zipcode: data.zipcode,
+                                    id: data.id,
+                                    memberUserId: data.memberuserid,
+                                    profilePictureUrl: data.profile_picture_url || '',
+                                    bio: data.bio || ''
+                                });
+                            } else {
+                                console.error('Error fetching user data:', response);
+                                // If family member not found, show basic info
+                                setUserData({
+                                    id: id,
+                                    displayName: '',
+                                    firstName: 'Unknown',
+                                    lastName: 'User',
+                                    email: '',
+                                });
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('There was a problem with the fetch operation:', error);
+                            setUserData({
+                                id: id,
+                                displayName: '',
+                                firstName: 'Unknown',
+                                lastName: 'User',
+                                email: '',
+                            });
+                        });
                 }
             })
             .catch((error) => {
-                console.error('There was a problem with the fetch operation:', error);
+                console.error('Error in fetching user data flow:', error);
+                setUserData({
+                    id: id,
+                    displayName: '',
+                    firstName: 'Unknown',
+                    lastName: 'User',
+                    email: '',
+                });
             });
     }, [id, supabaseUser]);
 
