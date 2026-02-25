@@ -1,4 +1,4 @@
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import * as styles from './styles';
 import logo from '../../assets/kintreelogo-adobe.png';
 import { useForm } from 'react-hook-form';
@@ -10,9 +10,6 @@ import { supabase } from '../../utils/supabaseClient';
 function Login() {
     const { register, handleSubmit } = useForm();
     const [ errorMessage, setErrorMessage ] = useState("");
-    const [ needsConfirm, setNeedsConfirm ] = useState(false);
-    const [ attemptedEmail, setAttemptedEmail ] = useState("");
-    const [ resendLoading, setResendLoading ] = useState(false);
     const { setCurrentAccountID, fetchCurrentUserID, fetchCurrentAccountID } = useCurrentUser();
     const [ mfaStep, setMfaStep ] = useState(false);
     const [ mfaFactorId, setMfaFactorId ] = useState("");
@@ -22,8 +19,6 @@ function Login() {
     
     const onSubmit = async (data) => {
         setErrorMessage(""); // clear previous errors
-        setNeedsConfirm(false);
-        setAttemptedEmail(data.email);
         try {
           await handleLogin(data.email, data.password); // password step
           // After password login, check for verified TOTP factor
@@ -41,13 +36,8 @@ function Login() {
           // No MFA required → proceed
           window.location.href = '/';
         } catch (error) {
-          const msg = String(error?.message || '').toLowerCase();
-          const requiresConfirm = msg.includes('confirm') || msg.includes('not confirmed');
-          if (requiresConfirm) {
-            setNeedsConfirm(true);
-          } else {
-            setErrorMessage(error.message);
-          }
+          // Email verification is now optional, so don't show confirmation errors
+          setErrorMessage(error.message);
         }
       };
 
@@ -63,27 +53,15 @@ function Login() {
         }
     }
 
-    const handleResendConfirmation = async () => {
-        if (!attemptedEmail) return;
-        setResendLoading(true);
-        try {
-            const { error } = await supabase.auth.resend({
-                type: 'signup',
-                email: attemptedEmail,
-                options: { emailRedirectTo: `${window.location.origin}/login` }
-            });
-            if (error) throw error;
-            // surface a lightweight notice
-            setErrorMessage('Confirmation email sent. Please check your inbox.');
-        } catch (e) {
-            setErrorMessage(e.message);
-        } finally {
-            setResendLoading(false);
-        }
-    }
-
-    document.body.style.overflow = 'hidden';
-    document.body.style.width = '100%'; 
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.body.style.width = '100%';
+        
+        return () => {
+            document.body.style.overflow = '';
+            document.body.style.width = '';
+        };
+    }, []);
 
     return (
         <div style={styles.DefaultStyle}>
@@ -92,22 +70,6 @@ function Login() {
                 <h1 style={styles.Header}>Sign In</h1>
                 {!mfaStep && (
                 <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
-                    {needsConfirm && (
-                        <div style={{
-                            background: '#fff8e1',
-                            border: '1px solid #ffe082',
-                            color: '#8d6e63',
-                            padding: '12px',
-                            borderRadius: '8px',
-                            marginBottom: '12px',
-                            textAlign: 'center'
-                        }}>
-                            <div>Please confirm your email to continue. We sent a link to<br/><strong>{attemptedEmail}</strong></div>
-                            <button type="button" onClick={handleResendConfirmation} disabled={resendLoading} style={{ marginTop: '8px' }}>
-                                {resendLoading ? 'Resending...' : 'Resend confirmation email'}
-                            </button>
-                        </div>
-                    )}
                     <ul style={styles.ListStyle}>
                         <li style={styles.ItemStyle}>
                             <label>
