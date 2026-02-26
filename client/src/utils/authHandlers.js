@@ -13,8 +13,7 @@ export async function handleLogin(email, password) {
     return data;
   } catch (error) {
     console.error('Login error:', error.message);
-    alert(error.message);
-    throw error; // so form onSubmit can catch it
+    throw error; // so form onSubmit can catch it (error displayed in red text on login page)
   }
 }
 
