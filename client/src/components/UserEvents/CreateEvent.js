@@ -16,34 +16,37 @@ function CreateEventPopup({ trigger, onEventCreated }) {
   const { currentAccountID, currentUserName, loading } = useCurrentUser();
 
   const onSubmit = async (formData, close) => {
-    // Check for currentAccountID 
-    if (!currentAccountID) {
-      alert("User session not found. Please log in again.");
-      return;
-    }
+  const { data: { session } } = await supabase.auth.getSession();
+  const trueUuid = session?.user?.id;
 
-    const newEvent = {
-      title: formData.title,
-      date: formData.date,
-      description: formData.description || null,
-      userid: currentAccountID, 
-    };
+  if (!trueUuid) {
+    alert("User session not found.");
+    return;
+  }
 
-    const { data, error } = await supabase
-      .from("event")
-      .insert([newEvent])
-      .select();
-
-    if (error) {
-      console.error("Supabase Error:", error);
-      alert("Error: " + error.message);
-      return;
-    }
-
-    if (onEventCreated) onEventCreated();
-    reset();
-    close();
+  const newEvent = {
+    title: formData.title,
+    date: formData.date,
+    description: formData.description || null,
+    userid: trueUuid, 
   };
+
+  const { data, error } = await supabase
+    .from("event")
+    .insert([newEvent])
+    .select(); // This returns the newly created event object
+
+  if (error) {
+    console.error("Supabase Error:", error);
+    return;
+  }
+
+  // Pass the NEW event data back to the dashboard
+  if (onEventCreated && data) onEventCreated(data[0]); 
+  
+  reset();
+  close();
+};
 
   return (
     <Popup trigger={trigger} modal>

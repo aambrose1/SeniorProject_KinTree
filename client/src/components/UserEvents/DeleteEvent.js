@@ -13,7 +13,8 @@ export async function deleteEvent(eventId, onDeleted) {
     if (error) {
       alert("Error deleting event: " + error.message);
     } else {
-      if (onDeleted) onDeleted(); // refreshes the dashboard list
+      if (onDeleted) onDeleted(eventId); // refreshes the dashboard list
     }
   }
 }
+

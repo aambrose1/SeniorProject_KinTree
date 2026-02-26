@@ -22,6 +22,7 @@ function Dashboard() {
 
   const { currentAccountID, loading } = useCurrentUser();
 
+  // Defined locally to support the hover state
   const ButtonStyle = {
     fontFamily: 'Alata',
     backgroundColor: isHovering ? '#3a5a40' : '#ccdecc',
@@ -36,20 +37,46 @@ function Dashboard() {
     height: '45px'
   };
 
-  const fetchEvents = useCallback(async () => {
-    if (!currentAccountID) return;
+const fetchEvents = useCallback(async () => {
+    // 1. Grab the real Auth UUID from the active session
+    const { data: { session } } = await supabase.auth.getSession();
+    const trueUuid = session?.user?.id;
+
+    if (!trueUuid) return;
+
+    // 2. Pass that true UUID to Supabase instead of currentAccountID
     const { data, error } = await supabase
       .from("event")
       .select("*")
-      .eq("userid", currentAccountID)
+      .eq("userid", trueUuid) 
       .order("date", { ascending: false });
 
-    if (!error) setAllEvents(data || []);
-  }, [currentAccountID]);
+    if (error) {
+      console.error("Error fetching events:", error);
+    } else {
+      setAllEvents(data || []);
+    }
+  }, []); // We can remove currentAccountID from the dependencies here
 
+// 3. Update the useEffect to just run fetchEvents on load
   useEffect(() => {
-    if (!loading && currentAccountID) fetchEvents();
-  }, [currentAccountID, loading, fetchEvents]);
+    if (!loading) fetchEvents();
+  }, [loading, fetchEvents]);
+
+  // NEW: Logic to update UI without a full page refresh
+  const handleEventCreated = (newEvent) => {
+    setAllEvents((prev) => [newEvent, ...prev]);
+  };
+
+  const handleEventDeleted = (id) => {
+    setAllEvents((prev) => prev.filter(event => event.id !== id));
+  };
+
+  const handleEventUpdated = (updatedEvent) => {
+    setAllEvents((prev) => prev.map(event => 
+      event.id === updatedEvent.id ? updatedEvent : event
+    ));
+  };
 
   useEffect(() => {
     let sortedEvents = [...allEvents];
@@ -83,7 +110,7 @@ function Dashboard() {
 
           <div style={styles.ButtonDivStyle}>
             <CreateEventPopup
-              onEventCreated={fetchEvents}
+              onEventCreated={handleEventCreated} 
               trigger={
                 <button
                   style={ButtonStyle}
@@ -106,7 +133,12 @@ function Dashboard() {
           <div style={styles.ListStyle}>
             {searchResults.length > 0 ? (
               searchResults.map((event) => (
-                <EventCard key={event.id} event={event} onRefresh={fetchEvents}/>
+                <EventCard 
+                  key={event.id} 
+                  event={event} 
+                  onDeleted={handleEventDeleted} 
+                  onUpdated={handleEventUpdated}
+                />
               ))
             ) : (
               <p style={{ textAlign: 'center', marginTop: '20px' }}>No events found.</p>

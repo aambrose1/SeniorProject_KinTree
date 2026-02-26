@@ -17,19 +17,27 @@ function EditEventPopup({ trigger, event, onEventUpdated }) {
   });
 
   const onSubmit = async (formData, close) => {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("event")
       .update({
         title: formData.title,
         date: formData.date,
         description: formData.description
       })
-      .eq("id", event.id);
+      .eq("id", event.id)
+      .select(); // 1. THIS IS REQUIRED to get the new data back
 
     if (error) {
       alert("Error updating event: " + error.message);
     } else {
-      if (onEventUpdated) onEventUpdated();
+      // 2. THIS IS THE FIX: We must pass data[0] back to the dashboard. 
+      // If we just put onEventUpdated(), it sends 'undefined' and causes the crash!
+      if (onEventUpdated && data && data.length > 0) {
+        onEventUpdated(data[0]); 
+      } else if (onEventUpdated) {
+        // Fallback just in case Supabase select() fails but update succeeds
+        onEventUpdated({ ...event, ...formData }); 
+      }
       close();
     }
   };

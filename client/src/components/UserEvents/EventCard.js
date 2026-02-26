@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import * as styles from './styles';
 import EditEventPopup from './EditEvent'; 
 import { deleteEvent } from './DeleteEvent'; 
-export function EventCard({ event, onRefresh }) {
+
+// 1. Catch the specific props from UserActivityDash here:
+export function EventCard({ event, onDeleted, onUpdated }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const characterLimit = 150; 
@@ -37,17 +39,17 @@ export function EventCard({ event, onRefresh }) {
       
       <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '15px' }}>
         
-        {/* EDIT ACTION: */}
+        {/* 2. Pass onUpdated to the Edit popup */}
         <EditEventPopup 
           event={event} 
-          onEventUpdated={onRefresh}
+          onEventUpdated={onUpdated} 
           trigger={<button style={styles.GrayButtonStyle}>Edit</button>} 
         />
 
-        {/* DELETE ACTION: */}
+        {/* 3. Pass onDeleted to the Delete action */}
         <button 
           style={{ ...styles.GrayButtonStyle, backgroundColor: '#ffcccc' }} 
-          onClick={() => deleteEvent(event.id, onRefresh)}
+          onClick={() => deleteEvent(event.id, onDeleted)}
         >
           Delete
         </button>
