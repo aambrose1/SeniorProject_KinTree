@@ -9,6 +9,7 @@ import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
 import { useCurrentUser } from '../../CurrentUserProvider';
 import { familyTreeService } from '../../services/familyTreeService';
+import { addRelationship } from '../../utils/relationUtil';
 
 // TODO: make form clear when dismissed by clicking outside of modal
 //       make sync contact button functional
@@ -29,7 +30,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     reset,
     watch,
     handleSubmit,
-  } = useForm({defaultValues: {selectedMember: '', selectedMemberRelationship: '', matPat: ''}});
+  } = useForm({ defaultValues: { selectedMember: '', selectedMemberRelationship: '', matPat: '' } });
 
   // stored list of family members that require maternal/paternal distinction (maybe shift this to retrieval from backend, so that it can be updated without changing code)
   let matPat = useMemo(() => ["parent", "cousin", "aunt", "uncle", "grandparent", "niece", "nephew"], []);
@@ -38,7 +39,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   const selectedMemberRelationship = watch("selectedMemberRelationship");
   var enableMatPat = useRef(false);
   useEffect(() => {
-    if(matPat.includes(selectedMemberRelationship)) {
+    if (matPat.includes(selectedMemberRelationship)) {
       enableMatPat.current = true;
     }
     else {
@@ -50,7 +51,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   const {
     register: register2,
     handleSubmit: handleSubmit2,
-  } = useForm({defaultValues: {firstName: '', lastName: '', relationship: '', matPat2: '', location: '', birthday: '', birthplace: '', deathdate: '', gender: ''}});
+  } = useForm({ defaultValues: { firstName: '', lastName: '', relationship: '', matPat2: '', location: '', birthday: '', birthplace: '', deathdate: '', gender: '' } });
 
 
 
@@ -75,11 +76,11 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       }
 
       // populate users list
-      try{
+      try {
         const responseData = await familyTreeService.getRegisteredUsers();
         console.log('Registered users:', responseData);
-        users.current = responseData.filter(user => 
-          user.username.toLowerCase().includes(searchTerm.toLowerCase()) && 
+        users.current = responseData.filter(user =>
+          user.username.toLowerCase().includes(searchTerm.toLowerCase()) &&
           !family.current.some(member => member.id === user.id));
         setSearchResults(users.current);
       } catch (error) {
@@ -141,8 +142,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         memberuserid: selectedUser.id, // Existing user's ID
         gender: selectedUser.gender
       };
-      
-       // get account treemember id
+
+      // get account treemember id
       let treeUser = await familyTreeService.getFamilyMemberByUserId(currentAccountID);
       const treeUserId = treeUser.id;
       console.log(treeUserId, 'user treemember id');
@@ -172,11 +173,43 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         throw new Error(relData.error || 'Failed to add relationship');
       }
 
+      // --- Update treeinfo so the new member appears on the tree visualization ---
+      try {
+        const treeData = await familyTreeService.getFamilyTreeByUserId(currentAccountID);
+        const treeIndex = Object.fromEntries(treeData.map(person => [person.id, person]));
+
+        // Use the treeMemberId as the node ID for the new member
+        const newNodeId = `${treeMemberId}`;
+        const relativeNodeId = `${treeUserId}`;
+
+        // Add new node to tree index
+        treeIndex[newNodeId] = {
+          "id": newNodeId,
+          "data": {
+            "first name": selectedUser.firstname,
+            "last name": selectedUser.lastname,
+            "gender": selectedUser.gender || ""
+          },
+          "rels": {}
+        };
+
+        // Add the relationship links in the tree data
+        addRelationship(treeIndex, newNodeId, relativeNodeId, data.selectedMemberRelationship);
+
+        // Persist updated tree
+        const updatedTreeData = Object.values(treeIndex);
+        await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
+        console.log('Tree info updated with new member');
+      } catch (treeError) {
+        console.error('Warning: Member added but tree visualization update failed:', treeError);
+        // Don't throw - the member was still added successfully
+      }
+
       reset();
       close();
 
       console.log(relData.message);
-      return window.location.href = `/account/${selectedUser.id}`; // redirect to account page
+      return window.location.href = `/tree`; // redirect to tree page to see the update
 
     } catch (error) {
       console.error('Error:', error);
@@ -189,22 +222,22 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     console.log("submit attempted");
     // console.log("Form data:", data);
     setErrorMessage("");
-    
+
     try {
       // add new member to family members table
       let memberData = {
-          firstname: data.firstName,
-          lastname: data.lastName,
-          birthdate: data.birthDate,
-          deathdate: data.deathDate,
-          location: data.location || null,
-          phonenumber: data.phoneNumber || null,
-          userid: currentAccountID, // The user adding the family member
-          memberuserid: null, // manually added members do not have associated user accounts
-          gender: data.gender 
-        }
+        firstname: data.firstName,
+        lastname: data.lastName,
+        birthdate: data.birthDate,
+        deathdate: data.deathDate,
+        location: data.location || null,
+        phonenumber: data.phoneNumber || null,
+        userid: currentAccountID, // The user adding the family member
+        memberuserid: null, // manually added members do not have associated user accounts
+        gender: data.gender
+      }
 
-       // get account treemember id
+      // get account treemember id
       let treeUser = await familyTreeService.getFamilyMemberByUserId(currentAccountID);
       const treeUserId = treeUser.id;
       console.log(treeUserId, 'user treemember id');
@@ -228,16 +261,49 @@ function AddFamilyMemberPopup({ trigger, userid }) {
           userId: userid,
         })
       });
-      
+
       const relData = await relResponse.json();
       if (!relResponse.ok) {
         throw new Error(relData.error || 'Failed to add relationship');
       }
       console.log(relData.message);
+
+      // --- Update treeinfo so the new member appears on the tree visualization ---
+      try {
+        const treeData = await familyTreeService.getFamilyTreeByUserId(currentAccountID);
+        const treeIndex = Object.fromEntries(treeData.map(person => [person.id, person]));
+
+        // Use the treeMemberId as the node ID for the new member
+        const newNodeId = `${treeMemberId}`;
+        const relativeNodeId = `${treeUserId}`;
+
+        // Add new node to tree index
+        treeIndex[newNodeId] = {
+          "id": newNodeId,
+          "data": {
+            "first name": data.firstName,
+            "last name": data.lastName,
+            "gender": data.gender || ""
+          },
+          "rels": {}
+        };
+
+        // Add the relationship links in the tree data
+        addRelationship(treeIndex, newNodeId, relativeNodeId, data.relationship);
+
+        // Persist updated tree
+        const updatedTreeData = Object.values(treeIndex);
+        await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
+        console.log('Tree info updated with new manual member');
+      } catch (treeError) {
+        console.error('Warning: Member added but tree visualization update failed:', treeError);
+        // Don't throw - the member was still added successfully
+      }
+
       reset();
       close();
-      return window.location.href = `/account/${treeMemberId}`;
-      
+      return window.location.href = `/tree`; // redirect to tree page to see the update
+
     } catch (error) {
       console.error('Error:', error);
       setErrorMessage(error.message);
@@ -259,36 +325,36 @@ function AddFamilyMemberPopup({ trigger, userid }) {
               </button>
             </div>
 
-            <form key={1} onSubmit={handleSubmit(data => onSubmitExisting(data, close))}> 
+            <form key={1} onSubmit={handleSubmit(data => onSubmitExisting(data, close))}>
               <div style={styles.MainContainerStyle}>
                 <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
                   <h2 style={{ marginTop: '0px', margin: '0' }}>Add Family Member</h2>
                 </div>
 
                 {/* Error message display */}
-                  {errorMessage && (
-                    <div style={{ 
-                      backgroundColor: '#ffebee', 
-                      color: '#c62828', 
-                      padding: '10px', 
-                      borderRadius: '5px', 
-                      margin: '10px',
-                      textAlign: 'center',
-                      fontFamily: 'Alata',
-                      border: '1px solid #ef5350'
-                    }}>
-                      {errorMessage}
-                    </div>
-                  )}
+                {errorMessage && (
+                  <div style={{
+                    backgroundColor: '#ffebee',
+                    color: '#c62828',
+                    padding: '10px',
+                    borderRadius: '5px',
+                    margin: '10px',
+                    textAlign: 'center',
+                    fontFamily: 'Alata',
+                    border: '1px solid #ef5350'
+                  }}>
+                    {errorMessage}
+                  </div>
+                )}
 
                 {/* search for existing user */}
                 <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                   <input
-                      type="text"
-                      placeholder="Search for a family member..."
-                      style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', fontFamily: 'Alata', margin: '10px' }}
-                      value={searchTerm}
-                      onChange={e => setSearchTerm(e.target.value)}
+                    type="text"
+                    placeholder="Search for a family member..."
+                    style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', fontFamily: 'Alata', margin: '10px' }}
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
                   />
                 </div>
 
@@ -321,25 +387,25 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   <label>
                     Relationship:
                     <select {...register("selectedMemberRelationship", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''}>
-                        <option value="" disabled hidden>Select</option>
-                        <option value="spouse">Spouse</option>
-                        <option value="child">Child</option>
-                        <option value="parent">Parent</option>
-                        <option value="sibling">Sibling</option>
-                        <option value="cousin">Cousin</option>
-                        <option value="aunt">Aunt</option>
-                        <option value="uncle">Uncle</option>
-                        <option value="grandparent">Grandparent</option>
-                        <option value="grandchild">Grandchild</option>
-                        <option value="niece">Niece</option>
-                        <option value="nephew">Nephew</option>
+                      <option value="" disabled hidden>Select</option>
+                      <option value="spouse">Spouse</option>
+                      <option value="child">Child</option>
+                      <option value="parent">Parent</option>
+                      <option value="sibling">Sibling</option>
+                      <option value="cousin">Cousin</option>
+                      <option value="aunt">Aunt</option>
+                      <option value="uncle">Uncle</option>
+                      <option value="grandparent">Grandparent</option>
+                      <option value="grandchild">Grandchild</option>
+                      <option value="niece">Niece</option>
+                      <option value="nephew">Nephew</option>
                     </select>
                   </label>
                 </div>
 
                 <div style={{ marginTop: '10px', display: matPat.includes(selectedMemberRelationship) ? 'block' : 'none' }}>
-                  <input type="radio" name="matPat" value="maternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })}/> * Maternal
-                  <input type="radio" name="matPat" value="paternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })}/> * Paternal
+                  <input type="radio" name="matPat" value="maternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })} /> * Maternal
+                  <input type="radio" name="matPat" value="paternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })} /> * Paternal
                 </div>
 
                 {/* add button */}
@@ -348,16 +414,16 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 </div>
 
                 <div>
-                  <button type="button" onClick={() => {setManual(true);}} style={styles.GrayButtonStyle}>Can't find your family member?</button>
+                  <button type="button" onClick={() => { setManual(true); }} style={styles.GrayButtonStyle}>Can't find your family member?</button>
                 </div>
               </div>
             </form>
 
-              {/* ----------------------- */}
+            {/* ----------------------- */}
           </div>
 
           {/* manual content */}
-          
+
           <div style={{ display: manual ? 'block' : 'none' }}>
             {/* close button */}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -371,26 +437,26 @@ function AddFamilyMemberPopup({ trigger, userid }) {
               <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
                 <h2 style={{ marginTop: '0px' }}>Manually Add Family Member</h2>
               </div>
-    
+
               {/* sync contacts button */}
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                  {/* TODO create handler, backend (?) */}
-                  <button onClick={() => { close(); }} style={styles.GrayButtonStyle}>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <div style={{display: 'flex', }}>Sync Contact</div>
-                          <ImportIcon style={{ width: '20px', height: '20px', margin: '0px 0px 0px 10px' }} />
-                      </div>
-                      
-                  </button>
+                {/* TODO create handler, backend (?) */}
+                <button onClick={() => { close(); }} style={styles.GrayButtonStyle}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', }}>Sync Contact</div>
+                    <ImportIcon style={{ width: '20px', height: '20px', margin: '0px 0px 0px 10px' }} />
+                  </div>
+
+                </button>
               </div>
 
               {/* Error message display */}
               {errorMessage && (
-                <div style={{ 
-                  backgroundColor: '#ffebee', 
-                  color: '#c62828', 
-                  padding: '10px', 
-                  borderRadius: '5px', 
+                <div style={{
+                  backgroundColor: '#ffebee',
+                  color: '#c62828',
+                  padding: '10px',
+                  borderRadius: '5px',
                   margin: '10px',
                   textAlign: 'center',
                   fontFamily: 'Alata',
@@ -399,9 +465,9 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   {errorMessage}
                 </div>
               )}
-    
+
               <ul style={styles.ListStyle}>
-                  {/* required fields */}
+                {/* required fields */}
                 <li style={styles.ItemStyle}>
                   <label>
                     *First Name:
@@ -417,9 +483,9 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 <li style={styles.ItemStyle} >
                   <label>*Gender:
                     <select {...register2("gender", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '85px' }} defaultValue={''} required>
-                        <option value="" disabled hidden>Select</option>
-                        <option value="M">Male</option>
-                        <option value="F">Female</option>
+                      <option value="" disabled hidden>Select</option>
+                      <option value="M">Male</option>
+                      <option value="F">Female</option>
                     </select>
                   </label>
                 </li>
@@ -446,8 +512,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 </li>
 
                 <div style={{ marginTop: '10px', display: matPat.includes(selectedMemberRelationship) ? 'block' : 'none' }}>
-                  <input type="radio" name="matPat2" value="maternal" {...register2("matPat2", { required: matPat.includes(selectedMemberRelationship) })}/> Maternal
-                  <input type="radio" name="matPat2" value="paternal" {...register2("matPat2", { required: matPat.includes(selectedMemberRelationship) })}/> Paternal
+                  <input type="radio" name="matPat2" value="maternal" {...register2("matPat2", { required: matPat.includes(selectedMemberRelationship) })} /> Maternal
+                  <input type="radio" name="matPat2" value="paternal" {...register2("matPat2", { required: matPat.includes(selectedMemberRelationship) })} /> Paternal
                 </div>
 
                 {/* optional fields */}

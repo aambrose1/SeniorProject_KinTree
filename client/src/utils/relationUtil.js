@@ -1,12 +1,48 @@
+/**
+ * Maps extended relationship types to the fundamental tree relationships
+ * that family-chart can represent (parent, child, spouse, sibling).
+ * 
+ * Mapping logic:
+ * - grandparent → parent (structurally, they are an ancestor above)
+ * - grandchild  → child  (structurally, they are a descendant below)
+ * - aunt/uncle  → sibling (of the relative, i.e. they share parents with someone)
+ * - niece/nephew → child  (child of a sibling)
+ * - cousin      → sibling (simplest structural approximation)
+ * 
+ * For the tree visualization, these mappings place the node in a
+ * reasonable position even if the exact relationship is more nuanced.
+ * The precise relationship label is stored separately in the relationships table.
+ */
+function mapToTreeRelationship(relationship) {
+    const mapping = {
+        'parent': 'parent',
+        'child': 'child',
+        'spouse': 'spouse',
+        'sibling': 'sibling',
+        'grandparent': 'parent',
+        'grandchild': 'child',
+        'aunt': 'parent',      // place as same generation as parents
+        'uncle': 'parent',     // place as same generation as parents
+        'niece': 'child',      // place as same generation as children
+        'nephew': 'child',     // place as same generation as children
+        'cousin': 'sibling',   // place as same generation
+    };
+    return mapping[relationship] || relationship;
+}
+
 export function addRelationship(treeIndex, accountUserId, relativeId, relationship) {
     if (!treeIndex[`${accountUserId}`] || !treeIndex[`${relativeId}`]) {
         throw new Error("Account user or relative not found in tree");
     }
-    
+
     const accountUser = treeIndex[`${accountUserId}`]; // the user that the relationship is being added to
     const relative = treeIndex[`${relativeId}`]; // the user that is being added as a relationship
 
-    switch (relationship) {
+    // Map extended relationship types to fundamental tree relationships
+    const treeRelationship = mapToTreeRelationship(relationship);
+    console.log(`Mapping relationship "${relationship}" to tree relationship "${treeRelationship}"`);
+
+    switch (treeRelationship) {
         case "parent": // Relative is the parent of the account user
             // Check if user already has maximum number of parents (2)
             if (accountUser.rels.parents && accountUser.rels.parents.length >= 2) {
@@ -61,26 +97,59 @@ export function addRelationship(treeIndex, accountUserId, relativeId, relationsh
             break;
 
         case "sibling": // Relative is a sibling of the account user
-            // Check if relative has at least one parent
-            if (!relative.rels.parents || relative.rels.parents.length === 0) {
-                throw new Error(`Cannot add as sibling: Selected member has no parents`);
-            }
-
-            // Initialize parents array if it doesn't exist
-            if (!accountUser.rels?.parents) {
-                accountUser.rels.parents = [];
-            }
-
-            // Add the relative's parents as the account user's parents
-            relative.rels.parents.forEach(parentId => {
-                const parent = treeIndex[`${parentId}`];
-                if (!accountUser.rels.parents.includes(`${parentId}`)) {
-                    accountUser.rels.parents.push(`${parentId}`);
+            // If relative has parents, share those parents
+            if (relative.rels.parents && relative.rels.parents.length > 0) {
+                // Initialize parents array if it doesn't exist
+                if (!accountUser.rels?.parents) {
+                    accountUser.rels.parents = [];
                 }
-                if (!parent.rels.children.includes(`${accountUserId}`)) {
-                    parent.rels.children.push(`${accountUserId}`);
+
+                // Add the relative's parents as the account user's parents
+                relative.rels.parents.forEach(parentId => {
+                    const parent = treeIndex[`${parentId}`];
+                    if (!accountUser.rels.parents.includes(`${parentId}`)) {
+                        accountUser.rels.parents.push(`${parentId}`);
+                    }
+                    if (parent && !parent.rels.children.includes(`${accountUserId}`)) {
+                        parent.rels.children.push(`${accountUserId}`);
+                    }
+                });
+            }
+            // If relative has no parents, share the account user's parents
+            else if (accountUser.rels.parents && accountUser.rels.parents.length > 0) {
+                if (!relative.rels?.parents) {
+                    relative.rels.parents = [];
                 }
-            });
+
+                accountUser.rels.parents.forEach(parentId => {
+                    const parent = treeIndex[`${parentId}`];
+                    if (!relative.rels.parents.includes(`${parentId}`)) {
+                        relative.rels.parents.push(`${parentId}`);
+                    }
+                    if (parent) {
+                        if (!parent.rels?.children) parent.rels.children = [];
+                        if (!parent.rels.children.includes(`${relativeId}`)) {
+                            parent.rels.children.push(`${relativeId}`);
+                        }
+                    }
+                });
+            }
+            // If neither has parents, fall back to a simple parent-child link so the node still appears
+            else {
+                console.warn(`Neither user has parents to share for sibling relationship. Adding as child instead.`);
+                if (!accountUser.rels?.children) {
+                    accountUser.rels.children = [];
+                }
+                if (!relative.rels?.parents) {
+                    relative.rels.parents = [];
+                }
+                if (!accountUser.rels.children.includes(`${relativeId}`)) {
+                    accountUser.rels.children.push(`${relativeId}`);
+                }
+                if (!relative.rels.parents.includes(`${accountUserId}`)) {
+                    relative.rels.parents.push(`${accountUserId}`);
+                }
+            }
             break;
 
         case "spouse": // Relative is a spouse of the account user
@@ -105,12 +174,12 @@ export function addRelationship(treeIndex, accountUserId, relativeId, relationsh
             relative.rels?.children.forEach(childId => {
 
                 const child = treeIndex[`${childId}`];
-                
+
                 // Initialize parents array if it doesn't exist
                 if (!child.rels?.parents) {
                     child.rels.parents = [];
                 }
-                
+
                 // Add account user as parent if not already present and child has less than 2 parents
                 if (!child.rels.parents.includes(`${accountUserId}`) && child.rels.parents.length < 2) {
                     child.rels.parents.push(`${accountUserId}`);
@@ -128,8 +197,23 @@ export function addRelationship(treeIndex, accountUserId, relativeId, relationsh
             break;
 
         default:
-            throw new Error("Invalid relationship type");
+            console.warn(`Unrecognized relationship type "${relationship}", falling back to child relationship`);
+            // Fall back: add as a child so the node at least appears on the tree
+            if (!accountUser.rels?.children) {
+                accountUser.rels.children = [];
+            }
+            if (!relative.rels?.parents) {
+                relative.rels.parents = [];
+            }
+            if (!accountUser.rels.children.includes(`${relativeId}`)) {
+                accountUser.rels.children.push(`${relativeId}`);
+            }
+            if (!relative.rels.parents.includes(`${accountUserId}`)) {
+                relative.rels.parents.push(`${accountUserId}`);
+            }
+            break;
     }
 
     return "Successfully added relationship";
 }
+
