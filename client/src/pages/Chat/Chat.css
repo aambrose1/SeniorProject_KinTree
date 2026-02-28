@@ -1,0 +1,301 @@
+/* ============================================================
+   KinTree Chat — Themed Styles
+   Color palette matches the rest of the app:
+     - Page bg:     #E7F2D8
+     - Navbar/sidebar:   #ccdfcd
+     - Hover/active:     #ebffec
+     - Accent:           #4a7c59
+     - Font:             'Alata', sans-serif
+   ============================================================ */
+
+.chat-page-container {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    width: 100vw;
+    background-color: #E7F2D8;
+    overflow: hidden;
+    font-family: 'Alata', sans-serif;
+}
+
+.chat-wrapper {
+    flex-grow: 1;
+    position: relative;
+    height: 100%;
+    margin-left: 150px;
+    /* Account for fixed NavBar width */
+}
+
+/* ---- Main Container ---- */
+.cs-main-container {
+    height: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    font-family: 'Alata', sans-serif !important;
+    background-color: #E7F2D8 !important;
+}
+
+/* ---- Sidebar ---- */
+.cs-sidebar {
+    background-color: #ffffff !important;
+    border-right: 2px solid #ccdfcd !important;
+    max-width: 340px !important;
+    min-width: 280px !important;
+}
+
+.chat-sidebar-header {
+    padding: 16px 20px;
+    background-color: #ccdfcd;
+    border-bottom: 1px solid #b8cfb8;
+}
+
+.chat-sidebar-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #2d5a3d;
+    font-family: 'Alata', sans-serif;
+    font-weight: normal;
+    letter-spacing: 0.3px;
+}
+
+/* ---- Conversation List Items ---- */
+.cs-conversation {
+    border-bottom: 1px solid #f0f5ef !important;
+    transition: background-color 0.2s ease !important;
+    font-family: 'Alata', sans-serif !important;
+}
+
+.cs-conversation:hover {
+    background-color: #ebffec !important;
+}
+
+.cs-conversation.cs-conversation--active {
+    background-color: #dff0df !important;
+    border-left: 3px solid #4a7c59 !important;
+}
+
+.cs-conversation__name {
+    font-family: 'Alata', sans-serif !important;
+    color: #2d3b2d !important;
+    font-size: 14px !important;
+}
+
+.cs-conversation__info {
+    font-size: 12px !important;
+    color: #7a8f7a !important;
+}
+
+/* Unread dot */
+.cs-conversation__unread-dot {
+    background-color: #4a7c59 !important;
+}
+
+/* ---- Conversation Header ---- */
+.cs-conversation-header {
+    background-color: #ffffff !important;
+    border-bottom: 2px solid #ccdfcd !important;
+    padding: 10px 16px !important;
+    font-family: 'Alata', sans-serif !important;
+}
+
+.cs-conversation-header__user-name {
+    font-family: 'Alata', sans-serif !important;
+    color: #2d5a3d !important;
+    font-size: 16px !important;
+}
+
+.cs-conversation-header__info {
+    font-size: 12px !important;
+    color: #7a8f7a !important;
+}
+
+/* ---- Message List ---- */
+.cs-message-list {
+    background-color: #f4f9f0 !important;
+    padding: 16px !important;
+}
+
+/* ---- Messages ---- */
+.cs-message {
+    font-family: 'Alata', sans-serif !important;
+    margin-bottom: 4px !important;
+}
+
+/* Incoming messages */
+.cs-message--incoming .cs-message__content {
+    background-color: #ffffff !important;
+    color: #2d3b2d !important;
+    border-radius: 16px 16px 16px 4px !important;
+    border: 1px solid #e0ece0 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Outgoing messages */
+.cs-message--outgoing .cs-message__content {
+    background-color: #ccdfcd !important;
+    color: #1a2e1a !important;
+    border-radius: 16px 16px 4px 16px !important;
+    border: none !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Message footer (timestamp) */
+.cs-message__footer {
+    font-size: 10px !important;
+    color: #8fa88f !important;
+}
+
+/* ---- Message Separator (date dividers) ---- */
+.cs-message-separator {
+    color: #6b8a6b !important;
+    font-family: 'Alata', sans-serif !important;
+    font-size: 12px !important;
+}
+
+.cs-message-separator::before,
+.cs-message-separator::after {
+    border-color: #ccdfcd !important;
+}
+
+/* ---- Message Input ---- */
+.cs-message-input {
+    background-color: #ffffff !important;
+    border-top: 2px solid #ccdfcd !important;
+    font-family: 'Alata', sans-serif !important;
+}
+
+.cs-message-input__content-editor {
+    background-color: #f8fbf5 !important;
+    border-radius: 20px !important;
+    border: 1px solid #ccdfcd !important;
+    font-family: 'Alata', sans-serif !important;
+    color: #2d3b2d !important;
+}
+
+.cs-message-input__content-editor:focus-within {
+    border-color: #4a7c59 !important;
+    box-shadow: 0 0 0 2px rgba(74, 124, 89, 0.15) !important;
+}
+
+.cs-message-input__content-editor-wrapper {
+    background-color: transparent !important;
+}
+
+.cs-button--send {
+    color: #4a7c59 !important;
+}
+
+.cs-button--send:hover {
+    color: #3a6249 !important;
+}
+
+/* ---- Avatar ---- */
+.cs-avatar {
+    border: 2px solid #ccdfcd !important;
+}
+
+/* ---- Empty & Loading States ---- */
+.chat-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 300px;
+    padding: 40px;
+    text-align: center;
+    color: #6b8a6b;
+}
+
+.chat-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+}
+
+.chat-empty-state h3 {
+    font-family: 'Alata', sans-serif;
+    font-size: 20px;
+    color: #4a7c59;
+    margin: 0 0 8px 0;
+    font-weight: normal;
+}
+
+.chat-empty-state p {
+    font-size: 14px;
+    color: #8fa88f;
+    margin: 0;
+    max-width: 280px;
+    line-height: 1.5;
+}
+
+.chat-loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #6b8a6b;
+}
+
+.chat-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #ccdfcd;
+    border-top-color: #4a7c59;
+    border-radius: 50%;
+    animation: chat-spin 0.8s linear infinite;
+    margin-bottom: 12px;
+}
+
+@keyframes chat-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.chat-loading-state p {
+    font-size: 13px;
+    color: #7a8f7a;
+    margin: 0;
+    font-family: 'Alata', sans-serif;
+}
+
+.chat-empty-members {
+    padding: 30px 20px;
+    text-align: center;
+    color: #6b8a6b;
+}
+
+.chat-empty-members p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-family: 'Alata', sans-serif;
+}
+
+.chat-empty-hint {
+    font-size: 12px !important;
+    color: #8fa88f !important;
+    font-style: italic;
+}
+
+/* ---- Responsiveness ---- */
+@media (max-width: 768px) {
+    .chat-wrapper {
+        margin-left: 0;
+        /* NavBar hidden on mobile */
+    }
+
+    .cs-main-container {
+        flex-direction: column !important;
+    }
+
+    .cs-sidebar {
+        max-width: 100% !important;
+        min-width: 100% !important;
+        height: 35% !important;
+        min-height: 180px;
+        border-right: none !important;
+        border-bottom: 2px solid #ccdfcd !important;
+    }
+}

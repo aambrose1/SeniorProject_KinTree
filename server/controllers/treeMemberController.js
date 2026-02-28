@@ -6,25 +6,25 @@ const User = require('../models/userModel');
 const formatDate = (dateValue) => {
     const d = new Date(dateValue);
     if (isNaN(d.getTime())) return null; // Invalid date
-    
+
     // Extract YYYY-MM-DD from the date object
     const year = d.getUTCFullYear();
     const month = String(d.getUTCMonth() + 1).padStart(2, '0'); // month starts at zero
     const day = String(d.getUTCDate()).padStart(2, '0');
-    
+
     return `${year}-${month}-${day}`;
 };
 
 const addTreeMember = async (req, res) => {
     try {
         const { firstname, lastname, birthdate, deathdate, location, phonenumber, userid, memberuserid, gender } = req.body;
-        
+
         // Resolve UUIDs to integer user IDs - CRITICAL: database requires integers, not UUIDs
         console.log('addTreeMember received userId:', userid, typeof userid);
         const userIdInt = await User.resolveUserIdFromAuthUid(userid);
         console.log('Resolved userIdInt:', userIdInt, typeof userIdInt);
         if (!userIdInt) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'Invalid user ID. User not found in database. Please sync your account first.',
                 received: userid
             });
@@ -32,7 +32,7 @@ const addTreeMember = async (req, res) => {
 
         const memberUserIdInt = memberuserid ? await User.resolveUserIdFromAuthUid(memberuserid) : null;
         if (memberuserid && !memberUserIdInt) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'Invalid member user ID. User not found in database.',
                 received: memberuserid
             });
@@ -105,15 +105,15 @@ const editTreeMember = async (req, res) => {
             //this works 
         }
 
-        
+
         for (let key in updateData) {
             // delete empty or undefined fields from updateData
             if (updateData[key] === '' || updateData[key] === undefined) {
                 delete updateData[key];
             }
             // Verify YYYY-MM-DD format before sending it to the database
-            if (key === 'birthDate') { updateData.birthDate = formatDate(updateData.birthDate);}
-            if (key === 'deathDate') { updateData.deathDate = formatDate(updateData.deathDate);}
+            if (key === 'birthDate') { updateData.birthDate = formatDate(updateData.birthDate); }
+            if (key === 'deathDate') { updateData.deathDate = formatDate(updateData.deathDate); }
         }
 
         if (Object.keys(updateData).length === 0) {
@@ -136,59 +136,76 @@ const editTreeMember = async (req, res) => {
     }
 };
 
-const getMembersByUser = async (req,res) =>{
-    try{
+const getMembersByUser = async (req, res) => {
+    try {
         const { userId } = req.params;
         // Resolve UUID to integer user ID first
         const userIdInt = await User.resolveUserIdFromAuthUid(userId);
         if (!userIdInt) {
             return res.status(404).json({ error: 'User not found' });
         }
-        const members = await treeMember.getMembersByUser(userIdInt)
+        const members = await treeMember.getMembersByUser(userIdInt);
+
+        // Inject auth_uid for chat functionality
+        if (members && members.length > 0) {
+            for (let member of members) {
+                if (member.memberuserid) {
+                    try {
+                        const userObj = await User.findById(member.memberuserid);
+                        if (userObj && userObj.auth_uid) {
+                            member.auth_uid = userObj.auth_uid;
+                        }
+                    } catch (err) {
+                        console.error("Error fetching auth_uid for member:", member.id, err);
+                    }
+                }
+            }
+        }
+
         console.log(members);
         res.status(200).json(members);
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).json({
             error: 'Error fetching members',
             details: error.message
         });
-        
+
     }
 };
 
-const getMembersByOtherUser = async (req,res) =>{
-    try{
-        const { userId} = req.params;
+const getMembersByOtherUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
         const members = await treeMember.getMembeByOtherUser(userId)
         res.status(200).json(members);
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).json({
             error: 'Error fetching members'
         });
-        
+
     }
 };
 
 
-const deleteByUser =  async (req, res) => {
-    const {userId} = req.params;
+const deleteByUser = async (req, res) => {
+    const { userId } = req.params;
 
-    try{
+    try {
         await treeMember.deleteByUser(userId);
-    
-        res.json({ 
-          message: "Family member deleted successfullyS"
+
+        res.json({
+            message: "Family member deleted successfullyS"
         })
-    
-      }
-      catch (error){
+
+    }
+    catch (error) {
         console.error(error);
-        res.status(500).json({error:"Error deleting family member"})
-      }
+        res.status(500).json({ error: "Error deleting family member" })
+    }
 
 }
 const getMemberById = async (req, res) => {
@@ -233,15 +250,15 @@ const getMemberbyMemberId = async (req, res) => {
     try {
         const id = await req.params.id;
         const member = await treeMember.getMemberbyMemberId(id);
-            if (!member) {
-                return res.status(404).json({ error: 'Family member not found' });
-            }
-            res.status(200).json(member);
+        if (!member) {
+            return res.status(404).json({ error: 'Family member not found' });
+        }
+        res.status(200).json(member);
     } catch (error) {
         console.error("Error in fetching family member by member id:", error);
         res.status(500).json({ error: 'Error fetching family member' });
     }
 };
 
-module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId, getMemberbyMemberId };  
+module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId, getMemberbyMemberId };
 
