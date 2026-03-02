@@ -182,6 +182,7 @@ const syncAuthUser = async (req, res) => {
         // 1. Check/Provision Active Tree Member
         console.log("Returned User Object:", userObj);
         console.log("Attempting to get active member for ID:", userObj.id);
+        let activeMemberId;
         const activeMember = await treeMember.getActiveMemberId(userObj.id);
         if (!activeMember) {
           console.log(`Auto-provisioning active tree member for user ${userObj.id}`);
@@ -189,7 +190,7 @@ const syncAuthUser = async (req, res) => {
           const fName = firstName || userObj.firstname || 'Unknown';
           const lName = lastName || userObj.lastname || 'Unknown';
 
-          await treeMember.addMember({
+          const newMember = await treeMember.addMember({
             firstname: fName,
             lastname: lName,
             birthdate: birthDate || null,
@@ -197,6 +198,9 @@ const syncAuthUser = async (req, res) => {
             memberuserid: userObj.id,
             gender: 'Unknown' // NOT NULL constraint in database requires a valid value
           });
+          activeMemberId = newMember.id;
+        } else {
+          activeMemberId = activeMember.id;
         }
 
         // 2. Check/Provision Tree Info
@@ -209,7 +213,7 @@ const syncAuthUser = async (req, res) => {
           const lName = lastName || userObj.lastname || 'Unknown';
           const initialTreeArray = [
             {
-              "id": `${userObj.id}`,
+              "id": `${activeMemberId}`,
               "data": {
                 "first name": fName,
                 "last name": lName,
