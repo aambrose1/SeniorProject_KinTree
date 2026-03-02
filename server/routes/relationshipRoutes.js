@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRelationships, getRelationshipsByUser, getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser } = require('../controllers/relationshipController');
+const { getRelationships, getRelationshipsByUser, getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser, getRelationshipBetween } = require('../controllers/relationshipController');
 
 
 router.post('/', addRelationship);
