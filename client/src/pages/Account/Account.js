@@ -62,6 +62,7 @@ function Account() {
     const [profilePictureFile, setProfilePictureFile] = useState(null);
     const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
     const [backendUserId, setBackendUserId] = useState(null);
+    const [relationship, setRelationship] = useState(null);
     const [deleteState, setDeleteState] = useState({ loading: false, error: '', success: '' });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [totpFactorId, setTotpFactorId] = useState('');
@@ -257,6 +258,28 @@ function Account() {
                 });
             });
     }, [id, supabaseUser]);
+
+    // Fetch relationship to viewing user
+    useEffect(() => {
+        if (!id || !supabaseUser?.id || id === supabaseUser?.id) {
+            setRelationship(null);
+            return;
+        }
+
+        fetch(`http://localhost:5000/api/relationships/between/${supabaseUser.id}/${id}`)
+            .then(async (response) => {
+                if (response.ok) {
+                    const data = await response.json();
+                    setRelationship(data?.relationshiptype || null);
+                } else {
+                    setRelationship(null);
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching relationship:', error);
+                setRelationship(null);
+            });
+    }, [id, supabaseUser?.id]);
 
     useEffect(() => {
         if (editingSection === null) {
@@ -821,6 +844,20 @@ function Account() {
                                         )}
                                         <div style={styles.ProfileMeta}>
                                             {summaryLocation && <span>{summaryLocation}</span>}
+                                            {relationship && (
+                                                <span style={{
+                                                    marginLeft: summaryLocation ? '12px' : '0',
+                                                    padding: '2px 10px',
+                                                    backgroundColor: '#e7f3e1',
+                                                    color: '#2d5a27',
+                                                    borderRadius: '12px',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '600',
+                                                    textTransform: 'capitalize'
+                                                }}>
+                                                    {relationship}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
