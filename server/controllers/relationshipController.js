@@ -3,41 +3,41 @@ const User = require('../models/userModel');
 const treeMember = require('../models/treeMemberModel');
 
 const getRelationships = async (req, res) => {
-    try{
-        const { id} = req.params;
+    try {
+        const { id } = req.params;
         const relationships = await Relationship.getRelationships(id);
         res.status(200).json(relationships);
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).json({
             error: 'Error fetching relationships'
         });
-        
+
     }
 };
 
-const getRelationshipsByUser = async (req,res) => {
+const getRelationshipsByUser = async (req, res) => {
     try {
         const userId = await req.params.id;
         console.log('Fetching relationships for userId:', userId);
         const relationships = await Relationship.getRelationshipByUser(userId);
         res.status(200).json(relationships);
     }
-    catch(error){
+    catch (error) {
         console.error('Error in relationship fetch for user, ' + req.params.id + ':', error);
         res.status(500).json({
             error: 'Error fetching relationships'
         });
     }
 };
-const getRelationshipsByOtherUser = async (req,res) => {
+const getRelationshipsByOtherUser = async (req, res) => {
     try {
-        const {userId} = req.params;
+        const { userId } = req.params;
         const relationships = await Relationship.getRelationshipByOtherUser(userId);
         res.status(200).json(relationships);
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).json({
             error: 'Error fetching relationships'
@@ -45,13 +45,13 @@ const getRelationshipsByOtherUser = async (req,res) => {
     }
 };
 
-const addRelationship = async (req,res) =>{
+const addRelationship = async (req, res) => {
     //need to add functionality to refuse a relationship if it already exists 
-    try{
-        let {person1_id, person2_id, relationshipType, relationshipStatus, side, userId} = req.body;
-        
-        console.log('addRelationship received:', {person1_id, person2_id, userId, typeof_person1_id: typeof person1_id});
-        
+    try {
+        let { person1_id, person2_id, relationshipType, relationshipStatus, side, userId } = req.body;
+
+        console.log('addRelationship received:', { person1_id, person2_id, userId, typeof_person1_id: typeof person1_id });
+
         // Resolve person1_id if it's a UUID (user ID) - need to find the member ID for that user
         if (typeof person1_id === 'string' && person1_id.includes('-')) {
             const userIdInt = await User.resolveUserIdFromAuthUid(person1_id);
@@ -65,7 +65,7 @@ const addRelationship = async (req,res) =>{
             }
             person1_id = member.id;
         }
-        
+
         // Resolve person2_id if it's a UUID (user ID)
         if (typeof person2_id === 'string' && person2_id.includes('-')) {
             const userIdInt = await User.resolveUserIdFromAuthUid(person2_id);
@@ -79,7 +79,7 @@ const addRelationship = async (req,res) =>{
             }
             person2_id = member.id;
         }
-        
+
         // Resolve userId from UUID to integer
         if (userId && typeof userId === 'string' && userId.includes('-')) {
             userId = await User.resolveUserIdFromAuthUid(userId);
@@ -87,14 +87,14 @@ const addRelationship = async (req,res) =>{
                 return res.status(400).json({ error: 'Invalid userId: User not found' });
             }
         }
-        
-        console.log('addRelationship resolved:', {person1_id, person2_id, userId});
-        
+
+        console.log('addRelationship resolved:', { person1_id, person2_id, userId });
+
         const newRelationship = await Relationship.addRelationship({
-            person1_id, 
-            person2_id, 
-            relationshipType, 
-            relationshipStatus, 
+            person1_id,
+            person2_id,
+            relationshipType,
+            relationshipStatus,
             side,
             userId
         });
@@ -111,12 +111,12 @@ const addRelationship = async (req,res) =>{
     }
 }
 
-const filterBySide = async (req,res) => {
-    try{
-        const {id} = req.params;
-        const {side} = req.query;
+const filterBySide = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { side } = req.query;
 
-        if (!side || (side !== "paternal" && side !== "maternal" && side !== "both")){
+        if (!side || (side !== "paternal" && side !== "maternal" && side !== "both")) {
             return res.status(400).json({
                 error: "Invalid side parameter. Use 'paternal' or 'maternal'."
             });
@@ -124,34 +124,86 @@ const filterBySide = async (req,res) => {
         const relatives = await Relationship.filterBySide(id, side);
         res.json(relatives);
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).json({
             error: 'Error fetching relationships'
         });
-        
+
     }
 };
 
-const deleteByUser =  async (req, res) => {
-    const {userId} = req.params;
+const deleteByUser = async (req, res) => {
+    const { userId } = req.params;
 
-    try{
+    try {
         await Relationship.deleteByUser(userId);
-    
-        res.json({ 
-          message: "Relationship deleted successfullyS"
+
+        res.json({
+            message: "Relationship deleted successfullyS"
         })
-    
-      }
-      catch (error){
+
+    }
+    catch (error) {
         console.error(error);
-        res.status(500).json({error:"Error deleting relationship"})
-      }
+        res.status(500).json({ error: "Error deleting relationship" })
+    }
 
 }
 
 
 
 
-module.exports = {getRelationships,getRelationshipsByUser,getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser};
+const getRelationshipBetween = async (req, res) => {
+    try {
+        const { viewerId, profileId } = req.params;
+
+        // viewerId and profileId are auth_uids (UUIDs)
+        const viewerUserId = await User.resolveUserIdFromAuthUid(viewerId);
+        if (!viewerUserId) {
+            return res.status(404).json({ error: 'Viewer not found' });
+        }
+
+        // Find viewer's root member ID in their tree
+        const viewerRootMember = await treeMember.getActiveMemberId(viewerUserId);
+        if (!viewerRootMember) {
+            return res.status(404).json({ error: 'Viewer root member not found' });
+        }
+
+        // Find profile owner's member record in the VIEWER'S tree
+        // If profile owner is a registered user, they might have a member record linked via memberuserid
+        const profileUserId = await User.resolveUserIdFromAuthUid(profileId);
+
+        let profileMember;
+        if (profileUserId) {
+            // Looking for a member in viewer's tree that is linked to profileUserId
+            const { data, error } = await require('../lib/supabase')
+                .from('treemembers')
+                .select('*')
+                .eq('userid', viewerUserId)
+                .eq('memberuserid', profileUserId)
+                .maybeSingle();
+
+            if (error) throw error;
+            profileMember = data;
+        }
+
+        // If not found (maybe viewerId === profileId or they aren't linked yet), return nothing
+        if (!profileMember) {
+            return res.status(200).json(null);
+        }
+
+        const relationshipRecord = await Relationship.getRelationshipBetweenMembers(
+            viewerRootMember.id,
+            profileMember.id,
+            viewerUserId
+        );
+
+        res.status(200).json(relationshipRecord);
+    } catch (error) {
+        console.error('Error in getRelationshipBetween:', error);
+        res.status(500).json({ error: 'Error fetching relationship between users' });
+    }
+};
+
+module.exports = { getRelationships, getRelationshipsByUser, getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser, getRelationshipBetween };

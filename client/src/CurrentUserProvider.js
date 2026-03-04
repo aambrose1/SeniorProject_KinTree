@@ -1,5 +1,6 @@
 import { React, useState, createContext, useContext, useEffect } from "react"
 import { supabase } from "./utils/supabaseClient";
+import { buildSyncPayload } from "./utils/metadataHelpers";
 
 export const currentContext = createContext();
 
@@ -87,24 +88,37 @@ export const CurrentUserProvider = ({ children }) => {
           response = await response.json();
           setCurrentAccountIDState(response.id);
           setCurrentUserNameState(session.user.email);
-          // Auto-sync profile into public.users using auth metadata when available
-          try {
-            const m = session.user.user_metadata || {};
-            await fetch('http://localhost:5000/api/auth/sync', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                auth_uid: session.user.id,
-                email: session.user.email,
-                username: session.user.email,
-                firstName: m.firstName || m.first_name || null,
-                lastName: m.lastName || m.last_name || null,
-                phoneNumber: m.phoneNumber || m.phone_number || m.phonenum || null,
-                birthDate: m.birthDate || m.birthdate || null,
-              })
-            });
-          } catch (e) {
-            console.warn('Auth sync failed:', e?.message || e);
+          
+          // Only sync on SIGNED_IN event to avoid redundant syncs
+          // The trigger handles initial user creation, and registration sync handles new users
+          if (event === 'SIGNED_IN') {
+            // Auto-sync profile into public.users using auth metadata when available
+            // Note: The trigger handle_new_auth_user should already create the user,
+            // but we sync here to ensure metadata is up to date
+            try {
+              const m = session.user.user_metadata || {};
+              // Only sync if metadata has extended fields (to avoid unnecessary updates)
+              const hasExtendedMetadata = m.address || m.city || m.state || m.country || m.zipcode || 
+                                          m.firstName || m.first_name || m.lastName || m.last_name ||
+                                          m.phoneNumber || m.phone_number;
+              
+              if (hasExtendedMetadata) {
+                const syncPayload = buildSyncPayload(session.user.id, session.user.email, m);
+                const syncResponse = await fetch('http://localhost:5000/api/auth/sync', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(syncPayload)
+                });
+                
+                if (!syncResponse.ok) {
+                  // Don't fail login - trigger may have already created the user
+                  console.warn('Auth sync failed on login');
+                }
+              }
+            } catch (e) {
+              // Don't fail login - trigger may have already created the user
+              console.warn('Auth sync error on login:', e?.message || e);
+            }
           }
         } else {
           setSupabaseUser(null);

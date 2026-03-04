@@ -4,15 +4,30 @@
 -- ========================
 
 -- 1. Users Table
+-- Database is the source of truth for user profile data
 create table users (
     id serial primary key,
+    auth_uid uuid unique,  -- Links to Supabase Auth user
     username text unique not null,
-    password text not null,
+    password text,  -- Nullable: passwords are stored in Supabase Auth, not here
     email text unique not null,
-    firstName text,
+    firstName text,         -- Legacy camelCase (kept for backwards compatibility)
     lastName text,
     phoneNumber text,
     birthDate date,
+    -- Profile fields (snake_case for consistency)
+    firstname text,
+    lastname text,
+    phonenumber text,
+    birthdate date,
+    display_name text,
+    address text,
+    city text,
+    state text,
+    country text,
+    zipcode text,
+    bio text,
+    profile_picture_url text,
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now()
 );

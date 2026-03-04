@@ -14,15 +14,16 @@
 }
 
 .App-header {
-  background-color: #E7F2D8;
+  background-color: var(--bg-color);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--text-color);
   gap: 40px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .App-link {
@@ -42,11 +43,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: white;
-  color: black;
+  background-color: var(--card-bg);
+  color: var(--text-color);
   border-radius: 50px;
   padding: 20px 40px;
   margin: 0px 20px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .font-face-alata {
