@@ -22,30 +22,57 @@ function ShareTree() {
     async function onSubmitForm (data){
         console.log('Form data:', data);
         console.log('Selected member:', data.selectedMember);
+        console.log('Invite email:', inviteEmail);
         console.log('treeInfo:', treeInfoRef.current);
+        
+        // Validation: must have either a selected member or a valid email
+        if (!data.selectedMember && !inviteEmail) {
+            setMemberError("Please select a family member or enter an email address");
+            return;
+        }
+        
+        if (!data.selectedMember && inviteEmail && emailError) {
+            return;
+        }
+        
+        const requestBody = {
+            senderID: currentAccountID,
+            perms: "view",
+            parentalSide: "both",
+            treeInfo: JSON.stringify(treeInfoRef.current),
+            comment: data.comments || ""
+        };
+        
+        // Add either receiverID or receiverEmail based on what was provided
+        if (data.selectedMember) {
+            requestBody.receiverID = Number(data.selectedMember);
+        } else if (inviteEmail) {
+            requestBody.receiverEmail = inviteEmail;
+        }
+        
         fetch(`http://localhost:5000/api/share-trees/share`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                senderID: currentAccountID,
-                receiverID: Number(data.selectedMember), // this will have to be a member ID
-                perms: "view",
-                parentalSide: "both",
-                treeInfo: JSON.stringify(treeInfoRef.current),
-                comment: data.comments || ""
-            })})
+            body: JSON.stringify(requestBody)
+        })
         .then(async (response) => {
             if (response.ok) {
                 let responseData = await response.json();
                 console.log(responseData);
+                alert(responseData.message);
                 window.location.href = '/';
             }
             else {
                 let errorData = await response.json();
                 console.log('Error:', errorData);
+                alert('Error sharing tree: ' + (errorData.error || 'Unknown error'));
             }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('Error sharing tree: ' + error.message);
         });
     }
 
@@ -176,9 +203,7 @@ function ShareTree() {
                                     type="radio"
                                     name="selectedMember"
                                     value={result.memberuserid}
-                                    {...register("selectedMember", {
-                                        required: true,
-                                    })}
+                                    {...register("selectedMember")}
     
                                 />
                                 <Link to={`/account/${result?.memberuserid}`} style={{ marginLeft: '10px' }}>

@@ -12,12 +12,15 @@ const sharedTrees = {
             .insert([
                 {
                     senderid: treeData.senderID,
-                    receiverid: treeData.receiverID,
+                    receiverid: treeData.receiverID || null,
+                    receiveremail: treeData.receiverEmail || null,
                     perms: treeData.perms,
                     parentalside: treeData.parentalSide,
                     treeinfo: treeData.treeInfo,
                     sharedate: new Date().toISOString(),
-                    comment: treeData.comment || null
+                    comment: treeData.comment || null,
+                    token: treeData.token || null,
+                    status: treeData.status || 'pending'
                 }
              ])
             .select('*')
@@ -68,6 +71,31 @@ const sharedTrees = {
             .select('*')
             .eq('token', token)
             .maybeSingle();
+        if (error) throw error;
+        return data;
+    },
+
+    getSharedTreeByEmail: async (email) => {
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .select('*')
+            .eq('receiveremail', email)
+            .eq('status', 'pending');
+        if (error) throw error;
+        return data;
+    },
+
+    updateSharedTreeReceiver: async (sharedTreeId, receiverId) => {
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .update({
+                receiverid: receiverId,
+                status: 'accepted',
+                updated_at: new Date().toISOString()
+            })
+            .eq('sharedtreeid', sharedTreeId)
+            .select('*')
+            .single();
         if (error) throw error;
         return data;
     },

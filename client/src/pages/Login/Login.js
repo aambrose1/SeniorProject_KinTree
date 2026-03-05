@@ -4,7 +4,7 @@ import logo from '../../assets/kintreelogo-adobe.png';
 import { useForm } from 'react-hook-form';
 import { handleLogin, handleSignInWithGoogle } from '../../utils/authHandlers';
 import { supabase } from '../../utils/supabaseClient';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 
 function Login() {
   const { register, handleSubmit, setValue } = useForm();
@@ -17,14 +17,24 @@ function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Check for invitation token - redirect to create account
+    const inviteToken = searchParams.get('inviteToken');
+    if (inviteToken) {
+      navigate(`/create-account?inviteToken=${inviteToken}`);
+      return;
+    }
+    
     const savedEmail = localStorage.getItem('kintree_remembered_email');
     if (savedEmail) {
       setRememberMe(true);
       setValue('email', savedEmail);
     }
-  }, [setValue]);
+  }, [setValue, searchParams, navigate]);
 
   const onSubmit = async (data) => {
     setErrorMessage(""); // clear previous errors
