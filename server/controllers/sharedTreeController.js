@@ -31,11 +31,9 @@ const getSharedTreeByToken = async (req, res) => {
             });   
         }
 
-        const members = await treeMember.getMemberByUser(sharedTree.senderID);
-        res.status(200).json({
-            shareTree,
-            TreeMembers: members
-        });
+        res.status(200).json(
+            sharedTree,
+        );
     }
     catch(error){
         console.error(error);
@@ -123,7 +121,7 @@ const shareTree = async (req,res) => {
                 `;
                 
                 await resend.emails.send({
-                    from: process.env.EMAIL_FROM || "KinTree <onboarding@resend.dev>",
+                    from: 'Kintree <invites@' + process.env.EMAIL_FROM + '>',
                     to: [receiverEmail],
                     subject: emailSubject,
                     html: emailHtml

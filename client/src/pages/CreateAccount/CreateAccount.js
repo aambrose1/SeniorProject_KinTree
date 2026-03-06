@@ -62,9 +62,11 @@ const CreateAccount = () => {
             fetch(`http://localhost:5000/api/share-trees/token/${token}`)
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Invitation data:', data);
                     if (data && data.receiveremail) {
                         setInviteEmail(data.receiveremail);
                         setValue('email', data.receiveremail);
+                        console.log('Invitation found for email:', data.receiveremail);
                     }
                 })
                 .catch(error => {
@@ -76,6 +78,7 @@ const CreateAccount = () => {
         }
     }, [searchParams, setValue]);
 
+    // TODO: find out what happened to the family tree creation on registration :(
     const onSubmit = async (data) => {
         setErrorMessage(""); // clear previous errors
 
@@ -214,6 +217,7 @@ const CreateAccount = () => {
                                 {...register("email")} 
                                 style={inviteToken ? {...styles.FieldStyle, backgroundColor: '#f5f5f5'} : styles.FieldStyle}
                                 readOnly={!!inviteToken}
+                                value={inviteEmail || ''}
                             />
                             {errors.email && <p>{errors.email.message}</p>}
                         </div>

@@ -25,7 +25,7 @@ function Login() {
     // Check for invitation token - redirect to create account
     const inviteToken = searchParams.get('inviteToken');
     if (inviteToken) {
-      navigate(`/create-account?inviteToken=${inviteToken}`);
+      navigate(`/register?inviteToken=${inviteToken}`);
       return;
     }
     
