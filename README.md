@@ -41,4 +41,6 @@ Then, from the same directory, run the following command to run the server/API:
 
 ### Emails setup
 
-Follow the steps on [sending emails with Resend](https://github.com/resend/resend-examples/tree/main/express-resend-examples) to verify your domain and obtain your RESEND_API_KEY.
+Follow the steps on [sending emails with Resend](https://github.com/resend/resend-examples/tree/main/express-resend-examples) to verify your domain and obtain your RESEND_API_KEY to store in `.env`.
+
+Set EMAIL_FROM in `.env`.

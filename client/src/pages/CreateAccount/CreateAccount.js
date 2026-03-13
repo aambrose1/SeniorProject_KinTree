@@ -6,6 +6,7 @@ import * as yup from "yup"
 import * as styles from './styles'
 import logo from '../../assets/kintreelogo-adobe.png';
 import { useSearchParams } from 'react-router-dom';
+import {familyTreeService} from '../../services/familyTreeService';
 
 //validation functionality
 const yupValidation = yup.object().shape(
@@ -102,6 +103,21 @@ const CreateAccount = () => {
             const user = await handleRegister(data.email, data.password, metadata);
 
             console.log('Registration successful:', user);
+
+            // add new user as family member 
+            const memberData = {
+                firstname: data.firstname,
+                lastname: data.lastname,
+                birthdate: data.birthdate,
+                location: `${data.city}, ${data.state}, ${data.country}`,
+                phonenumber: data.phonenum,
+                userid: user.user.id,
+                memberuserid: user.user.id,
+                gender: data.gender
+            };
+
+            await familyTreeService.createFamilyMember(memberData);
+            await familyTreeService.initializeTreeInfo(user.user.id, memberData, user.user.id);
 
             // If this registration is from an invitation, process pending invitations
             if (inviteToken || inviteEmail) {
@@ -217,7 +233,6 @@ const CreateAccount = () => {
                                 {...register("email")} 
                                 style={inviteToken ? {...styles.FieldStyle, backgroundColor: '#f5f5f5'} : styles.FieldStyle}
                                 readOnly={!!inviteToken}
-                                value={inviteEmail || ''}
                             />
                             {errors.email && <p>{errors.email.message}</p>}
                         </div>
