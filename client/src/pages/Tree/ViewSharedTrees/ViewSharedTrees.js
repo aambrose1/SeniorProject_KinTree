@@ -33,7 +33,6 @@ function ViewSharedTrees() {
             });
 
             if (response.ok) {
-                // Remove the deleted tree from the state
                 setTrees(prevTrees => prevTrees.filter(tree => tree.sharedtreeid !== sharedTreeId));
                 console.log('Shared tree deleted successfully');
             } else {
@@ -44,6 +43,35 @@ function ViewSharedTrees() {
         } catch (error) {
             console.error('Error deleting shared tree:', error);
             alert('Failed to delete shared tree');
+        }
+    };
+
+    const handleUpdateStatus = async (sharedTreeId, status) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/share-trees/${sharedTreeId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status }),
+            });
+
+            if (response.ok) {
+                if (status === 'rejected') {
+                    setTrees(prevTrees => prevTrees.filter(tree => tree.sharedtreeid !== sharedTreeId));
+                } else {
+                    setTrees(prevTrees =>
+                        prevTrees.map(tree =>
+                            tree.sharedtreeid === sharedTreeId ? { ...tree, status } : tree
+                        )
+                    );
+                }
+            } else {
+                const errorData = await response.json();
+                console.error(`Error updating tree status:`, errorData);
+                alert(`Failed to ${status} invitation`);
+            }
+        } catch (error) {
+            console.error('Error updating tree status:', error);
+            alert(`Failed to ${status} invitation`);
         }
     };
 
@@ -96,12 +124,17 @@ function ViewSharedTrees() {
                         <li key={tree.sharedtreeid} style={styles.ItemStyle}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
                                 <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                                    {/* name and timestamp */}
+                                    {/* name, status badge, and timestamp */}
                                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                                         <span style={{ fontWeight: 'bold', marginRight: '10px' }}>
                                             {userData.find(user => user.id === tree.senderid)?.firstname}{' '}
                                             {userData.find(user => user.id === tree.senderid)?.lastname}
                                         </span>
+                                        {tree.status === 'pending' && (
+                                            <span style={{ fontSize: '0.75em', backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffc107', borderRadius: '4px', padding: '1px 6px', marginRight: '10px' }}>
+                                                Pending
+                                            </span>
+                                        )}
                                         <span style={{ fontSize: '0.9em', color: '#666' }}>
                                             {getTimeAgo(tree.sharedate)}
                                         </span>
@@ -114,28 +147,66 @@ function ViewSharedTrees() {
                                         </div>
                                     )}
                                 </div>
-                                <div style={{ display: 'flex', gap: '10px', marginLeft: '15px', whiteSpace: 'nowrap' }}>
-                                    {/* view tree*/}
-                                    <Link to={`/sharedtree/${tree.sharedtreeid}`} style={{ color: '#000' }}>
-                                        View Tree
-                                    </Link>
-                                    {/* delete tree */}
-                                    <button 
-                                        onClick={() => handleDeleteTree(tree.sharedtreeid)}
-                                        style={{ 
-                                            background: 'none', 
-                                            border: 'none', 
-                                            color: '#d32f2f', 
-                                            cursor: 'pointer',
-                                            textDecoration: 'underline',
-                                            padding: 0,
-                                            fontFamily: 'inherit',
-                                            fontSize: 'inherit'
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
-                                    {/* TODO: merge tree button and functionality */}
+                                <div style={{ display: 'flex', gap: '10px', marginLeft: '15px', whiteSpace: 'nowrap', alignItems: 'center' }}>
+                                    {tree.status === 'pending' ? (
+                                        <>
+                                            {/* accept invite */}
+                                            <button
+                                                onClick={() => handleUpdateStatus(tree.sharedtreeid, 'accepted')}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: '#2e7d32',
+                                                    cursor: 'pointer',
+                                                    textDecoration: 'underline',
+                                                    padding: 0,
+                                                    fontFamily: 'inherit',
+                                                    fontSize: 'inherit'
+                                                }}
+                                            >
+                                                Accept
+                                            </button>
+                                            {/* reject invite */}
+                                            <button
+                                                onClick={() => handleUpdateStatus(tree.sharedtreeid, 'rejected')}
+                                                style={{
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: '#d32f2f',
+                                                    cursor: 'pointer',
+                                                    textDecoration: 'underline',
+                                                    padding: 0,
+                                                    fontFamily: 'inherit',
+                                                    fontSize: 'inherit'
+                                                }}
+                                            >
+                                                Reject
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* view tree */}
+                                            <Link to={`/sharedtree/${tree.sharedtreeid}`} style={{ color: '#000' }}>
+                                                View Tree
+                                            </Link>
+                                            {/* delete tree */}
+                                            <button 
+                                                onClick={() => handleDeleteTree(tree.sharedtreeid)}
+                                                style={{ 
+                                                    background: 'none', 
+                                                    border: 'none', 
+                                                    color: '#d32f2f', 
+                                                    cursor: 'pointer',
+                                                    textDecoration: 'underline',
+                                                    padding: 0,
+                                                    fontFamily: 'inherit',
+                                                    fontSize: 'inherit'
+                                                }}
+                                            >
+                                                Delete
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </li>

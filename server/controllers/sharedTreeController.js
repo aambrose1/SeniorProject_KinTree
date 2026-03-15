@@ -96,7 +96,7 @@ const shareTree = async (req,res) => {
             treeInfo,
             comment,
             token,
-            status: receiverID ? 'accepted' : 'pending'
+            status: 'pending'
         });
         
         // If it's an email invitation (no receiverID), send invitation email
@@ -304,6 +304,23 @@ const processPendingInvitations = async (req, res) => {
     }
 };
 
+const updateSharedTreeStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['accepted', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status. Use accepted or rejected.' });
+        }
+
+        const updated = await sharedTrees.updateSharedTreeStatus(id, status);
+        res.status(200).json({ message: `Tree ${status} successfully`, object: updated });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error updating shared tree status' });
+    }
+};
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-module.exports = {getSharedTreeById, getSharedTreeByToken, getSharedTreeBySender, getSharedTreebyReciever,shareTree, assignNewMemberRelationship, mergeMembers, deleteSharedTree, processPendingInvitations }
+module.exports = {getSharedTreeById, getSharedTreeByToken, getSharedTreeBySender, getSharedTreebyReciever, shareTree, assignNewMemberRelationship, mergeMembers, deleteSharedTree, processPendingInvitations, updateSharedTreeStatus }

@@ -100,6 +100,20 @@ const sharedTrees = {
         return data;
     },
 
+    updateSharedTreeStatus: async (id, status) => {
+        const { data, error } = await supabase
+            .from('sharedtrees')
+            .update({ 
+                status: status,
+                updated_at: new Date().toISOString()
+             })
+            .eq('sharedtreeid', id)
+            .select('*')
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
     deleteSharedTree: async (id) => {
         const { data, error } = await supabase
             .from('sharedtrees')
