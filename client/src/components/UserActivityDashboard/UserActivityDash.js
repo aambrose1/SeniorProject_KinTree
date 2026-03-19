@@ -9,7 +9,7 @@ import { EventCard } from "../UserEvents/EventCard";
 import CreateMemoryPopup from "../CreateMemory/CreateMemory";
 import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
 import { useCurrentUser } from "../../CurrentUserProvider";
-import supabase from "../../supabaseClient";
+import { supabase } from "../../utils/supabaseClient";
 
 function Dashboard() {
   document.body.style.width = "100%";

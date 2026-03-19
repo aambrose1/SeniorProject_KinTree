@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
-import supabase from "../../supabaseClient";
+import { supabase } from "../../utils/supabaseClient";
 
 function EditEventPopup({ trigger, event, onEventUpdated }) {
 

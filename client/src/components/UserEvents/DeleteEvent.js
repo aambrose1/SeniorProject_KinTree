@@ -1,5 +1,5 @@
 import React from 'react';
-import supabase from "../../supabaseClient";
+import { supabase } from "../../utils/supabaseClient";
 
 export async function deleteEvent(eventId, onDeleted) {
   const confirmed = window.confirm("Are you sure you want to delete this event?");

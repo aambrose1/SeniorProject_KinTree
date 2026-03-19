@@ -7,7 +7,7 @@ import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as UploadIcon } from '../../assets/upload.svg';
 import { useCurrentUser } from '../../CurrentUserProvider'; 
-import supabase from "../../supabaseClient";
+import { supabase } from "../../utils/supabaseClient";
 
 function CreateEventPopup({ trigger, onEventCreated }) {
   const { register, handleSubmit, reset } = useForm();
