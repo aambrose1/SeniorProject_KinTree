@@ -20,7 +20,7 @@ const handleCreateEvent = async (req, res) => {
       title,
       date,
       description,
-      user_id: userIdInt,
+      userid: userIdInt,
     };
 
     // 3. Create the event
@@ -56,7 +56,51 @@ const handleGetEvents = async (req, res) => {
   }
 };
 
+/**
+ * Handle PUT request to update an existing event
+ */
+const handleUpdateEvent = async (req, res) => {
+  try {
+    // Grab the event ID from the URL parameters
+    const { id } = req.params; 
+    // Grab the updated fields from the request body
+    const { title, date, description } = req.body; 
+
+    const updateData = { title, date, description };
+
+    const updatedEvent = await eventModel.updateEvent(id, updateData);
+    
+    // Return the newly updated event to the frontend
+    res.status(200).json(updatedEvent);
+
+  } catch (error) {
+    console.error('Error updating event:', error);
+    res.status(500).json({ error: 'Error updating event' });
+  }
+};
+
+/**
+ * Handle DELETE request to remove an event
+ */
+const handleDeleteEvent = async (req, res) => {
+  try {
+    // Grab the event ID from the URL parameters
+    const { id } = req.params; 
+
+    const deletedEvent = await eventModel.deleteEvent(id);
+    
+    // Send a success message back
+    res.status(200).json({ message: 'Event deleted successfully', deletedEvent });
+
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    res.status(500).json({ error: 'Error deleting event' });
+  }
+};
+
 module.exports = {
   handleCreateEvent,
   handleGetEvents,
+  handleUpdateEvent,
+  handleDeleteEvent, // Export the new controllers
 };

@@ -11,4 +11,12 @@ router.post('/', eventController.handleCreateEvent);
 // Gets all events for a specific user by their auth_uid
 router.get('/:auth_uid', eventController.handleGetEvents);
 
+// PUT /api/events/:id
+// Updates an existing event by its event ID
+router.put('/:id', eventController.handleUpdateEvent);
+
+// DELETE /api/events/:id
+// Deletes an event by its event ID
+router.delete('/:id', eventController.handleDeleteEvent);
+
 module.exports = router;
