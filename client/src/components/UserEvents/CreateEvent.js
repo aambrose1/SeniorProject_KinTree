@@ -12,41 +12,49 @@ import { supabase } from "../../utils/supabaseClient";
 function CreateEventPopup({ trigger, onEventCreated }) {
   const { register, handleSubmit, reset } = useForm();
   
-  // Grab currentAccountID (UUID) from context
-  const { currentAccountID, currentUserName, loading } = useCurrentUser();
+  const { currentUserName, loading } = useCurrentUser();
 
   const onSubmit = async (formData, close) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  const trueUuid = session?.user?.id;
+    const { data: { session } } = await supabase.auth.getSession();
+    const trueUuid = session?.user?.id;
 
-  if (!trueUuid) {
-    alert("User session not found.");
-    return;
-  }
+    if (!trueUuid) {
+      alert("User session not found.");
+      return;
+    }
 
-  const newEvent = {
-    title: formData.title,
-    date: formData.date,
-    description: formData.description || null,
-    userid: trueUuid, 
+    const eventPayload = {
+      title: formData.title,
+      date: formData.date,
+      description: formData.description || null,
+      auth_uid: trueUuid, 
+    };
+
+    console.log("FRONTEND: Sending payload to server ->", eventPayload);
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventPayload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create event');
+      }
+
+      const newEventData = await response.json();
+
+      if (onEventCreated && newEventData) onEventCreated(newEventData); 
+      
+      reset();
+      close();
+    } catch (error) {
+      console.error("Backend Error:", error);
+      alert("Error creating event: " + error.message);
+    }
   };
-
-  const { data, error } = await supabase
-    .from("event")
-    .insert([newEvent])
-    .select(); // This returns the newly created event object
-
-  if (error) {
-    console.error("Supabase Error:", error);
-    return;
-  }
-
-  // Pass the NEW event data back to the dashboard
-  if (onEventCreated && data) onEventCreated(data[0]); 
-  
-  reset();
-  close();
-};
 
   return (
     <Popup trigger={trigger} modal>

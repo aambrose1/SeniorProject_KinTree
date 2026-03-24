@@ -9,7 +9,7 @@ import { EventCard } from "../UserEvents/EventCard";
 import CreateMemoryPopup from "../CreateMemory/CreateMemory";
 import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
 import { useCurrentUser } from "../../CurrentUserProvider";
-import { supabase } from "../../utils/supabaseClient";
+import { supabase } from "../../utils/supabaseClient"; 
 
 function Dashboard() {
   document.body.style.width = "100%";
@@ -22,7 +22,6 @@ function Dashboard() {
 
   const { currentAccountID, loading } = useCurrentUser();
 
-  // Defined locally to support the hover state
   const ButtonStyle = {
     fontFamily: 'Alata',
     backgroundColor: isHovering ? '#3a5a40' : '#ccdecc',
@@ -37,33 +36,39 @@ function Dashboard() {
     height: '45px'
   };
 
-const fetchEvents = useCallback(async () => {
+  const fetchEvents = useCallback(async () => {
     // 1. Grab the real Auth UUID from the active session
     const { data: { session } } = await supabase.auth.getSession();
     const trueUuid = session?.user?.id;
 
     if (!trueUuid) return;
 
-    // 2. Pass that true UUID to Supabase instead of currentAccountID
-    const { data, error } = await supabase
-      .from("event")
-      .select("*")
-      .eq("userid", trueUuid) 
-      .order("date", { ascending: false });
+    try {
+      // 2. Send the GET request to your backend route
+      const response = await fetch(`http://localhost:5000/api/events/${trueUuid}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch events from server");
+      }
 
-    if (error) {
-      console.error("Error fetching events:", error);
-    } else {
+      // 3. Parse the data
+      const data = await response.json();
+      
+      // 🟢 THE NEW LOG: See the full list of events the server sent back
+      console.log("FRONTEND: Dashboard successfully fetched events ->", data);
+
+      // 4. Set the state
       setAllEvents(data || []);
-    }
-  }, []); // We can remove currentAccountID from the dependencies here
 
-// 3. Update the useEffect to just run fetchEvents on load
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+  }, []); 
+
   useEffect(() => {
     if (!loading) fetchEvents();
   }, [loading, fetchEvents]);
 
-  // NEW: Logic to update UI without a full page refresh
   const handleEventCreated = (newEvent) => {
     setAllEvents((prev) => [newEvent, ...prev]);
   };

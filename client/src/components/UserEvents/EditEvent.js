@@ -4,11 +4,10 @@ import { useForm } from 'react-hook-form';
 import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
-import { supabase } from "../../utils/supabaseClient";
 
 function EditEventPopup({ trigger, event, onEventUpdated }) {
 
-    const { register, handleSubmit, reset } = useForm({
+  const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       title: event.title,
       date: event.date,
@@ -17,28 +16,41 @@ function EditEventPopup({ trigger, event, onEventUpdated }) {
   });
 
   const onSubmit = async (formData, close) => {
-    const { data, error } = await supabase
-      .from("event")
-      .update({
-        title: formData.title,
-        date: formData.date,
-        description: formData.description
-      })
-      .eq("id", event.id)
-      .select(); // 1. THIS IS REQUIRED to get the new data back
+    
+    // 1. Prepare the payload
+    const updatePayload = {
+      title: formData.title,
+      date: formData.date,
+      description: formData.description
+    };
 
-    if (error) {
-      alert("Error updating event: " + error.message);
-    } else {
-      // 2. THIS IS THE FIX: We must pass data[0] back to the dashboard. 
-      // If we just put onEventUpdated(), it sends 'undefined' and causes the crash!
-      if (onEventUpdated && data && data.length > 0) {
-        onEventUpdated(data[0]); 
+    console.log(`FRONTEND: Sending PUT request for Event ID ${event.id} ->`, updatePayload);
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/events/${event.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatePayload), 
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update event');
+      }
+
+      const updatedEventData = await response.json();
+
+      console.log("FRONTEND: Server responded with updated event ->", updatedEventData);
+
+      if (onEventUpdated && updatedEventData) {
+        onEventUpdated(updatedEventData); 
       } else if (onEventUpdated) {
-        // Fallback just in case Supabase select() fails but update succeeds
         onEventUpdated({ ...event, ...formData }); 
       }
       close();
+    } catch (error) {
+      console.error("Error updating event:", error);
+      alert("Error updating event: " + error.message);
     }
   };
 
