@@ -62,6 +62,7 @@ function Account() {
     const [profilePictureFile, setProfilePictureFile] = useState(null);
     const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
     const [backendUserId, setBackendUserId] = useState(null);
+    const [relationship, setRelationship] = useState(null);
     const [deleteState, setDeleteState] = useState({ loading: false, error: '', success: '' });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [totpFactorId, setTotpFactorId] = useState('');
@@ -82,16 +83,8 @@ function Account() {
     useEffect(() => {
         setSaveError('');
         console.log('Id params not passed in')
-        if (!id) {
-            // Fetch current user's data
-            const fetchOwnUserData = async () => {
-                const user = await fetch(`http://localhost:5000/api/auth/user/${supabaseUser.id}`);
-                const fetchedUserData = await user.json();
-                setUserData(fetchedUserData);
-                setOwnAccount(true);
-                navigate(`/account/${fetchedUserData.id}`, { replace: true });
-            }
-            fetchOwnUserData();
+        if (!id && supabaseUser?.id) {
+            navigate(`/account/${supabaseUser.id}`, { replace: true });
         }
     }, [id, supabaseUser?.id, navigate]);
 
@@ -167,12 +160,16 @@ function Account() {
                 });
             setOwnAccount(true);
             return;
+        } else {
+            setOwnAccount(false);
         }
     }, [id, supabaseUser, navigate]);
 
     // Fetch user info - check if it's a Supabase user or family member
     useEffect(() => {
         if (!id || !supabaseUser?.id) return;
+        if (id === supabaseUser?.id) return; // Prevent redundant fetch for own account
+
         console.log("current account id:", supabaseUser.id);
         console.log("viewing account id:", id);
         setSaveError('');
@@ -261,6 +258,28 @@ function Account() {
                 });
             });
     }, [id, supabaseUser]);
+
+    // Fetch relationship to viewing user
+    useEffect(() => {
+        if (!id || !supabaseUser?.id || id === supabaseUser?.id) {
+            setRelationship(null);
+            return;
+        }
+
+        fetch(`http://localhost:5000/api/relationships/between/${supabaseUser.id}/${id}`)
+            .then(async (response) => {
+                if (response.ok) {
+                    const data = await response.json();
+                    setRelationship(data?.relationshiptype || null);
+                } else {
+                    setRelationship(null);
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching relationship:', error);
+                setRelationship(null);
+            });
+    }, [id, supabaseUser?.id]);
 
     useEffect(() => {
         if (editingSection === null) {
@@ -825,6 +844,20 @@ function Account() {
                                         )}
                                         <div style={styles.ProfileMeta}>
                                             {summaryLocation && <span>{summaryLocation}</span>}
+                                            {relationship && (
+                                                <span style={{
+                                                    marginLeft: summaryLocation ? '12px' : '0',
+                                                    padding: '2px 10px',
+                                                    backgroundColor: '#e7f3e1',
+                                                    color: '#2d5a27',
+                                                    borderRadius: '12px',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: '600',
+                                                    textTransform: 'capitalize'
+                                                }}>
+                                                    {relationship}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -835,7 +868,7 @@ function Account() {
                             <div style={styles.CardHeader}>
                                 <div>
                                     <h2 style={styles.CardTitle}>Personal information</h2>
-                                    <p style={styles.CardSubtitle}>Basics about you</p>
+                                    <p style={styles.CardSubtitle}>{ownAccount ? 'Basics about you' : `Basics about ${userData.firstName || 'this user'}`}</p>
                                 </div>
                                 {ownAccount && (
                                     editingSection === 'personal' ? (
@@ -966,7 +999,7 @@ function Account() {
                             <div style={styles.CardHeader}>
                                 <div>
                                     <h2 style={styles.CardTitle}>Address</h2>
-                                    <p style={styles.CardSubtitle}>Where you call home</p>
+                                    <p style={styles.CardSubtitle}>{ownAccount ? 'Where you call home' : 'Address details'}</p>
                                 </div>
                                 {ownAccount && (
                                     editingSection === 'address' ? (
@@ -1074,14 +1107,14 @@ function Account() {
                             )}
                         </section>
 
-                        <section style={styles.CardStyle}>
-                            <div style={styles.CardHeader}>
-                                <div>
-                                    <h2 style={styles.CardTitle}>Account security</h2>
-                                    <p style={styles.CardSubtitle}>Protect your KinTree account</p>
+                        {ownAccount && (
+                            <section style={styles.CardStyle}>
+                                <div style={styles.CardHeader}>
+                                    <div>
+                                        <h2 style={styles.CardTitle}>Account security</h2>
+                                        <p style={styles.CardSubtitle}>Protect your KinTree account</p>
+                                    </div>
                                 </div>
-                            </div>
-                            {ownAccount ? (
                                 <div style={styles.SecurityContent}>
                                     <div style={styles.SecurityBlock}>
                                         <div style={styles.SecurityHeadingRow}>
@@ -1262,10 +1295,8 @@ function Account() {
                                         </button>
                                     </div>
                                 </div>
-                            ) : (
-                                <p style={styles.HelpText}>Only the account owner can manage security settings.</p>
-                            )}
-                        </section>
+                            </section>
+                        )}
 
                         {(saveError || saveSuccess) && (
                             <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>

@@ -20,34 +20,40 @@ export default function ResetPassword() {
   return (
     <div style={styles.DefaultStyle}>
       <div style={styles.Container}>
-        <img src={logo} alt="KinTree Logo" style={styles.Logo} />
-        <h1 style={styles.Header}>Reset Password</h1>
+        <div style={styles.LogoContainer}>
+          <img src={logo} alt="KinTree Logo" style={styles.Logo} />
+        </div>
+        <h1 style={styles.WelcomeHeader}>Reset Password</h1>
+        <p style={{ ...styles.Subtitle, marginBottom: '24px' }}>Enter your email to receive a reset link.</p>
+
         <form onSubmit={onSubmit} style={styles.FormStyle}>
           {message && (
-            <div style={{color: 'green', marginBottom: '10px', padding: '10px', backgroundColor: '#e8f5e9', border: '1px solid #a5d6a7', borderRadius: '4px'}}>
+            <div style={{ color: '#059669', marginBottom: '20px', padding: '12px', backgroundColor: '#d1fae5', border: '1px solid #10b981', borderRadius: '10px', fontSize: '14px', textAlign: 'center' }}>
               {message}
             </div>
           )}
-          <ul style={styles.ListStyle}>
-            <li style={styles.ItemStyle}>
-              <label>Email Address:</label>
+
+          <div style={styles.InputGroup}>
+            <label style={styles.Label}>Email</label>
+            <div style={styles.InputWrapper}>
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={styles.FieldStyle}
                 required
               />
-            </li>
-          </ul>
-          <div style={styles.ButtonDivStyle}>
-            <button type="submit" style={{...styles.ButtonStyle, width: '100%'}}>Send Reset Email</button>
+            </div>
           </div>
-          <div style={{textAlign: 'center', marginTop: '20px'}}>
-            <p style={{...styles.TextStyle, fontSize: '0.9em'}}>
-              Remembered your password? <a href="/login" style={{ color: '#1a73e8', textDecoration: 'underline' }}>Back to Sign In</a>
-            </p>
+
+          <button type="submit" style={styles.SignInButton}>
+            Send Reset Email
+          </button>
+
+          <div style={styles.RegisterRow}>
+            Remembered your password?
+            <a href="/login" style={styles.RegisterLink}>Back to Sign In</a>
           </div>
         </form>
       </div>
