@@ -1,6 +1,6 @@
 // eventController.js
 const eventModel = require('../models/eventModel');
-const User = require('../models/userModel'); // To resolve auth_uid to user_id
+// We don't even need the UserModel anymore!
 
 /**
  * Handle POST request to create a new event
@@ -9,21 +9,14 @@ const handleCreateEvent = async (req, res) => {
   try {
     const { title, date, description, auth_uid } = req.body;
 
-    // 1. Find the internal user ID from the Supabase auth_uid
-    const userIdInt = await User.resolveUserIdFromAuthUid(auth_uid);
-    if (!userIdInt) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // 2. Prepare event data
     const eventData = {
       title,
       date,
       description,
-      userid: userIdInt,
+      userid: auth_uid, 
     };
 
-    // 3. Create the event
+    // Create the event
     const newEvent = await eventModel.createEvent(eventData);
     res.status(201).json(newEvent);
 
@@ -39,15 +32,8 @@ const handleCreateEvent = async (req, res) => {
 const handleGetEvents = async (req, res) => {
   try {
     const { auth_uid } = req.params;
-
-    // 1. Find the internal user ID
-    const userIdInt = await User.resolveUserIdFromAuthUid(auth_uid);
-    if (!userIdInt) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // 2. Fetch events
-    const events = await eventModel.getEventsByUserId(userIdInt);
+    
+    const events = await eventModel.getEventsByUserId(auth_uid);
     res.status(200).json(events);
 
   } catch (error) {
@@ -61,16 +47,12 @@ const handleGetEvents = async (req, res) => {
  */
 const handleUpdateEvent = async (req, res) => {
   try {
-    // Grab the event ID from the URL parameters
     const { id } = req.params; 
-    // Grab the updated fields from the request body
     const { title, date, description } = req.body; 
 
     const updateData = { title, date, description };
 
     const updatedEvent = await eventModel.updateEvent(id, updateData);
-    
-    // Return the newly updated event to the frontend
     res.status(200).json(updatedEvent);
 
   } catch (error) {
@@ -84,12 +66,9 @@ const handleUpdateEvent = async (req, res) => {
  */
 const handleDeleteEvent = async (req, res) => {
   try {
-    // Grab the event ID from the URL parameters
     const { id } = req.params; 
 
     const deletedEvent = await eventModel.deleteEvent(id);
-    
-    // Send a success message back
     res.status(200).json({ message: 'Event deleted successfully', deletedEvent });
 
   } catch (error) {
@@ -102,5 +81,5 @@ module.exports = {
   handleCreateEvent,
   handleGetEvents,
   handleUpdateEvent,
-  handleDeleteEvent, // Export the new controllers
+  handleDeleteEvent, 
 };
