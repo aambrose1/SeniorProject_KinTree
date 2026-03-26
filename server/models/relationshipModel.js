@@ -18,13 +18,13 @@ const Relationships = {
         Object.keys(mappedData).forEach(key => mappedData[key] === undefined && delete mappedData[key]);
         const { data: inserted, error } = await supabase
             .from('relationships')
-            .insert([ mappedData ])
+            .insert([mappedData])
             .select('*')
             .single();
         if (error) throw error;
         return inserted;
     },
-  
+
     getRelationships: async (personId) => {
         // person1_id = personId OR person2_id = personId
         const { data, error } = await supabase
@@ -79,6 +79,19 @@ const Relationships = {
             .delete()
             .eq('userid', userId);
         if (error) throw error;
+    },
+
+    getRelationshipBetweenMembers: async (person1Id, person2Id, userId) => {
+        // Find relationship where person1 is one and person2 is the other, or vice versa
+        // AND it belongs to the viewer's tree (userId)
+        const { data, error } = await supabase
+            .from('relationships')
+            .select('*')
+            .or(`and(person1_id.eq.${person1Id},person2_id.eq.${person2Id}),and(person1_id.eq.${person2Id},person2_id.eq.${person1Id})`)
+            .eq('userid', userId)
+            .maybeSingle();
+        if (error) throw error;
+        return data;
     }
 };
 

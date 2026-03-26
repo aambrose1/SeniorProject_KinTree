@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getRelationships, getRelationshipsByUser, getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser} = require('../controllers/relationshipController');
+const { getRelationships, getRelationshipsByUser, getRelationshipsByOtherUser, addRelationship, filterBySide, deleteByUser, getRelationshipBetween } = require('../controllers/relationshipController');
 
 
 router.post('/', addRelationship);
@@ -8,6 +8,7 @@ router.get('/:id', getRelationships);
 router.get('/user/:id', getRelationshipsByUser);
 router.get('/assignedUser/:id', getRelationshipsByOtherUser);
 router.get('/family-side/:id', filterBySide);
+router.get('/between/:viewerId/:profileId', getRelationshipBetween);
 router.delete('/remove/:id', deleteByUser);
 
 module.exports = router;
