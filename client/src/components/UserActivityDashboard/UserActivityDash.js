@@ -6,7 +6,8 @@ import * as styles from "./styles";
 import CreateEventPopup from "../UserEvents/CreateEvent";
 import { EventCard } from "../UserEvents/EventCard"; 
 
-import CreateMemoryPopup from "../CreateMemory/CreateMemory";
+import CreateMemoryPopup from "../UserMemory/CreateMemory";
+import MemoryCard from "../UserMemory/MemoryCard"; 
 import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
 import { useCurrentUser } from "../../CurrentUserProvider";
 import { supabase } from "../../utils/supabaseClient"; 
@@ -14,13 +15,19 @@ import { supabase } from "../../utils/supabaseClient";
 function Dashboard() {
   document.body.style.width = "100%";
 
+  // State for Events
   const [allEvents, setAllEvents] = useState([]);
   const [searchItem, setSearchItem] = useState("");
   const [sortDate, setSortDate] = useState("newest");
   const [searchResults, setSearchResults] = useState([]); 
+  
+  // State for Memories
+  const [allMemories, setAllMemories] = useState([]); 
+  
   const [isHovering, setIsHovering] = useState(false);
 
-  const { currentAccountID, loading } = useCurrentUser();
+  // Pulling the Tree Member integer ID from your context
+  const { currentUserID, loading } = useCurrentUser();
 
   const ButtonStyle = {
     fontFamily: 'Alata',
@@ -36,39 +43,50 @@ function Dashboard() {
     height: '45px'
   };
 
+  // --- FETCH EVENTS ---
   const fetchEvents = useCallback(async () => {
-    // 1. Grab the real Auth UUID from the active session
     const { data: { session } } = await supabase.auth.getSession();
     const trueUuid = session?.user?.id;
 
     if (!trueUuid) return;
 
     try {
-      // 2. Send the GET request to your backend route
       const response = await fetch(`http://localhost:5000/api/events/${trueUuid}`);
+      if (!response.ok) throw new Error("Failed to fetch events");
       
-      if (!response.ok) {
-        throw new Error("Failed to fetch events from server");
-      }
-
-      // 3. Parse the data
       const data = await response.json();
-      
-      // 🟢 THE NEW LOG: See the full list of events the server sent back
-      console.log("FRONTEND: Dashboard successfully fetched events ->", data);
-
-      // 4. Set the state
       setAllEvents(data || []);
-
     } catch (error) {
       console.error("Error fetching events:", error);
     }
   }, []); 
 
-  useEffect(() => {
-    if (!loading) fetchEvents();
-  }, [loading, fetchEvents]);
+  // --- FETCH MEMORIES ---
+  const fetchMemories = useCallback(async () => {
+    // Wait for the integer ID to be available
+    if (!currentUserID || isNaN(currentUserID)) return;
 
+    try {
+      const response = await fetch(`http://localhost:5000/api/memories/${currentUserID}`);
+      if (!response.ok) throw new Error("Failed to fetch memories");
+      
+      const data = await response.json();
+      console.log("FRONTEND: Fetched memories ->", data);
+      setAllMemories(data || []);
+    } catch (error) {
+      console.error("Error fetching memories:", error);
+    }
+  }, [currentUserID]);
+
+  // Initial Data Fetch
+  useEffect(() => {
+    if (!loading) {
+      fetchEvents();
+      fetchMemories();
+    }
+  }, [loading, fetchEvents, fetchMemories]);
+
+  // --- EVENT HANDLERS ---
   const handleEventCreated = (newEvent) => {
     setAllEvents((prev) => [newEvent, ...prev]);
   };
@@ -83,6 +101,22 @@ function Dashboard() {
     ));
   };
 
+  // --- MEMORY HANDLERS ---
+  const handleMemoryCreated = (newMemory) => {
+    setAllMemories((prev) => [newMemory, ...prev]);
+  };
+
+  const handleMemoryDeleted = (id) => {
+    setAllMemories((prev) => prev.filter(m => m.id !== id));
+  };
+
+  const handleMemoryUpdated = (updatedMemory) => {
+    setAllMemories((prev) => prev.map(m => 
+      m.id === updatedMemory.id ? updatedMemory : m
+    ));
+  };
+
+  // Sort and filter events
   useEffect(() => {
     let sortedEvents = [...allEvents];
     sortedEvents.sort((a, b) =>
@@ -103,12 +137,14 @@ function Dashboard() {
       <NavBar />
       <div style={styles.RightSide}>
         <div style={styles.Container}>
+          
+          {/* --- EVENTS SECTION --- */}
           <h1 style={styles.Header}>Family Events</h1>
           
           <input 
             style={styles.SearchBar} 
             type="text" 
-            placeholder="Search by title or date..." 
+            placeholder="Search events..." 
             value={searchItem} 
             onChange={(e) => setSearchItem(e.target.value)} 
           />
@@ -130,7 +166,7 @@ function Dashboard() {
               style={{ margin: "10px" }}
               onClick={() => setSortDate(sortDate === "newest" ? "oldest" : "newest")}
             >
-              Sort by: {sortDate === "newest" ? "Newest First" : "Oldest First"}
+              Sort: {sortDate === "newest" ? "Newest" : "Oldest"}
               <DropDown style={{ width: "23px", height: "25px" }} />
             </button>
           </div>
@@ -149,8 +185,32 @@ function Dashboard() {
               <p style={{ textAlign: 'center', marginTop: '20px' }}>No events found.</p>
             )}
           </div>
+
+          {/* --- MEMORIES SECTION --- */}
+          <h1 style={{ ...styles.Header, marginTop: '50px' }}>Family Memories</h1>
+          
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center', paddingBottom: '80px' }}>
+            {allMemories.length > 0 ? (
+              allMemories.map((memory) => (
+                <MemoryCard 
+                  key={memory.id} 
+                  memory={memory} 
+                  onDeleted={handleMemoryDeleted} 
+                  onUpdated={handleMemoryUpdated}
+                />
+              ))
+            ) : (
+              <p style={{ textAlign: 'center', width: '100%' }}>No memories yet!</p>
+            )}
+          </div>
+
         </div>
-        <CreateMemoryPopup trigger={<PlusIcon style={styles.PlusButton} />} />
+
+        <CreateMemoryPopup 
+          trigger={<PlusIcon style={styles.PlusButton} />} 
+          onMemoryCreated={handleMemoryCreated} 
+          profileID={currentUserID} 
+        />
       </div>
     </div>
   );
