@@ -135,3 +135,10 @@ dist
 .yarn/install-state.gz
 .pnp.*
 client/src/components/AddToTree/sample-data.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

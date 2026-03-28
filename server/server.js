@@ -17,6 +17,11 @@ const port = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 
+// Status check  
+app.get('/', (req, res) => {
+  res.status(200).json();
+});
+
 app.use('/api/share-trees', sharedTreeRoutes)
 app.use('/api/family-members', treeMemberRoutes);
 app.use('/api/relationships', relationshipRoutes);
