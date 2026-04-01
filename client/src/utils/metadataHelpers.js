@@ -9,6 +9,7 @@ export function normalizeMetadata(metadata = {}) {
   return {
     firstName: metadata.firstName || metadata.first_name || null,
     lastName: metadata.lastName || metadata.last_name || null,
+    gender: metadata.gender || null,
     phoneNumber: metadata.phoneNumber || metadata.phone_number || metadata.phonenum || null,
     birthDate: metadata.birthDate || metadata.birthdate || null,
     displayName: metadata.displayName || metadata.display_name || null,
@@ -44,6 +45,7 @@ export function buildSyncPayload(authUid, email, metadata = {}) {
     username: email,
     firstName: normalized.firstName,
     lastName: normalized.lastName,
+    gender: normalized.gender,
     phoneNumber: normalized.phoneNumber,
     birthDate: normalized.birthDate,
     displayName: displayName,

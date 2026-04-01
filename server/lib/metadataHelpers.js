@@ -9,6 +9,7 @@ function buildAuthMetadata(user) {
   return {
     first_name: user.firstname || null,
     last_name: user.lastname || null,
+    gender: user.gender || null,
     display_name: user.display_name || null,
     phone_number: user.phonenumber || null,
     birthdate: user.birthdate || null,

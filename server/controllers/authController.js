@@ -139,6 +139,7 @@ const syncAuthUser = async (req, res) => {
       username,
       firstName,
       lastName,
+      gender,
       phoneNumber,
       birthDate,
       displayName,
@@ -161,6 +162,7 @@ const syncAuthUser = async (req, res) => {
       username,
       firstName,
       lastName,
+      gender,
       phoneNumber,
       birthDate,
       displayName,
@@ -196,7 +198,7 @@ const syncAuthUser = async (req, res) => {
             birthdate: birthDate || null,
             userid: userObj.id,
             memberuserid: userObj.id,
-            gender: 'Unknown' // NOT NULL constraint in database requires a valid value
+            gender: userObj.gender || 'Unknown' // NOT NULL constraint in database requires a valid value
           });
           activeMemberId = newMember.id;
         } else {
@@ -217,7 +219,7 @@ const syncAuthUser = async (req, res) => {
               "data": {
                 "first name": fName,
                 "last name": lName,
-                "gender": "Unknown"
+                "gender": userObj.gender || 'Unknown'
               },
               "rels": {}
             }
