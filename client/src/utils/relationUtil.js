@@ -21,8 +21,8 @@ function mapToTreeRelationship(relationship) {
         'sibling': 'sibling',
         'grandparent': 'grandparent',
         'grandchild': 'child',
-        'aunt': 'parent',      // place as same generation as parents
-        'uncle': 'parent',     // place as same generation as parents
+        'aunt': 'aunt_uncle',
+        'uncle': 'aunt_uncle',
         'niece': 'child',      // place as same generation as children
         'nephew': 'child',     // place as same generation as children
         'cousin': 'sibling',   // place as same generation
@@ -201,6 +201,57 @@ export function addRelationship(treeIndex, accountUserId, relativeId, relationsh
                 if (!relative.rels.parents.includes(`${accountUserId}`)) {
                     relative.rels.parents.push(`${accountUserId}`);
                 }
+            }
+            break;
+        }
+
+        case "aunt_uncle": { // Relative is an aunt/uncle of the account user
+            const targetParentId = getPreferredParentId(accountUser, side);
+
+            if (targetParentId) {
+                const targetParent = treeIndex[`${targetParentId}`];
+
+                if (!targetParent) {
+                    throw new Error(`Parent node ${targetParentId} not found in tree`);
+                }
+
+                ensureAllRelationshipLists(targetParent);
+
+                // Add relative as grandparent's child
+                if (targetParent.rels.parents.length > 0) {
+                    targetParent.rels.parents.forEach(grandparentId => {
+                        const grandparent = treeIndex[`${grandparentId}`];
+
+                        if (!relative.rels.parents.includes(`${grandparentId}`)) {
+                            relative.rels.parents.push(`${grandparentId}`);
+                        }
+
+                        if (grandparent) {
+                            ensureAllRelationshipLists(grandparent);
+                            if (!grandparent.rels.children.includes(`${relativeId}`)) {
+                                grandparent.rels.children.push(`${relativeId}`);
+                            }
+                        }
+                    });
+                } else { // If no grandparents,
+                    // Add relative as a parent of the account user
+                    if (!accountUser.rels.parents.includes(`${relativeId}`) && accountUser.rels.parents.length < 2) {
+                        accountUser.rels.parents.push(`${relativeId}`);
+                    }
+                    if (!relative.rels.children.includes(`${accountUserId}`)) {
+                        relative.rels.children.push(`${accountUserId}`);
+                    }
+                }
+
+                return "Successfully added relationship";
+            }
+
+            // No parents or grandparents, fallback to sibling
+            if (!accountUser.rels.children.includes(`${relativeId}`)) {
+                accountUser.rels.children.push(`${relativeId}`);
+            }
+            if (!relative.rels.parents.includes(`${accountUserId}`)) {
+                relative.rels.parents.push(`${accountUserId}`);
             }
             break;
         }
