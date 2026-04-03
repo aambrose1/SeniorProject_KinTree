@@ -50,8 +50,11 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   // second form -- manually add family member
   const {
     register: register2,
+    watch: watch2,
     handleSubmit: handleSubmit2,
   } = useForm({ defaultValues: { firstName: '', lastName: '', relationship: '', matPat2: '', location: '', birthday: '', birthplace: '', deathdate: '', gender: '' } });
+
+  const selectedManualRelationship = watch2("relationship");
 
 
 
@@ -194,7 +197,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         };
 
         // Add the relationship links in the tree data
-        addRelationship(treeIndex, newNodeId, relativeNodeId, data.selectedMemberRelationship);
+        addRelationship(treeIndex, relativeNodeId, newNodeId, data.selectedMemberRelationship, data.matPat || null);
 
         // Persist updated tree
         const updatedTreeData = Object.values(treeIndex);
@@ -290,7 +293,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
         // Add the relationship links in the tree data
         // new integration uses account user as the subject, new member = relative as the actor (newNode is account's <relationship> relative)
-        addRelationship(treeIndex, accountNodeId, newNodeId, data.relationship);
+        addRelationship(treeIndex, accountNodeId, newNodeId, data.relationship, data.matPat2 || null);
 
         // Persist updated tree
         const updatedTreeData = Object.values(treeIndex);
@@ -512,9 +515,9 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   </label>
                 </li>
 
-                <div style={{ marginTop: '10px', display: matPat.includes(selectedMemberRelationship) ? 'block' : 'none' }}>
-                  <input type="radio" name="matPat2" value="maternal" {...register2("matPat2", { required: matPat.includes(selectedMemberRelationship) })} /> Maternal
-                  <input type="radio" name="matPat2" value="paternal" {...register2("matPat2", { required: matPat.includes(selectedMemberRelationship) })} /> Paternal
+                <div style={{ marginTop: '10px', display: matPat.includes(selectedManualRelationship) ? 'block' : 'none' }}>
+                  <input type="radio" name="matPat2" value="maternal" {...register2("matPat2", { required: matPat.includes(selectedManualRelationship) })} /> Maternal
+                  <input type="radio" name="matPat2" value="paternal" {...register2("matPat2", { required: matPat.includes(selectedManualRelationship) })} /> Paternal
                 </div>
 
                 {/* optional fields */}
