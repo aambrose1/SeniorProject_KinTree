@@ -36,7 +36,7 @@
     height: 100%;
   }
   .f3 svg.main_svg text {
-    fill: currentColor;
+    fill: var(--background-color);
   }
   
   /* card-html */
@@ -46,8 +46,23 @@
     color: var(--text-color);
     position: relative;
     line-height: 1.2;
+    
+  }
+  .f3 div.card .mini-tree g {
+    transform: translate(18px, 15px);
+  }
+  .f3 div.card .mini-tree line {
+    stroke-width: 2px;
+    stroke: var(--background-color);
+    stroke-linecap: round;
   }
 
+  .f3 div.card .mini-tree rect.card-male{
+    color: var(--male-color);
+  }
+  .f3 div.card .mini-tree rect.card-female{
+    color: var(--female-color)
+  }
   .f3 div.card-image-circle {
     border-radius: 50%;
     padding: 5px;

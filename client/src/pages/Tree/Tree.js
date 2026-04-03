@@ -40,24 +40,20 @@ function FamilyTree() {
                 console.log(data)
                 const f3chart = f3.createChart('#FamilyChart', data)
                     .setTransitionTime(1000)
-                    .setCardXSpacing(250)
-                    .setCardYSpacing(150)
+                    .setCardXSpacing(200)
+                    .setCardYSpacing(200)
                     .setShowSiblingsOfMain(true)
                     .setSingleParentEmptyCard(false)
                     .setOrientationVertical()
+                    .setAncestryDepth(5)
+                    .setProgenyDepth(5);
 
                 const f3Card = f3chart.setCardHtml()
                     .setCardDisplay([["first name"], ["last name"]])
                     .setCardDim({})
                     .setMiniTree(true)
                     .setStyle('imageCircle')
-                    .setOnHoverPathToMain()
-                    .setOnCardClick((e, data) => {
-                        // Find the corresponding tree member to check for memberuserid
-                        const memberInfo = familyMembers?.find(m => String(m.id) === String(data?.data?.id));
-                        const targetId = memberInfo?.memberuserid || data?.data?.id;
-                        window.location.href = `/account/${targetId}`; // navigate to member's account page
-                    });
+                    .setOnHoverPathToMain();
 
                 f3chart.updateTree({ initial: true });
             }
