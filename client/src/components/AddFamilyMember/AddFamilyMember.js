@@ -275,7 +275,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
         // Use the treeMemberId as the node ID for the new member
         const newNodeId = `${treeMemberId}`;
-        const relativeNodeId = `${treeUserId}`;
+        const accountNodeId = `${treeUserId}`;
 
         // Add new node to tree index
         treeIndex[newNodeId] = {
@@ -289,7 +289,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         };
 
         // Add the relationship links in the tree data
-        addRelationship(treeIndex, newNodeId, relativeNodeId, data.relationship);
+        // new integration uses account user as the subject, new member = relative as the actor (newNode is account's <relationship> relative)
+        addRelationship(treeIndex, accountNodeId, newNodeId, data.relationship);
 
         // Persist updated tree
         const updatedTreeData = Object.values(treeIndex);
