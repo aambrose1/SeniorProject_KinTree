@@ -11,8 +11,13 @@ const yupValidation = yup.object().shape(
     {
         firstname: yup.string().required("First name is a required field."),
         lastname: yup.string().required("Last name is a required field."),
-        birthdate: yup.date().required("Birthdate is a required field."),
-        gender: yup.string().oneOf(['M', 'F'], 'Please select a valid option').required('Gender field is required'),
+        birthdate: yup
+            .date()
+            .transform((value, originalValue) => (originalValue === '' ? null : value))
+            .nullable()
+            .typeError("Birthdate is a required field.")
+            .required("Birthdate is a required field."),
+        gender: yup.string().oneOf(['M', 'F'], 'Gender field is required').required('Gender field is required'),
         email: yup.string().required("Email is a required field.")
             .matches(
                 "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
@@ -43,7 +48,10 @@ const yupValidation = yup.object().shape(
 );
 
 const CreateAccount = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(yupValidation) });
+    const { register, handleSubmit, formState: { errors } } = useForm({
+        resolver: yupResolver(yupValidation),
+        defaultValues: { gender: '' }
+    });
     const [errorMessage, setErrorMessage] = useState("");
     const [isHovering, setIsHovering] = useState(false);
 
@@ -125,8 +133,8 @@ const CreateAccount = () => {
                         </div>
                         <div style={styles.ItemStyle}>
                             <label>Gender
-                                <select id="gender" {...register("gender")} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }}>
-                                    <option value="" disabled hidden>Select</option>
+                                <select id="gender" defaultValue="" {...register("gender")} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }}>
+                                    <option value="" hidden>Select</option>
                                     <option value="M">Male</option>
                                     <option value="F">Female</option>
                                 </select>
