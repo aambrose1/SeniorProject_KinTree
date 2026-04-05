@@ -84,6 +84,7 @@ test.describe('Flow #1: Register a New Account', () => {
 		await createAccountPage.fillRequiredFields(buildRegistrationData(email));
 		await createAccountPage.submit();
 
+        await page.waitForURL(/\/login$/);
 		await expect(page).toHaveURL(/\/login$/);
 		await loginPage.expectLoaded();
 	});
@@ -95,12 +96,13 @@ test.describe('Flow #1: Register a New Account', () => {
 		await createAccountPage.goto();
 		await createAccountPage.fillRequiredFields(buildRegistrationData(duplicateEmail));
 		await createAccountPage.submit();
+        await page.waitForURL(/\/login$/);
 		await expect(page).toHaveURL(/\/login$/);
 
 		await createAccountPage.goto();
 		await createAccountPage.fillRequiredFields(buildRegistrationData(duplicateEmail));
 		await createAccountPage.submit();
-
+        await page.waitForURL(/\/register$/);
 		await expect(page).toHaveURL(/\/register$/);
 		await expect(page.getByText(/registered|exists|in use|already/i).first()).toBeVisible();
 	});
