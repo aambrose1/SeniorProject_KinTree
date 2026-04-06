@@ -49,13 +49,78 @@
     border-bottom: 1px solid #b8cfb8;
 }
 
-.chat-sidebar-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #2d5a3d;
+.chat-sidebar-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(74, 124, 89, 0.2);
+}
+
+.sidebar-tab {
+    background: none;
+    border: none;
+    padding: 6px 4px 10px 4px;
     font-family: 'Alata', sans-serif;
-    font-weight: normal;
-    letter-spacing: 0.3px;
+    font-size: 14px;
+    color: #6b8a6b;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+.sidebar-tab:hover {
+    color: #4a7c59;
+}
+
+.sidebar-tab.active {
+    color: #2d5a3d;
+    font-weight: bold;
+}
+
+.sidebar-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: #4a7c59;
+    border-radius: 3px 3px 0 0;
+}
+
+.chat-search-container {
+    position: relative;
+    width: 100%;
+}
+
+.chat-search-input {
+    width: 100%;
+    padding: 10px 35px 10px 15px;
+    border: 1px solid #b8cfb8;
+    border-radius: 20px;
+    font-family: 'Alata', sans-serif;
+    font-size: 13px;
+    background-color: #f8fbf5;
+    color: #2d3b2d;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.chat-search-input:focus {
+    border-color: #4a7c59;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.1);
+}
+
+.chat-search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #8fa88f;
+    pointer-events: none;
 }
 
 /* ---- Conversation List Items ---- */

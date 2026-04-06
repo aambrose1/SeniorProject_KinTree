@@ -32,6 +32,8 @@ function Chat() {
     const [isLoading, setIsLoading] = useState(true);
     const [isMessagesLoading, setIsMessagesLoading] = useState(false);
     const [messageInputValue, setMessageInputValue] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [activeSidebarTab, setActiveSidebarTab] = useState("messages"); // "messages" or "family"
     const [unreadCounts, setUnreadCounts] = useState({}); // { sender_id: count }
     const [lastMessages, setLastMessages] = useState({}); // { sender_id: "last message text" }
     const [messageError, setMessageError] = useState(null);
@@ -439,23 +441,51 @@ function Chat() {
                 <MainContainer responsive>
                     <Sidebar position="left" scrollable={true}>
                         <div className="chat-sidebar-header">
-                            <h3>Messages</h3>
+                            <div className="chat-sidebar-tabs">
+                                <button 
+                                    className={`sidebar-tab ${activeSidebarTab === "messages" ? "active" : ""}`}
+                                    onClick={() => setActiveSidebarTab("messages")}
+                                >
+                                    Messages
+                                </button>
+                                <button 
+                                    className={`sidebar-tab ${activeSidebarTab === "family" ? "active" : ""}`}
+                                    onClick={() => setActiveSidebarTab("family")}
+                                >
+                                    All Family
+                                </button>
+                            </div>
+                            <div className="chat-search-container">
+                                <input 
+                                    type="text" 
+                                    placeholder={activeSidebarTab === "messages" ? "Search chats..." : "Find family members..."}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="chat-search-input"
+                                />
+                                <span className="chat-search-icon">🔍</span>
+                            </div>
                         </div>
                         {isLoading ? (
                             <div className="chat-loading-state">
                                 <div className="chat-spinner"></div>
                                 <p>Loading family members...</p>
                             </div>
-                        ) : familyMembers.length === 0 ? (
-                            <div className="chat-empty-members">
-                                <p>No family members with accounts found.</p>
-                                <p className="chat-empty-hint">
-                                    Family members need a KinTree account to chat.
-                                </p>
-                            </div>
                         ) : (
                             <ConversationList>
-                                {familyMembers.map((member) => {
+                                {familyMembers
+                                    .filter(m => {
+                                        const fullName = `${m.firstname} ${m.lastname}`.toLowerCase();
+                                        const matchesSearch = fullName.includes(searchTerm.toLowerCase());
+                                        
+                                        if (activeSidebarTab === "messages") {
+                                            // Only show those with message history
+                                            return matchesSearch && lastMessages[m.auth_uid];
+                                        }
+                                        // Show everyone with an account
+                                        return matchesSearch;
+                                    })
+                                    .map((member) => {
                                     const memberUid = member.auth_uid;
                                     const unreadCount = unreadCounts[memberUid] || 0;
                                     const lastMsg = lastMessages[memberUid] || "Start a conversation";
