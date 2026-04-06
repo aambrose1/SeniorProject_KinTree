@@ -55,6 +55,31 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   } = useForm({ defaultValues: { firstName: '', lastName: '', relationship: '', matPat2: '', location: '', birthday: '', birthplace: '', deathdate: '', gender: '' } });
 
   const selectedManualRelationship = watch2("relationship");
+  const [treeMembers, setTreeMembers] = useState([]);
+
+  // relationships that require a "Connect To" link for proper placement
+  const extendedRelations = useMemo(() => ({
+    "cousin": { map: "child", label: "Parent of Cousin (Aunt/Uncle)", filter: ["aunt", "uncle"] },
+    "niece": { map: "child", label: "Parent of Niece (Sibling)", filter: ["sibling"] },
+    "nephew": { map: "child", label: "Parent of Nephew (Sibling)", filter: ["sibling"] },
+    "aunt": { map: "sibling", label: "Sibling of Aunt (Parent)", filter: ["parent"] },
+    "uncle": { map: "sibling", label: "Sibling of Uncle (Parent)", filter: ["parent"] },
+    "grandparent": { map: "parent", label: "Child of Grandparent (Parent)", filter: ["parent"] },
+    "grandchild": { map: "child", label: "Parent of Grandchild (Child)", filter: ["child"] }
+  }), []);
+
+  // Fetch all current tree members for the dropdown
+  useEffect(() => {
+    const loadTreeMembers = async () => {
+      try {
+        const members = await familyTreeService.getFamilyMembersByUserId(currentAccountID);
+        setTreeMembers(members);
+      } catch (err) {
+        console.error("Failed to load tree members for dropdown", err);
+      }
+    };
+    if (currentAccountID) loadTreeMembers();
+  }, [currentAccountID]);
 
 
 
@@ -158,13 +183,23 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       console.log('added user treeMemberId', treeMemberId);
 
       // relationship table uses id's from treeMembers table, not user ids!
+      // determine final relationship and primary contact for mapping
+      let finalRel = data.selectedMemberRelationship;
+      let targetId = treeUserId;
+      let isExtended = extendedRelations[data.selectedMemberRelationship];
+      
+      if (isExtended && data.connectTo) {
+        finalRel = isExtended.map;
+        targetId = Number(data.connectTo);
+      }
+
       let relRequestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          person1_id: treeUserId, // user adding the member (treemember id)
-          person2_id: treeMemberId, // added member (treemember id)
-          relationshipType: data.selectedMemberRelationship,
+          person1_id: targetId, 
+          person2_id: treeMemberId, 
+          relationshipType: finalRel,
           relationshipStatus: "active",
           side: data.matPat || null,
           userId: currentAccountID
@@ -183,7 +218,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
         // Use the treeMemberId as the node ID for the new member
         const newNodeId = `${treeMemberId}`;
-        const relativeNodeId = `${treeUserId}`;
+        const accountNodeId = `${treeUserId}`;
 
         // Add new node to tree index
         treeIndex[newNodeId] = {
@@ -197,7 +232,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         };
 
         // Add the relationship links in the tree data
-        addRelationship(treeIndex, relativeNodeId, newNodeId, data.selectedMemberRelationship, data.matPat || null);
+        addRelationship(treeIndex, accountNodeId, newNodeId, data.selectedMemberRelationship, data.matPat || null, data.connectTo);
 
         // Persist updated tree
         const updatedTreeData = Object.values(treeIndex);
@@ -252,13 +287,22 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       console.log('added user treeMemberId', treeMemberId);
 
       // add relationship to relationship table
+      let finalRel = data.relationship;
+      let targetId = treeUserId;
+      let isExtended = extendedRelations[data.relationship];
+      
+      if (isExtended && data.connectTo2) {
+        finalRel = isExtended.map;
+        targetId = Number(data.connectTo2);
+      }
+
       const relResponse = await fetch(`http://localhost:5000/api/relationships/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          person1_id: treeUserId,
+          person1_id: targetId,
           person2_id: treeMemberId,
-          relationshipType: data.relationship,
+          relationshipType: finalRel,
           relationshipStatus: "active",
           side: data.matPat2 || null,
           userId: userid,
@@ -293,7 +337,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
         // Add the relationship links in the tree data
         // new integration uses account user as the subject, new member = relative as the actor (newNode is account's <relationship> relative)
-        addRelationship(treeIndex, accountNodeId, newNodeId, data.relationship, data.matPat2 || null);
+        addRelationship(treeIndex, accountNodeId, newNodeId, data.relationship, data.matPat2 || null, data.connectTo2);
 
         // Persist updated tree
         const updatedTreeData = Object.values(treeIndex);
@@ -408,8 +452,27 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 </div>
 
                 <div style={{ marginTop: '10px', display: matPat.includes(selectedMemberRelationship) ? 'block' : 'none' }}>
-                  <input type="radio" name="matPat" value="maternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })} /> * Maternal
-                  <input type="radio" name="matPat" value="paternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })} /> * Paternal
+                  <label>
+                    Side:
+                    <input type="radio" name="matPat" value="maternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })} style={{ marginLeft: '10px' }} /> Maternal
+                    <input type="radio" name="matPat" value="paternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })} /> Paternal
+                  </label>
+                </div>
+
+                {/* Extended relationship "Connect To" dropdown */}
+                <div style={{ marginTop: '10px', display: extendedRelations[selectedMemberRelationship] ? 'block' : 'none' }}>
+                  <label>
+                    {extendedRelations[selectedMemberRelationship]?.label || "Connect To"}:
+                    <select {...register("connectTo", { required: false })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '180px' }} defaultValue={''}>
+                      <option value="">Skip / Link Later</option>
+                      {treeMembers.map(member => (
+                        <option key={member.id} value={member.id}>{member.firstname} {member.lastname}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <p style={{ fontSize: '12px', color: '#666', marginTop: '5px', marginLeft: '10px' }}>
+                    * Link to an existing member for better accuracy.
+                  </p>
                 </div>
 
                 {/* add button */}
@@ -516,8 +579,27 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 </li>
 
                 <div style={{ marginTop: '10px', display: matPat.includes(selectedManualRelationship) ? 'block' : 'none' }}>
-                  <input type="radio" name="matPat2" value="maternal" {...register2("matPat2", { required: matPat.includes(selectedManualRelationship) })} /> Maternal
-                  <input type="radio" name="matPat2" value="paternal" {...register2("matPat2", { required: matPat.includes(selectedManualRelationship) })} /> Paternal
+                  <label>
+                    Side:
+                    <input type="radio" name="matPat2" value="maternal" {...register2("matPat2", { required: matPat.includes(selectedManualRelationship) })} style={{ marginLeft: '10px' }} /> Maternal
+                    <input type="radio" name="matPat2" value="paternal" {...register2("matPat2", { required: matPat.includes(selectedManualRelationship) })} /> Paternal
+                  </label>
+                </div>
+
+                {/* Extended relationship "Connect To" dropdown for manual entry */}
+                <div style={{ marginTop: '10px', display: extendedRelations[selectedManualRelationship] ? 'block' : 'none' }}>
+                  <label>
+                    {extendedRelations[selectedManualRelationship]?.label || "Connect To"}:
+                    <select {...register2("connectTo2", { required: false })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '180px' }} defaultValue={''}>
+                      <option value="">Skip / Link Later</option>
+                      {treeMembers.map(member => (
+                        <option key={member.id} value={member.id}>{member.firstname} {member.lastname}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <p style={{ fontSize: '12px', color: '#666', marginTop: '5px', marginLeft: '10px' }}>
+                    * Link to an existing member for better accuracy.
+                  </p>
                 </div>
 
                 {/* optional fields */}
