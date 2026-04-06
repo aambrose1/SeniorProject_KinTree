@@ -159,9 +159,11 @@
 
 /* ---- Message Input ---- */
 .cs-message-input {
-    background-color: #ffffff !important;
-    border-top: 2px solid #ccdfcd !important;
+    background-color: transparent !important; /* Removed white background */
+    border-top: none !important; /* Removed outer border top */
     font-family: 'Alata', sans-serif !important;
+    padding: 15px 60px 15px 15px !important; /* Added right padding for send button */
+    position: relative !important;
 }
 
 .cs-message-input__content-editor {
@@ -170,6 +172,9 @@
     border: 1px solid #ccdfcd !important;
     font-family: 'Alata', sans-serif !important;
     color: #2d3b2d !important;
+    padding: 14px 18px !important;
+    min-height: 48px !important;
+    font-size: 15px !important;
 }
 
 .cs-message-input__content-editor:focus-within {
@@ -179,14 +184,22 @@
 
 .cs-message-input__content-editor-wrapper {
     background-color: transparent !important;
+    border: none !important; /* Ensure no border here */
 }
 
 .cs-button--send {
     color: #4a7c59 !important;
+    font-size: 26px !important;
+    position: absolute !important;
+    right: 20px !important; /* Positioned closer to the textbox end */
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    transition: transform 0.2s ease !important;
 }
 
 .cs-button--send:hover {
     color: #3a6249 !important;
+    transform: translateY(-50%) scale(1.1) !important;
 }
 
 /* ---- Avatar ---- */
@@ -252,6 +265,55 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+/* ---- Custom Context Menu ---- */
+.message-context-menu {
+    position: fixed;
+    background-color: #ffffff;
+    border: 1px solid #ccdfcd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 2000;
+    min-width: 140px;
+    padding: 6px 0;
+    animation: contextFadeIn 0.15s ease-out;
+}
+
+@keyframes contextFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.context-menu-item {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #2d3b2d;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.context-menu-item:hover {
+    background-color: #ebffec;
+    color: #1a2e1a;
+}
+
+.context-menu-item.delete {
+    color: #ff4d4f;
+    font-weight: bold;
+}
+
+.context-menu-item.delete:hover {
+    background-color: #fff1f0;
+}
+
+/* Dark mode context menu if needed */
+.dark-mode .message-context-menu {
+    background-color: #2d2d2d;
+    border-color: #4a4a4a;
 }
 
 .chat-loading-state p {

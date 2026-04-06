@@ -186,3 +186,30 @@
 .dark-mode .help-icon:hover {
     color: #4CAF50;
 }
+
+.chat-nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.unread-badge {
+    background-color: #ff4d4f;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.dark-mode .unread-badge {
+    background-color: #ff4d4f;
+}

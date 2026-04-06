@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import NavBar from '../../components/NavBar/NavBar';
 import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import {
@@ -22,17 +24,20 @@ import './Chat.css';
 const defaultAvatar = require('../../assets/default-avatar.png');
 
 function Chat() {
+    const navigate = useNavigate();
     const { supabaseUser, currentAccountID } = useCurrentUser();
     const [familyMembers, setFamilyMembers] = useState([]);
     const [activeConversation, setActiveConversation] = useState(null);
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isMessagesLoading, setIsMessagesLoading] = useState(false);
     const [messageInputValue, setMessageInputValue] = useState("");
     const [unreadCounts, setUnreadCounts] = useState({}); // { sender_id: count }
     const [lastMessages, setLastMessages] = useState({}); // { sender_id: "last message text" }
     const [messageError, setMessageError] = useState(null);
 
     const messagesEndRef = useRef(null);
+    const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, messageId: null });
 
     // Fetch unread counts for all conversations
     const fetchUnreadCounts = useCallback(async () => {
@@ -42,7 +47,8 @@ function Chat() {
             .from('messages')
             .select('sender_id')
             .eq('receiver_id', supabaseUser.id)
-            .eq('is_read', false);
+            .eq('is_read', false)
+            .eq('deleted_by_receiver', false);
 
         if (error) {
             console.error("Error fetching unread counts:", error);
@@ -69,19 +75,23 @@ function Chat() {
 
             const { data, error } = await supabase
                 .from('messages')
-                .select('content, created_at')
-                .or(
-                    `and(sender_id.eq.${supabaseUser.id},receiver_id.eq.${member.auth_uid}),and(sender_id.eq.${member.auth_uid},receiver_id.eq.${supabaseUser.id})`
-                )
-                .order('created_at', { ascending: false })
-                .limit(1);
+                .select('*') // Get all fields to check deletion flags
+                .or(`and(sender_id.eq.${supabaseUser.id},receiver_id.eq.${member.auth_uid}),and(sender_id.eq.${member.auth_uid},receiver_id.eq.${supabaseUser.id})`)
+                .order('created_at', { ascending: false });
 
             if (!error && data && data.length > 0) {
-                // Truncate long messages for preview
-                const preview = data[0].content.length > 35
-                    ? data[0].content.substring(0, 35) + '...'
-                    : data[0].content;
-                previews[member.auth_uid] = preview;
+                // Find the first message that isn't deleted for the current user
+                const latestValidMessage = data.find(msg => {
+                    const isOurs = msg.sender_id === supabaseUser.id;
+                    return isOurs ? !msg.deleted_by_sender : !msg.deleted_by_receiver;
+                });
+
+                if (latestValidMessage) {
+                    const previewText = latestValidMessage.content.length > 35
+                        ? latestValidMessage.content.substring(0, 35) + '...'
+                        : latestValidMessage.content;
+                    previews[member.auth_uid] = previewText;
+                }
             }
         }
         setLastMessages(previews);
@@ -98,6 +108,11 @@ function Chat() {
                 const validChatMembers = responseData.filter(member => member.auth_uid);
 
                 setFamilyMembers(validChatMembers);
+
+                // Auto-select the first conversation if none is active
+                if (validChatMembers.length > 0 && !activeConversation) {
+                    handleConversationClick(validChatMembers[0]);
+                }
 
                 // Fetch last message previews and unread counts
                 await fetchLastMessages(validChatMembers);
@@ -123,25 +138,31 @@ function Chat() {
         }
 
         const fetchMessages = async () => {
+            setIsMessagesLoading(true);
             setMessageError(null);
-
-            const { data, error } = await supabase
+            
+            try {
+                const { data, error } = await supabase
                 .from('messages')
                 .select('*')
-                .or(
-                    `and(sender_id.eq.${supabaseUser.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${supabaseUser.id})`
-                )
+                .or(`and(sender_id.eq.${supabaseUser.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${supabaseUser.id})`)
                 .order('created_at', { ascending: true });
 
             if (error) {
                 console.error("Error fetching messages:", error);
                 setMessageError("Could not load messages. Please try again.");
-            } else {
-                setMessages(data || []);
+                return;
             }
 
+            // Filter out messages that the current user has "soft-deleted"
+            const filteredMessages = (data || []).filter(msg => {
+                const isOurs = msg.sender_id === supabaseUser.id;
+                return isOurs ? !msg.deleted_by_sender : !msg.deleted_by_receiver;
+            });
+
+            setMessages(filteredMessages);
+
             // Mark messages from this sender as read
-            // NOTE: requires an UPDATE RLS policy on the messages table
             const { error: updateError } = await supabase
                 .from('messages')
                 .update({ is_read: true })
@@ -151,7 +172,6 @@ function Chat() {
 
             if (updateError) {
                 console.error("Error marking messages as read:", updateError);
-                // This will fail if no UPDATE RLS policy exists — see README
             } else {
                 // Clear unread count for this conversation
                 setUnreadCounts((prev) => {
@@ -160,7 +180,12 @@ function Chat() {
                     return updated;
                 });
             }
-        };
+        } catch (e) {
+            console.error("Error in fetchMessages:", e);
+        } finally {
+            setIsMessagesLoading(false);
+        }
+    };
 
         fetchMessages();
 
@@ -170,32 +195,52 @@ function Chat() {
             .channel(channelName)
             .on(
                 'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'messages' },
+                { event: '*', schema: 'public', table: 'messages' },
                 (payload) => {
-                    // Only append if it belongs to this conversation
-                    if (
-                        (payload.new.sender_id === supabaseUser.id && payload.new.receiver_id === otherUserId) ||
-                        (payload.new.sender_id === otherUserId && payload.new.receiver_id === supabaseUser.id)
-                    ) {
-                        setMessages((prev) => {
-                            // Avoid duplicates from optimistic update
-                            const isDuplicate = prev.some(
-                                (m) => m.content === payload.new.content &&
-                                    m.sender_id === payload.new.sender_id &&
-                                    typeof m.id === 'string' && m.id.startsWith('temp-')
-                            );
-                            if (isDuplicate) {
-                                // Replace the temp message with the real one
-                                return prev.map((m) =>
-                                    (typeof m.id === 'string' && m.id.startsWith('temp-') &&
-                                        m.content === payload.new.content &&
-                                        m.sender_id === payload.new.sender_id)
-                                        ? payload.new
-                                        : m
+                    // Update unread counts and previews regardless of current view
+                    fetchUnreadCounts();
+                    
+                    if (payload.eventType === 'INSERT') {
+                        // Only append if it belongs to this conversation and isn't deleted
+                        if (
+                            ((payload.new.sender_id === supabaseUser.id && payload.new.receiver_id === otherUserId && !payload.new.deleted_by_sender) ||
+                            (payload.new.sender_id === otherUserId && payload.new.receiver_id === supabaseUser.id && !payload.new.deleted_by_receiver))
+                        ) {
+                            setMessages((prev) => {
+                                // Avoid duplicates from optimistic update
+                                const isDuplicate = prev.some(
+                                    (m) => m.content === payload.new.content &&
+                                        m.sender_id === payload.new.sender_id &&
+                                        typeof m.id === 'string' && m.id.startsWith('temp-')
                                 );
-                            }
-                            return [...prev, payload.new];
-                        });
+                                if (isDuplicate) {
+                                    return prev.map((m) =>
+                                        (typeof m.id === 'string' && m.id.startsWith('temp-') &&
+                                            m.content === payload.new.content &&
+                                            m.sender_id === payload.new.sender_id)
+                                            ? payload.new
+                                            : m
+                                    );
+                                }
+                                return [...prev, payload.new];
+                            });
+                        }
+                    } else if (payload.eventType === 'UPDATE') {
+                        // Handle soft deletes or read status updates
+                        const updatedMsg = payload.new;
+                        const isDeletedForUs = (updatedMsg.sender_id === supabaseUser.id && updatedMsg.deleted_by_sender) ||
+                                              (updatedMsg.receiver_id === supabaseUser.id && updatedMsg.deleted_by_receiver);
+                        
+                        if (isDeletedForUs) {
+                            setMessages(prev => prev.filter(m => m.id !== updatedMsg.id));
+                        } else {
+                            setMessages(prev => prev.map(m => m.id === updatedMsg.id ? updatedMsg : m));
+                        }
+
+                        // Also refresh the sidebar preview
+                        if (activeConversation) {
+                            fetchLastMessages([activeConversation]);
+                        }
                     }
                 }
             )
@@ -204,17 +249,30 @@ function Chat() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [activeConversation, supabaseUser]);
+    }, [activeConversation, supabaseUser, fetchUnreadCounts]);
 
     // Auto-scroll to the newest message whenever the messages array changes
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollToBottom();
+        }
     }, [messages]);
+
+    // Handle clicks outside the context menu to close it
+    useEffect(() => {
+        const handleClickOutside = () => setContextMenu({ ...contextMenu, visible: false });
+        if (contextMenu.visible) {
+            window.addEventListener('click', handleClickOutside);
+        }
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, [contextMenu.visible, contextMenu]);
 
     const handleConversationClick = (member) => {
         setActiveConversation(member);
         setMessages([]); // Clear messages while new ones load
+        setIsMessagesLoading(true);
         setMessageError(null);
+        setContextMenu({ visible: false, x: 0, y: 0, messageId: null });
     };
 
     const handleSend = async (textContent) => {
@@ -226,7 +284,6 @@ function Chat() {
             return;
         }
 
-        // Strip HTML tags that chatscope's contentEditable may inject
         const cleanText = textContent.replace(/<[^>]*>/g, '').trim();
         if (!cleanText) return;
 
@@ -234,10 +291,11 @@ function Chat() {
             sender_id: supabaseUser.id,
             receiver_id: otherUserId,
             content: cleanText,
-            is_read: false
+            is_read: false,
+            deleted_by_sender: false,
+            deleted_by_receiver: false
         };
 
-        // Optimistic update — show the message immediately
         setMessages((prev) => [
             ...prev,
             { ...newMessage, id: `temp-${Date.now()}`, created_at: new Date().toISOString() }
@@ -249,11 +307,9 @@ function Chat() {
 
         if (error) {
             console.error("Error sending message:", error);
-            // Remove optimistic message on failure
             setMessages((prev) => prev.filter((m) => !(typeof m.id === 'string' && m.id.startsWith('temp-'))));
         }
 
-        // Update last message preview for this conversation
         setLastMessages((prev) => ({
             ...prev,
             [otherUserId]: cleanText.length > 35 ? cleanText.substring(0, 35) + '...' : cleanText
@@ -262,7 +318,102 @@ function Chat() {
         setMessageInputValue("");
     };
 
-    // Format timestamp for message grouping
+    const handleDeleteMessage = async (messageId) => {
+        if (!supabaseUser || !messageId) return;
+        setContextMenu({ ...contextMenu, visible: false });
+
+        // Guard against deleting optimistic (temp) messages
+        if (typeof messageId === 'string' && messageId.startsWith('temp-')) {
+            console.warn("Cannot delete message before it is synced to database.");
+            return;
+        }
+
+        const messageToDelete = messages.find(m => m.id === messageId);
+        if (!messageToDelete) return;
+
+        const isSender = messageToDelete.sender_id === supabaseUser.id;
+        const updateField = isSender ? 'deleted_by_sender' : 'deleted_by_receiver';
+
+        // Optimistic update
+        setMessages(prev => prev.filter(m => m.id !== messageId));
+
+        const { error } = await supabase
+            .from('messages')
+            .update({ [updateField]: true })
+            .eq('id', messageId);
+
+        if (error) {
+            console.error("Error deleting message from database:", error);
+            // Revert on error
+            fetchMessagesForActiveConversation();
+            alert("Failed to delete message. This might be due to server permissions.");
+        } else {
+            // Successfully deleted - refresh the preview in the sidebar
+            if (activeConversation) {
+                fetchLastMessages([activeConversation]);
+            }
+        }
+    };
+
+    const handleContextMenu = (e, messageId) => {
+        const bubble = e.target.closest('.cs-message__content');
+        if (!bubble) return;
+
+        e.preventDefault();
+
+        // Professional boundary check
+        const menuWidth = 160; 
+        const menuHeight = 50;  
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        let x = e.clientX;
+        let y = e.clientY;
+
+        // Flip horizontally if near the right edge
+        if (x + menuWidth > viewportWidth) {
+            x = x - menuWidth;
+        }
+
+        // Flip vertically if near the bottom edge
+        if (y + menuHeight > viewportHeight) {
+            y = y - menuHeight;
+        }
+
+        setContextMenu({
+            visible: true,
+            x,
+            y,
+            messageId
+        });
+    };
+
+    // Helper to refresh messages (used for revert)
+    const fetchMessagesForActiveConversation = async () => {
+        if (!activeConversation || !supabaseUser) return;
+        setIsMessagesLoading(true);
+        const { data, error } = await supabase
+            .from('messages')
+            .select('*')
+            .or(`and(sender_id.eq.${supabaseUser.id},receiver_id.eq.${activeConversation.auth_uid}),and(sender_id.eq.${activeConversation.auth_uid},receiver_id.eq.${supabaseUser.id})`)
+            .order('created_at', { ascending: true });
+            
+        if (!error && data) {
+            const filtered = data.filter(msg => {
+                const isOurs = msg.sender_id === supabaseUser.id;
+                return isOurs ? !msg.deleted_by_sender : !msg.deleted_by_receiver;
+            });
+            setMessages(filtered);
+        }
+        setIsMessagesLoading(false);
+    };
+
+    const handleProfileNavigation = (userId) => {
+        if (userId) {
+            navigate(`/account/${userId}`);
+        }
+    };
+
     const formatDateSeparator = (dateStr) => {
         const date = new Date(dateStr);
         const today = new Date();
@@ -274,7 +425,6 @@ function Chat() {
         return date.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
     };
 
-    // Determine if we should show a date separator before this message
     const shouldShowDateSeparator = (messages, index) => {
         if (index === 0) return true;
         const prevDate = new Date(messages[index - 1].created_at).toDateString();
@@ -291,21 +441,21 @@ function Chat() {
                         <div className="chat-sidebar-header">
                             <h3>Messages</h3>
                         </div>
-                        <ConversationList>
-                            {isLoading ? (
-                                <div className="chat-loading-state">
-                                    <div className="chat-spinner"></div>
-                                    <p>Loading family members...</p>
-                                </div>
-                            ) : familyMembers.length === 0 ? (
-                                <div className="chat-empty-members">
-                                    <p>No family members with accounts found.</p>
-                                    <p className="chat-empty-hint">
-                                        Family members need a KinTree account to chat.
-                                    </p>
-                                </div>
-                            ) : (
-                                familyMembers.map((member) => {
+                        {isLoading ? (
+                            <div className="chat-loading-state">
+                                <div className="chat-spinner"></div>
+                                <p>Loading family members...</p>
+                            </div>
+                        ) : familyMembers.length === 0 ? (
+                            <div className="chat-empty-members">
+                                <p>No family members with accounts found.</p>
+                                <p className="chat-empty-hint">
+                                    Family members need a KinTree account to chat.
+                                </p>
+                            </div>
+                        ) : (
+                            <ConversationList>
+                                {familyMembers.map((member) => {
                                     const memberUid = member.auth_uid;
                                     const unreadCount = unreadCounts[memberUid] || 0;
                                     const lastMsg = lastMessages[memberUid] || "Start a conversation";
@@ -323,12 +473,17 @@ function Chat() {
                                             <Avatar
                                                 src={member.avatar || defaultAvatar}
                                                 name={`${member.firstname} ${member.lastname}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleProfileNavigation(member.auth_uid);
+                                                }}
+                                                style={{ cursor: 'pointer' }}
                                             />
                                         </Conversation>
                                     );
-                                })
-                            )}
-                        </ConversationList>
+                                })}
+                            </ConversationList>
+                        )}
                     </Sidebar>
 
                     <ChatContainer>
@@ -337,9 +492,13 @@ function Chat() {
                                 <Avatar
                                     src={activeConversation.avatar || defaultAvatar}
                                     name={`${activeConversation.firstname} ${activeConversation.lastname}`}
+                                    onClick={() => handleProfileNavigation(activeConversation.auth_uid)}
+                                    style={{ cursor: 'pointer' }}
                                 />
                                 <ConversationHeader.Content
                                     userName={`${activeConversation.firstname} ${activeConversation.lastname}`}
+                                    onClick={() => handleProfileNavigation(activeConversation.auth_uid)}
+                                    style={{ cursor: 'pointer' }}
                                 />
                             </ConversationHeader>
                         ) : (
@@ -351,70 +510,103 @@ function Chat() {
                             </ConversationHeader>
                         )}
 
-                        <MessageList>
-                            {!activeConversation && (
+                        <MessageList ref={messagesEndRef}>
+                            {messageError ? (
+                                <MessageSeparator content={messageError} />
+                            ) : null}
+
+                            {!activeConversation ? (
                                 <div className="chat-empty-state">
                                     <div className="chat-empty-icon">💬</div>
                                     <h3>Welcome to KinTree Chat</h3>
-                                    <p>Select a family member from the sidebar to start a conversation.</p>
+                                    <p>Select a family member from the sidebar to start a private conversation.</p>
                                 </div>
-                            )}
-
-                            {messageError && (
-                                <MessageSeparator content={messageError} />
-                            )}
-
-                            {messages.map((msg, index) => {
+                            ) : isMessagesLoading ? (
+                                <div className="chat-loading-state">
+                                    <div className="chat-spinner"></div>
+                                    <p>Loading conversation...</p>
+                                </div>
+                            ) : messages.length === 0 ? (
+                                <div className="chat-empty-state">
+                                    <div className="chat-empty-icon">👋</div>
+                                    <h3>Say hello!</h3>
+                                    <p>This is the beginning of your conversation with {activeConversation.firstname}.</p>
+                                    <p className="chat-empty-hint">Type a message below to start chatting.</p>
+                                </div>
+                            ) : (
+                                messages.map((msg, index) => {
                                 const isOurs = msg.sender_id === supabaseUser.id;
-                                const isLastMessage = index === messages.length - 1;
                                 const showDateSep = shouldShowDateSeparator(messages, index);
 
                                 return (
                                     <React.Fragment key={msg.id}>
                                         {showDateSep && (
-                                            <MessageSeparator content={formatDateSeparator(msg.created_at)} />
+                                            <MessageSeparator key={`sep-${msg.id}`} content={formatDateSeparator(msg.created_at)} />
                                         )}
-                                        <div ref={isLastMessage ? messagesEndRef : null}>
-                                            <Message
-                                                model={{
-                                                    message: msg.content,
-                                                    sentTime: new Date(msg.created_at).toLocaleTimeString([], {
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    }),
-                                                    sender: isOurs ? "You" : activeConversation.firstname,
-                                                    direction: isOurs ? "outgoing" : "incoming",
-                                                    position: "single"
-                                                }}
-                                            >
-                                                <Message.Footer
-                                                    sentTime={new Date(msg.created_at).toLocaleTimeString([], {
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                />
-                                            </Message>
-                                        </div>
+                                        <Message
+                                            key={msg.id}
+                                            model={{
+                                                message: msg.content,
+                                                sentTime: new Date(msg.created_at).toLocaleTimeString([], {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                }),
+                                                sender: isOurs ? "You" : activeConversation.firstname,
+                                                direction: isOurs ? "outgoing" : "incoming",
+                                                position: "single"
+                                            }}
+                                            onContextMenu={(e) => handleContextMenu(e, msg.id)}
+                                        >
+                                            <Message.Footer
+                                                sentTime={new Date(msg.created_at).toLocaleTimeString([], {
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            />
+                                        </Message>
                                     </React.Fragment>
                                 );
-                            })}
+                            }))}
                         </MessageList>
 
-                        <MessageInput
-                            placeholder="Type a message..."
-                            value={messageInputValue}
-                            onChange={(val) => setMessageInputValue(val)}
-                            onSend={(innerHtml) => {
-                                // chatscope passes the innerHTML; strip tags for clean text
-                                const text = innerHtml.replace(/<[^>]*>/g, '');
-                                handleSend(text);
-                            }}
-                            disabled={!activeConversation}
-                            attachButton={false}
-                        />
+                        {activeConversation && (
+                            <MessageInput
+                                placeholder="Type a message..."
+                                value={messageInputValue}
+                                onChange={(val) => setMessageInputValue(val)}
+                                onSend={(innerHtml) => {
+                                    const text = innerHtml.replace(/<[^>]*>/g, '');
+                                    handleSend(text);
+                                }}
+                                disabled={!activeConversation}
+                                attachButton={false}
+                            />
+                        )}
                     </ChatContainer>
                 </MainContainer>
             </div>
+
+            {/* Custom Context Menu */}
+            <AnimatePresence>
+                {contextMenu.visible && (
+                    <motion.div 
+                        className="message-context-menu" 
+                        style={{ top: contextMenu.y, left: contextMenu.x }}
+                        onClick={(e) => e.stopPropagation()}
+                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                        transition={{ duration: 0.1 }}
+                    >
+                        <div 
+                            className="context-menu-item delete" 
+                            onClick={() => handleDeleteMessage(contextMenu.messageId)}
+                        >
+                            <span>🗑️</span> Delete Message
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
