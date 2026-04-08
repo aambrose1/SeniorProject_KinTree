@@ -116,6 +116,10 @@ test.describe('Flow #1: Register a New Account', () => {
 	});
 
 	test('registers successfully and redirects to login', async ({ page }) => {
+		// debug
+		page.on('console', msg => console.log('BROWSER CONSOLE:', msg.text()));
+		page.on('requestfailed', request => console.log('NETWORK ERROR:', request.url(), request.failure().errorText));
+		
 		const createAccountPage = new CreateAccountPage(page);
 		const loginPage = new LoginPage(page);
 		const email = testEmail;
