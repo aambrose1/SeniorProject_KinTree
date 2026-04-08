@@ -124,7 +124,6 @@ test.describe('Flow #1: Register a New Account', () => {
 		await createAccountPage.fillRequiredFields(buildRegistrationData(email));
 		await createAccountPage.submit();
 
-        await page.waitForURL(/\/login$/);
 		await expect(page).toHaveURL(/\/login$/);
 		await loginPage.expectLoaded();
 	});
