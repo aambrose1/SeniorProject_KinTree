@@ -12,8 +12,8 @@ setup('authenticate', async ({ page }) => {
   await page.getByRole('button', { name: 'Sign In' }).click();
 
   // 3. Wait for the redirect to confirm the login was successful
-  await page.waitForURL('http://localhost:3000/tree');
-  await expect(page.getByTestId('family-chart')).toBeVisible();
+  await page.waitForURL('http://localhost:3000/');
+  await expect(page.getByText(/Family Events/)).toBeVisible();
 
   // 4. Save the cookies and local storage state to the file
   await page.context().storageState({ path: authFile });
