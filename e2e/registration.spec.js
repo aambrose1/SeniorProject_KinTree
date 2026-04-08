@@ -5,8 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase admin client for cleanup
 const supabase = createClient(
-  process.env.TEST_SUPABASE_URL,
-  process.env.TEST_SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 const buildRegistrationData = (email) => ({
