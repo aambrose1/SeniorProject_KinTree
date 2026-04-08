@@ -47,7 +47,7 @@ jobs:
         PORT: 3000
       run: |
         cd client
-        npm run start:test & 
+        npm start & 
         wait-on http://localhost:3000
 
     - name: Run Playwright Tests
