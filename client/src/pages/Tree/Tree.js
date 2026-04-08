@@ -79,7 +79,7 @@ function FamilyTree() {
         
     }, [currentAccountID, contRef]);
 
-    return <div className="f3 f3-cont" id="FamilyChart" ref={contRef}>{errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}</div>;
+    return <div className="f3 f3-cont" id="FamilyChart" data-test-id="family-chart" ref={contRef}>{errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}</div>;
     
 }
 
