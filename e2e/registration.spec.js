@@ -30,7 +30,14 @@ test.describe('Flow #1: Register a New Account', () => {
   	const duplicateEmail = 'existing-user@msstate.edu';
 
   	// Setup
-	test.beforeAll(async () => { // for duplicate email test
+	test.beforeAll(async () => { 
+		const { data: { users } } = await supabase.auth.admin.listUsers();
+       // ensure clean slate
+       for (const email of [testEmail, duplicateEmail]) {
+          const user = users.find(u => u.email === email);
+          if (user) await supabase.auth.admin.deleteUser(user.id);
+        }
+		// for duplicate email test
 		await supabase.auth.admin.createUser({
 		email: duplicateEmail,
 		password: 'password123',
