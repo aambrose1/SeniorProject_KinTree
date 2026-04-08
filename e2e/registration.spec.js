@@ -1,8 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { CreateAccountPage } from './pages/CreateAccount';
 import { LoginPage } from './pages/Login';
+import { createClient } from '@supabase/supabase-js';
 
-const makeUniqueEmail = () => `kintree.e2e.${Date.now()}.${Math.floor(Math.random() * 100000)}@example.com`;
+// Initialize Supabase admin client for cleanup
+const supabase = createClient(
+  process.env.TEST_SUPABASE_URL,
+  process.env.TEST_SUPABASE_SERVICE_ROLE_KEY
+);
 
 const buildRegistrationData = (email) => ({
 	firstname: 'E2E',
@@ -14,9 +19,37 @@ const buildRegistrationData = (email) => ({
 	password: 'StrongPass1!',
 });
 
+// This suite runs without logged in state
+test.use({ storageState: { cookies: [], origins: [] } });
+
 // Flow #1
 
 test.describe('Flow #1: Register a New Account', () => {
+
+	const testEmail = 'new-user@msstate.edu';
+  	const duplicateEmail = 'existing-user@msstate.edu';
+
+  	// Setup
+	test.beforeAll(async () => { // for duplicate email test
+		await supabase.auth.admin.createUser({
+		email: duplicateEmail,
+		password: 'password123',
+		email_confirm: true,
+		});
+	});
+
+	// Cleanup, removes all test accs
+	test.afterAll(async () => {
+		const { data: { users } } = await supabase.auth.admin.listUsers();
+		
+		// Find and delete both test accounts if they exist
+		for (const email of [testEmail, duplicateEmail]) {
+		const user = users.find(u => u.email === email);
+		if (user) await supabase.auth.admin.deleteUser(user.id);
+		}
+	});
+
+
 	test('loads the create account form', async ({ page }) => {
 		const createAccountPage = new CreateAccountPage(page);
 
@@ -78,7 +111,7 @@ test.describe('Flow #1: Register a New Account', () => {
 	test('registers successfully and redirects to login', async ({ page }) => {
 		const createAccountPage = new CreateAccountPage(page);
 		const loginPage = new LoginPage(page);
-		const email = makeUniqueEmail();
+		const email = testEmail;
 
 		await createAccountPage.goto();
 		await createAccountPage.fillRequiredFields(buildRegistrationData(email));
@@ -91,16 +124,16 @@ test.describe('Flow #1: Register a New Account', () => {
 
 	test('shows an error when trying to register a duplicate email', async ({ page }) => {
 		const createAccountPage = new CreateAccountPage(page);
-		const duplicateEmail = makeUniqueEmail();
+		const email = duplicateEmail;
 
 		await createAccountPage.goto();
-		await createAccountPage.fillRequiredFields(buildRegistrationData(duplicateEmail));
+		await createAccountPage.fillRequiredFields(buildRegistrationData(email));
 		await createAccountPage.submit();
         await page.waitForURL(/\/login$/);
 		await expect(page).toHaveURL(/\/login$/);
 
 		await createAccountPage.goto();
-		await createAccountPage.fillRequiredFields(buildRegistrationData(duplicateEmail));
+		await createAccountPage.fillRequiredFields(buildRegistrationData(email));
 		await createAccountPage.submit();
         await page.waitForURL(/\/register$/);
 		await expect(page).toHaveURL(/\/register$/);

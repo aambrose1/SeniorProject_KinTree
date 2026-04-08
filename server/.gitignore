@@ -19,6 +19,7 @@
 playwright/.auth
 .env.production.local
 .env
+.env.test
 client/project-root/.env
 server/.env
 npm-debug.log*

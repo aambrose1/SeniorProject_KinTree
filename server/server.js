@@ -10,7 +10,11 @@ const backupRoutes = require('./routes/backupRoutes');
 const treeInfoRoutes = require('./routes/treeInfoRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 
-dotenv.config();
+if (process.env.NODE_ENV === 'test') {
+  dotenv.config({ path: '.env.test' });
+} else {
+  dotenv.config(); 
+}
 
 const app = express();
 const port = process.env.PORT || 5000;
