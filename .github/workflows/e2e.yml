@@ -67,7 +67,7 @@ jobs:
         azcopy cp --recursive "./playwright-report/*" "https://kintree2026.blob.core.windows.net/\$web/$REPORT_DIR"
         
         # Prints a clickable link in the GitHub Actions logs
-        echo "::notice title=HTML report url::https://kintree2026.z1.web.core.windows.net/$REPORT_DIR/index.html"
+        echo "::notice title=HTML report url::https://kintree2026.z13.web.core.windows.net/$REPORT_DIR/index.html"
       env:
         AZCOPY_AUTO_LOGIN_TYPE: SPN
         AZCOPY_SPA_APPLICATION_ID: '${{ secrets.AZCOPY_SPA_APPLICATION_ID }}'
