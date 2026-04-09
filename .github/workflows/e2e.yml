@@ -55,8 +55,26 @@ jobs:
       env:
         SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_ROLE_KEY }}
-    - name: Upload Playwright Report
-    
+        
+    - name: Upload HTML report to Azure
+      if: always() 
+      shell: bash
+      run: |
+        # Creates a unique folder name for this specific test run
+        REPORT_DIR='run-${{ github.run_id }}-${{ github.run_attempt }}'
+        
+        # Uploads the report to the $web container
+        azcopy cp --recursive "./playwright-report/*" "https://kintree2026.blob.core.windows.net/\$web/$REPORT_DIR"
+        
+        # Prints a clickable link in the GitHub Actions logs
+        echo "::notice title=HTML report url::https://kintree2026.z1.web.core.windows.net/$REPORT_DIR/index.html"
+      env:
+        AZCOPY_AUTO_LOGIN_TYPE: SPN
+        AZCOPY_SPA_APPLICATION_ID: '${{ secrets.AZCOPY_SPA_APPLICATION_ID }}'
+        AZCOPY_SPA_CLIENT_SECRET: '${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}'
+        AZCOPY_TENANT_ID: '${{ secrets.AZCOPY_TENANT_ID }}'
+
+    - name: Upload Playwright Report to GitHub Artifacts
       uses: actions/upload-artifact@v4
       if: always()
       with:
