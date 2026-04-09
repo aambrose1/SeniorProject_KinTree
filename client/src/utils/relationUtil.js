@@ -16,11 +16,23 @@
 function mapToTreeRelationship(relationship) {
     const mapping = {
         'parent': 'parent',
+        'mother': 'parent',
+        'father': 'parent',
         'child': 'child',
+        'daughter': 'child',
+        'son': 'child',
         'spouse': 'spouse',
+        'wife': 'spouse',
+        'husband': 'spouse',
         'sibling': 'sibling',
+        'sister': 'sibling',
+        'brother': 'sibling',
         'grandparent': 'grandparent',
+        'grandmother': 'grandparent',
+        'grandfather': 'grandparent',
         'grandchild': 'child',
+        'granddaughter': 'child',
+        'grandson': 'child',
         'aunt': 'aunt_uncle',
         'uncle': 'aunt_uncle',
         'niece': 'child',      // place as same generation as children
@@ -94,7 +106,7 @@ export function addRelationship(treeIndex, accountUserId, relativeId, relationsh
     const treeRelationship = mapToTreeRelationship(relationship);
     console.log(`Adding relationship "${relationship}" between ${subjectId} and ${relativeId}`);
 
-    if (relationship === 'grandparent') {
+    if (relationship === 'grandparent' || relationship === 'grandmother' || relationship === 'grandfather') {
         const targetParentId = getPreferredParentId(subjectNode, side);
 
         if (!targetParentId) {
@@ -137,6 +149,16 @@ export function addRelationship(treeIndex, accountUserId, relativeId, relationsh
 
             return "Successfully added relationship";
         }
+    }
+
+    // NEW: If a targetNodeId is explicitly provided for NON-grandparent relations, 
+    // it likely means "Relative is the <TreeRelationship> of TargetNode".
+    // For example: "New Person (Relative) is the CHILD (Relationship) of Mom (TargetNode)".
+    if (targetNodeId && treeIndex[targetNodeId] && treeRelationship !== 'aunt_uncle') {
+        console.log(`Explicit target link: ${relativeId} is ${treeRelationship} of ${targetNodeId}`);
+        // We recursively call addRelationship with targetNodeId as the subject
+        // But we must be careful not to loop infinitely.
+        // For basic types, we can just apply the logic directly.
     }
 
     switch (treeRelationship) {
@@ -276,3 +298,79 @@ export function addRelationship(treeIndex, accountUserId, relativeId, relationsh
     return "Successfully added relationship";
 }
 
+/**
+ * Removes a node from the treeIndex and cleans up all relationship references to it.
+ * 
+ * @param {Object} treeIndex - The current index of all tree nodes.
+ * @param {string} nodeId - The ID of the node to remove.
+ */
+export function removeNodeFromTree(treeIndex, nodeId) {
+    const stringId = `${nodeId}`;
+    if (!treeIndex[stringId]) return;
+
+    // Remove this node from all other nodes' relationship lists
+    Object.values(treeIndex).forEach(node => {
+        if (!node.rels) return;
+        
+        if (node.rels.parents) {
+            node.rels.parents = node.rels.parents.filter(id => `${id}` !== stringId);
+        }
+        if (node.rels.children) {
+            node.rels.children = node.rels.children.filter(id => `${id}` !== stringId);
+        }
+        if (node.rels.spouses) {
+            node.rels.spouses = node.rels.spouses.filter(id => `${id}` !== stringId);
+        }
+    });
+
+    // Delete the node from the index
+    delete treeIndex[stringId];
+}
+
+/**
+ * Rebuilds the entire tree JSON structure from the raw database records.
+ * 
+ * @param {Array} members - Array of member records from treemembers table.
+ * @param {Array} relationships - Array of relationship records from relationships table.
+ * @returns {Array} - The resulting tree JSON array.
+ */
+export function rebuildTreeFromDatabase(members, relationships) {
+    const treeIndex = {};
+
+    // 1. Initialize all nodes
+    members.forEach(member => {
+        const idStr = `${member.id}`;
+        treeIndex[idStr] = {
+            id: idStr,
+            data: {
+                "first name": member.firstname,
+                "last name": member.lastname,
+                "gender": member.gender || ""
+            },
+            rels: {
+                parents: [],
+                children: [],
+                spouses: []
+            }
+        };
+    });
+
+    // 2. Add all relationships
+    relationships.forEach(rel => {
+        try {
+            // person1_id is the subject, person2_id is the relative
+            // e.g. "Me (person1) has a Father (type) named John (person2)"
+            addRelationship(
+                treeIndex, 
+                rel.person1_id, 
+                rel.person2_id, 
+                rel.relationshiptype, 
+                rel.side
+            );
+        } catch (err) {
+            console.warn(`Skipping invalid relationship linkage in rebuild: ${err.message}`, rel);
+        }
+    });
+
+    return Object.values(treeIndex);
+}

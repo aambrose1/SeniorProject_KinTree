@@ -1,6 +1,7 @@
 const treeMember = require('../models/treeMemberModel');
 const relationship = require('../models/relationshipModel');
 const User = require('../models/userModel');
+const supabase = require('../lib/supabase');
 
 // format dates to YYYY-MM-DD
 const formatDate = (dateValue) => {
@@ -191,6 +192,27 @@ const deleteByUser =  async (req, res) => {
       }
 
 }
+
+const deleteTreeMember = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // delete all relationships associated with this member
+        await relationship.deleteRelationshipsByMemberId(id);
+        
+        // delete the member
+        await treeMember.deleteMember(id);
+
+        res.status(200).json({
+            message: 'Family member and their relationships deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error in deleteTreeMember:', error);
+        res.status(500).json({
+            error: 'Error deleting family member'
+        });
+    }
+};
 const getMemberById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -243,5 +265,71 @@ const getMemberbyMemberId = async (req, res) => {
     }
 };
 
-module.exports = { addTreeMember, editTreeMember, getMembersByUser, getMembersByOtherUser, deleteByUser, getMemberById, getActiveMemberId, getMemberbyMemberId };  
+const clearFamilyTree = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const userIdInt = await User.resolveUserIdFromAuthUid(userId);
+        if (!userIdInt) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // 1. Delete all relationships for this user
+        await relationship.deleteByUser(userIdInt);
+
+        // 2. Fetch the root member ID for this user (the one where memberuserid == userid)
+        const rootMember = await treeMember.getActiveMemberId(userIdInt);
+        const rootMemberId = rootMember ? rootMember.id : null;
+
+        // 3. Delete all family members for this user EXCEPT the root member
+        if (rootMemberId) {
+            const { error: deleteError } = await supabase
+                .from('treemembers')
+                .delete()
+                .eq('userid', userIdInt)
+                .neq('id', rootMemberId);
+            
+            if (deleteError) throw deleteError;
+
+            // 4. Reset the tree_info JSON to only contain the root member
+            const initialTreeData = [{
+                id: `${rootMemberId}`,
+                data: {
+                    "first name": rootMember.firstname,
+                    "last name": rootMember.lastname,
+                    "gender": rootMember.gender || "Unknown"
+                },
+                rels: {
+                    parents: [],
+                    children: [],
+                    spouses: []
+                }
+            }];
+
+            // We need direct DB update for tree_info
+            const { error: infoError } = await supabase
+                .from('treeinfo')
+                .update({ object: initialTreeData })
+                .eq('userid', userIdInt);
+            
+            if (infoError) throw infoError;
+        }
+
+        res.status(200).json({
+            message: 'Family tree cleared successfully. Starting fresh with only your profile.'
+        });
+    } catch (error) {
+        console.error('Error in clearFamilyTree:', error);
+        res.status(500).json({
+            error: 'Error resetting family tree',
+            details: error.message
+        });
+    }
+};
+
+module.exports = { 
+    addTreeMember, editTreeMember, getMembersByUser, 
+    getMembersByOtherUser, deleteByUser, deleteTreeMember, 
+    getMemberById, getActiveMemberId, getMemberbyMemberId,
+    clearFamilyTree 
+};  
 

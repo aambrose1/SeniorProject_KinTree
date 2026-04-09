@@ -30,42 +30,98 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     reset,
     watch,
     handleSubmit,
+    setValue,
   } = useForm({ defaultValues: { selectedMember: '', selectedMemberRelationship: '', matPat: '' } });
-
-  // stored list of family members that require maternal/paternal distinction (maybe shift this to retrieval from backend, so that it can be updated without changing code)
-  let matPat = useMemo(() => ["parent", "cousin", "aunt", "uncle", "grandparent", "niece", "nephew"], []);
-
-  // manage mat/pat selector using currently selected relationship type
-  const selectedMemberRelationship = watch("selectedMemberRelationship");
-  var enableMatPat = useRef(false);
-  useEffect(() => {
-    if (matPat.includes(selectedMemberRelationship)) {
-      enableMatPat.current = true;
-    }
-    else {
-      enableMatPat.current = false;
-    }
-  }, [selectedMemberRelationship, matPat]);
 
   // second form -- manually add family member
   const {
     register: register2,
     watch: watch2,
     handleSubmit: handleSubmit2,
+    setValue: setValue2,
   } = useForm({ defaultValues: { firstName: '', lastName: '', relationship: '', matPat2: '', location: '', birthday: '', birthplace: '', deathdate: '', gender: '' } });
 
+  // stored list of family members that require maternal/paternal distinction
+  let matPat = useMemo(() => ["parent", "mother", "father", "cousin", "aunt", "uncle", "grandparent", "grandmother", "grandfather", "niece", "nephew"], []);
+
+  // manage mat/pat selector using currently selected relationship type
+  const selectedMemberRelationship = watch("selectedMemberRelationship");
+  
+  // Reusable logic for both forms
+  const getSideChoiceType = (rel) => {
+    const fixed = { "mother": "maternal", "father": "paternal" };
+    const required = ["grandparent", "grandmother", "grandfather", "aunt", "uncle", "cousin", "niece", "nephew", "parent"];
+    if (fixed[rel]) return { status: 'fixed', value: fixed[rel] };
+    if (required.includes(rel)) return { status: 'required' };
+    return { status: 'none' };
+  };
+
+  useEffect(() => {
+    const choice = getSideChoiceType(selectedMemberRelationship);
+    if (choice.status === 'fixed') {
+      setValue("matPat", choice.value);
+    }
+  }, [selectedMemberRelationship, setValue]);
+
+  var enableMatPat = useRef(false);
+  useEffect(() => {
+    const choice = getSideChoiceType(selectedMemberRelationship);
+    enableMatPat.current = (choice.status === 'required');
+  }, [selectedMemberRelationship]);
+
   const selectedManualRelationship = watch2("relationship");
+  const selectedManualMatPat = watch2("matPat2");
+
+  useEffect(() => {
+    // Auto-set gender and side based on relationship selection
+    const genderMap = {
+      "mother": "F", "father": "M",
+      "sister": "F", "brother": "M",
+      "aunt": "F", "uncle": "M",
+      "niece": "F", "nephew": "M",
+      "grandmother": "F", "grandfather": "M",
+      "daughter": "F", "son": "M"
+    };
+    if (genderMap[selectedManualRelationship]) {
+      setValue2("gender", genderMap[selectedManualRelationship]);
+    }
+
+    // Auto-set side for unambiguous relationships
+    if (selectedManualRelationship === "mother") {
+      setValue2("matPat2", "maternal");
+    } else if (selectedManualRelationship === "father") {
+      setValue2("matPat2", "paternal");
+    }
+  }, [selectedManualRelationship, setValue2]);
+
+  // Determine if the "Side" selector should be shown
+  const isSideChoiceNeeded = (rel) => {
+    const multiSideRel = ["grandparent", "grandmother", "grandfather", "aunt", "uncle", "cousin", "niece", "nephew", "parent"];
+    // Mother and Father have fixed sides, so we don't need to ask
+    if (rel === "mother" || rel === "father") return false;
+    return multiSideRel.includes(rel);
+  };
   const [treeMembers, setTreeMembers] = useState([]);
 
-  // relationships that require a "Connect To" link for proper placement
+  // relationships that require or benefit from a "Connect To" link for proper placement
   const extendedRelations = useMemo(() => ({
-    "cousin": { map: "child", label: "Parent of Cousin (Aunt/Uncle)", filter: ["aunt", "uncle"] },
+    "parent": { map: "parent", label: "Spouse of Parent", filter: ["parent", "spouse"] },
+    "mother": { map: "parent", label: "Husband/Partner (Existing Father)", filter: ["parent", "spouse"] },
+    "father": { map: "parent", label: "Wife/Partner (Existing Mother)", filter: ["parent", "spouse"] },
+    "spouse": { map: "spouse", label: "Existing Children?", filter: ["child"] },
+    "child": { map: "child", label: "Other Parent?", filter: ["spouse", "parent"] },
+    "cousin": { map: "child", label: "Parent of Cousin (Aunt/Uncle)", filter: ["aunt", "uncle", "sibling"] },
     "niece": { map: "child", label: "Parent of Niece (Sibling)", filter: ["sibling"] },
     "nephew": { map: "child", label: "Parent of Nephew (Sibling)", filter: ["sibling"] },
     "aunt": { map: "sibling", label: "Sibling of Aunt (Parent)", filter: ["parent"] },
     "uncle": { map: "sibling", label: "Sibling of Uncle (Parent)", filter: ["parent"] },
     "grandparent": { map: "parent", label: "Child of Grandparent (Parent)", filter: ["parent"] },
-    "grandchild": { map: "child", label: "Parent of Grandchild (Child)", filter: ["child"] }
+    "grandmother": { map: "parent", label: "Child of Grandmother (Parent)", filter: ["parent"] },
+    "grandfather": { map: "parent", label: "Child of Grandfather (Parent)", filter: ["parent"] },
+    "grandchild": { map: "child", label: "Parent of Grandchild (Child)", filter: ["child"] },
+    "sibling": { map: "sibling", label: "Link to Parent", filter: ["parent"] },
+    "sister": { map: "sibling", label: "Link to Parent", filter: ["parent"] },
+    "brother": { map: "sibling", label: "Link to Parent", filter: ["parent"] }
   }), []);
 
   // Fetch all current tree members for the dropdown
@@ -147,9 +203,11 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         return;
       }
 
-      if (selectedUser && family.current.some(member => member.memberuserid === selectedUser.id)) {
-        setErrorMessage("This user is already in your family tree.");
-        console.error("Attempted to add existing family member:", selectedUser.username);
+      const existingMember = family.current.find(member => member.memberuserid === selectedUser.id);
+      
+      if (!selectedUser) {
+        setErrorMessage("Selected user not found");
+        console.error("Selected user not found in users list");
         return;
       }
 
@@ -174,13 +232,15 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       // get account treemember id
       let treeUser = await familyTreeService.getFamilyMemberByUserId(currentAccountID);
       const treeUserId = treeUser.id;
-      console.log(treeUserId, 'user treemember id');
-      console.log('current Account ID', currentAccountID);
 
-      // add new member to treemembers table
-      const treeMember = await familyTreeService.createFamilyMember(selectedUserData);
-      const treeMemberId = treeMember.member.id;
-      console.log('added user treeMemberId', treeMemberId);
+      let treeMemberId;
+      if (existingMember) {
+        console.log('Member already exists, using existing ID:', existingMember.id);
+        treeMemberId = existingMember.id;
+      } else {
+        const treeMemberRes = await familyTreeService.createFamilyMember(selectedUserData);
+        treeMemberId = treeMemberRes.member.id;
+      }
 
       // relationship table uses id's from treeMembers table, not user ids!
       // determine final relationship and primary contact for mapping
@@ -188,8 +248,12 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       let targetId = treeUserId;
       let isExtended = extendedRelations[data.selectedMemberRelationship];
       
-      if (isExtended && data.connectTo) {
+      // ALWAYS map to fundamental type if it's an extended relationship
+      if (isExtended) {
         finalRel = isExtended.map;
+      }
+
+      if (isExtended && data.connectTo) {
         targetId = Number(data.connectTo);
       }
 
@@ -208,7 +272,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       const relResponse = await fetch(`http://localhost:5000/api/relationships/`, relRequestOptions); // add relationship   
       const relData = await relResponse.json();
       if (!relResponse.ok) {
-        throw new Error(relData.error || 'Failed to add relationship');
+        const errorDetail = relData.details ? `: ${relData.details}` : '';
+        throw new Error(`${relData.error || 'Failed to add relationship'}${errorDetail}`);
       }
 
       // --- Update treeinfo so the new member appears on the tree visualization ---
@@ -286,13 +351,17 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       const treeMemberId = treeMember.member.id;
       console.log('added user treeMemberId', treeMemberId);
 
-      // add relationship to relationship table
+      // determine final relationship and primary contact for mapping
       let finalRel = data.relationship;
       let targetId = treeUserId;
       let isExtended = extendedRelations[data.relationship];
       
-      if (isExtended && data.connectTo2) {
+      // ALWAYS map to fundamental type if it's an extended relationship
+      if (isExtended) {
         finalRel = isExtended.map;
+      }
+
+      if (isExtended && data.connectTo2) {
         targetId = Number(data.connectTo2);
       }
 
@@ -311,7 +380,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
       const relData = await relResponse.json();
       if (!relResponse.ok) {
-        throw new Error(relData.error || 'Failed to add relationship');
+        const errorDetail = relData.details ? `: ${relData.details}` : '';
+        throw new Error(`${relData.error || 'Failed to add relationship'}${errorDetail}`);
       }
       console.log(relData.message);
 
@@ -439,11 +509,14 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                       <option value="spouse">Spouse</option>
                       <option value="child">Child</option>
                       <option value="parent">Parent</option>
+                      <option value="mother">Mother</option>
+                      <option value="father">Father</option>
                       <option value="sibling">Sibling</option>
                       <option value="cousin">Cousin</option>
                       <option value="aunt">Aunt</option>
                       <option value="uncle">Uncle</option>
-                      <option value="grandparent">Grandparent</option>
+                      <option value="grandmother">Grandmother</option>
+                      <option value="grandfather">Grandfather</option>
                       <option value="grandchild">Grandchild</option>
                       <option value="niece">Niece</option>
                       <option value="nephew">Nephew</option>
@@ -451,13 +524,15 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   </label>
                 </div>
 
-                <div style={{ marginTop: '10px', display: matPat.includes(selectedMemberRelationship) ? 'block' : 'none' }}>
-                  <label>
-                    Side:
-                    <input type="radio" name="matPat" value="maternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })} style={{ marginLeft: '10px' }} /> Maternal
-                    <input type="radio" name="matPat" value="paternal" {...register("matPat", { required: matPat.includes(selectedMemberRelationship) })} /> Paternal
-                  </label>
-                </div>
+                {isSideChoiceNeeded(selectedMemberRelationship) && (
+                  <div style={{ marginTop: '10px' }}>
+                    <label>
+                      Side:
+                      <input type="radio" value="maternal" {...register("matPat", { required: true })} style={{ marginLeft: '10px' }} /> Maternal
+                      <input type="radio" value="paternal" {...register("matPat", { required: true })} /> Paternal
+                    </label>
+                  </div>
+                )}
 
                 {/* Extended relationship "Connect To" dropdown */}
                 <div style={{ marginTop: '10px', display: extendedRelations[selectedMemberRelationship] ? 'block' : 'none' }}>
@@ -566,11 +641,14 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                       <option value="spouse">Spouse</option>
                       <option value="child">Child</option>
                       <option value="parent">Parent</option>
+                      <option value="mother">Mother</option>
+                      <option value="father">Father</option>
                       <option value="sibling">Sibling</option>
                       <option value="cousin">Cousin</option>
                       <option value="aunt">Aunt</option>
                       <option value="uncle">Uncle</option>
-                      <option value="grandparent">Grandparent</option>
+                      <option value="grandmother">Grandmother</option>
+                      <option value="grandfather">Grandfather</option>
                       <option value="grandchild">Grandchild</option>
                       <option value="niece">Niece</option>
                       <option value="nephew">Nephew</option>
@@ -578,13 +656,15 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   </label>
                 </li>
 
-                <div style={{ marginTop: '10px', display: matPat.includes(selectedManualRelationship) ? 'block' : 'none' }}>
-                  <label>
-                    Side:
-                    <input type="radio" name="matPat2" value="maternal" {...register2("matPat2", { required: matPat.includes(selectedManualRelationship) })} style={{ marginLeft: '10px' }} /> Maternal
-                    <input type="radio" name="matPat2" value="paternal" {...register2("matPat2", { required: matPat.includes(selectedManualRelationship) })} /> Paternal
-                  </label>
-                </div>
+                 {isSideChoiceNeeded(selectedManualRelationship) && (
+                  <div style={{ marginTop: '10px' }}>
+                    <label>
+                      Side:
+                      <input type="radio" value="maternal" {...register2("matPat2", { required: true })} style={{ marginLeft: '10px' }} /> Maternal
+                      <input type="radio" value="paternal" {...register2("matPat2", { required: true })} /> Paternal
+                    </label>
+                  </div>
+                 )}
 
                 {/* Extended relationship "Connect To" dropdown for manual entry */}
                 <div style={{ marginTop: '10px', display: extendedRelations[selectedManualRelationship] ? 'block' : 'none' }}>

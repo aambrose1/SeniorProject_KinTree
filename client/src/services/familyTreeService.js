@@ -135,6 +135,23 @@ export const familyTreeService = {
         return responseData;
     },
     /**
+     * Deletes a family member and their relationships
+     * @param {int} memberId 
+     * @returns 
+     */
+    async deleteFamilyMember(memberId) {
+        const response = await fetch(`http://localhost:5000/api/family-members/${memberId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        const responseData = await response.json();
+        if (!response.ok) {
+            console.error('Failed to delete family member:', responseData.error);
+            throw new Error(responseData.error || 'Failed to delete family member');
+        }
+        return responseData;
+    },
+    /**
      * 
      * @returns JSON Array of all registered users
      */
@@ -208,5 +225,37 @@ export const familyTreeService = {
             console.log("JSON parse needed");
             return JSON.parse(responseData.object.object);
         }
+    },
+    /**
+     * @param {int} userId 
+     * @returns JSON Array of all relationships for the user's tree
+     */
+    async getRelationshipsByUser(userId) {
+        const response = await fetch(`http://localhost:5000/api/relationships/user/${userId}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        const responseData = await response.json();
+        if (!response.ok) {
+            console.error('Failed to fetch relationships:', responseData.error);
+            throw new Error(responseData.error || 'Failed to fetch relationships');
+        }
+        return responseData;
+    },
+    /**
+     * Resets the family tree (deletes all members except self and all relationships)
+     * @param {string} userId 
+     */
+    async clearFamilyTree(userId) {
+        const response = await fetch(`http://localhost:5000/api/family-members/clear/${userId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+        });
+        const responseData = await response.json();
+        if (!response.ok) {
+            console.error('Failed to clear family tree:', responseData.error);
+            throw new Error(responseData.error || 'Failed to clear family tree');
+        }
+        return responseData;
     },
 };
