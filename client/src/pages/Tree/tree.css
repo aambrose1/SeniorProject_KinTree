@@ -157,10 +157,10 @@
 
 .f3 .card-delete {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 24px;
-  height: 24px;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
   background-color: #ff4d4d;
   color: white;
   border-radius: 50%;
@@ -183,4 +183,26 @@
 .f3 .card-delete:hover {
   background-color: #ff1a1a;
   transform: scale(1.1);
+}
+
+/* PLUS BUTTON HOVER EFFECTS */
+.tree-plus-button {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  transform-origin: center;
+}
+
+.tree-plus-button:hover {
+  transform: scale(1.25);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.tree-plus-button:hover path {
+  fill: #000;
+  transition: fill 0.3s ease;
+}
+
+.tree-plus-button:active {
+  transform: scale(0.95);
+  transition: all 0.1s ease !important;
 }

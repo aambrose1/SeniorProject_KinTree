@@ -9,6 +9,7 @@ import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
 import { useCurrentUser } from '../../CurrentUserProvider';
 import { familyTreeService } from '../../services/familyTreeService';
+import { relationshipService } from '../../services/relationshipService';
 import { addRelationship } from '../../utils/relationUtil';
 
 // TODO: make form clear when dismissed by clicking outside of modal
@@ -19,6 +20,9 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
+  const [treeInfo, setTreeInfo] = useState(null); // Full tree index for smart checks
+  const [userTreeId, setUserTreeId] = useState(null); // The tree-node ID for "You"
   const { currentUserID, currentAccountID } = useCurrentUser();
 
   var family = useRef([]);
@@ -96,46 +100,57 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
   // Determine if the "Side" selector should be shown
   const isSideChoiceNeeded = (rel) => {
-    const multiSideRel = ["grandparent", "grandmother", "grandfather", "aunt", "uncle", "cousin", "niece", "nephew", "parent"];
-    // Mother and Father have fixed sides, so we don't need to ask
-    if (rel === "mother" || rel === "father") return false;
+    const multiSideRel = ["grandparent", "grandmother", "grandfather", "aunt", "uncle", "cousin"];
+    // Mother and Father have fixed sides, and Siblings/Nieces/Nephews are relative to your branch
+    if (rel === "mother" || rel === "father" || rel === "sibling" || rel === "niece" || rel === "nephew") return false;
     return multiSideRel.includes(rel);
   };
   const [treeMembers, setTreeMembers] = useState([]);
 
   // relationships that require or benefit from a "Connect To" link for proper placement
-  const extendedRelations = useMemo(() => ({
-    "parent": { map: "parent", label: "Spouse of Parent", filter: ["parent", "spouse"] },
-    "mother": { map: "parent", label: "Husband/Partner (Existing Father)", filter: ["parent", "spouse"] },
-    "father": { map: "parent", label: "Wife/Partner (Existing Mother)", filter: ["parent", "spouse"] },
-    "spouse": { map: "spouse", label: "Existing Children?", filter: ["child"] },
-    "child": { map: "child", label: "Other Parent?", filter: ["spouse", "parent"] },
-    "cousin": { map: "child", label: "Parent of Cousin (Aunt/Uncle)", filter: ["aunt", "uncle", "sibling"] },
-    "niece": { map: "child", label: "Parent of Niece (Sibling)", filter: ["sibling"] },
-    "nephew": { map: "child", label: "Parent of Nephew (Sibling)", filter: ["sibling"] },
-    "aunt": { map: "sibling", label: "Sibling of Aunt (Parent)", filter: ["parent"] },
-    "uncle": { map: "sibling", label: "Sibling of Uncle (Parent)", filter: ["parent"] },
-    "grandparent": { map: "parent", label: "Child of Grandparent (Parent)", filter: ["parent"] },
-    "grandmother": { map: "parent", label: "Child of Grandmother (Parent)", filter: ["parent"] },
-    "grandfather": { map: "parent", label: "Child of Grandfather (Parent)", filter: ["parent"] },
-    "grandchild": { map: "child", label: "Parent of Grandchild (Child)", filter: ["child"] },
-    "sibling": { map: "sibling", label: "Link to Parent", filter: ["parent"] },
-    "sister": { map: "sibling", label: "Link to Parent", filter: ["parent"] },
-    "brother": { map: "sibling", label: "Link to Parent", filter: ["parent"] }
-  }), []);
+  const extendedRelations = relationshipService.EXTENDED_RELATIONS;
 
   // Fetch all current tree members for the dropdown
   useEffect(() => {
     const loadTreeMembers = async () => {
       try {
-        const members = await familyTreeService.getFamilyMembersByUserId(currentAccountID);
+        const [members, fullTree, userTreeMember] = await Promise.all([
+          familyTreeService.getFamilyMembersByUserId(currentAccountID),
+          familyTreeService.getFamilyTreeByUserId(currentAccountID),
+          familyTreeService.getFamilyMemberByUserId(currentAccountID)
+        ]);
         setTreeMembers(members);
+        setUserTreeId(userTreeMember?.id);
+        const index = Object.fromEntries(fullTree.map(p => [p.id, p]));
+        setTreeInfo(index);
       } catch (err) {
-        console.error("Failed to load tree members for dropdown", err);
+        console.error("Failed to load tree data for smart detection", err);
       }
     };
     if (currentAccountID) loadTreeMembers();
   }, [currentAccountID]);
+
+  // Smart detection now handled by relationshipService
+
+  const smartTarget = useMemo(() => {
+    return relationshipService.findSmartTarget(treeInfo, userTreeId, selectedMemberRelationship || "", watch("matPat") || "");
+  }, [selectedMemberRelationship, watch("matPat"), treeInfo, userTreeId]);
+
+  useEffect(() => {
+    if (smartTarget) {
+      setValue("connectTo", smartTarget);
+    }
+  }, [smartTarget, setValue]);
+
+  const smartTargetManual = useMemo(() => {
+    return relationshipService.findSmartTarget(treeInfo, userTreeId, selectedManualRelationship || "", watch2("matPat2") || "");
+  }, [selectedManualRelationship, watch2("matPat2"), treeInfo, userTreeId]);
+
+  useEffect(() => {
+    if (smartTargetManual) {
+      setValue2("connectTo2", smartTargetManual);
+    }
+  }, [smartTargetManual, setValue2]);
 
 
 
@@ -217,6 +232,11 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         return;
       }
 
+      // Relationship Hint: Mother/Father selection should override the profile's gender 
+      // to ensure the tree visualization is correct.
+      const relHint = relationshipService.EXTENDED_RELATIONS[data.selectedMemberRelationship];
+      const finalGender = relHint?.gender || selectedUser.gender;
+
       const selectedUserData = {
         firstname: selectedUser.firstname,
         lastname: selectedUser.lastname,
@@ -226,7 +246,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         phonenumber: selectedUser.phonenumber || null,
         userid: currentAccountID, // The user adding the family member
         memberuserid: selectedUser.id, // Existing user's ID
-        gender: selectedUser.gender
+        gender: finalGender
       };
 
       // get account treemember id
@@ -242,38 +262,34 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         treeMemberId = treeMemberRes.member.id;
       }
 
-      // relationship table uses id's from treeMembers table, not user ids!
-      // determine final relationship and primary contact for mapping
-      let finalRel = data.selectedMemberRelationship;
-      let targetId = treeUserId;
-      let isExtended = extendedRelations[data.selectedMemberRelationship];
+      // Resolve relationships to create across the database
+      // IMPORTANT: Use treeUserId (the member ID), not currentAccountID (the user ID)
+      const relsToCreate = relationshipService.getRequiredDBRelationships(
+        treeUserId,
+        treeMemberId,
+        data.selectedMemberRelationship,
+        data.connectTo,
+        data.matPat || null
+      );
       
-      // ALWAYS map to fundamental type if it's an extended relationship
-      if (isExtended) {
-        finalRel = isExtended.map;
-      }
+      console.log('Relationships to create (Existing):', relsToCreate);
 
-      if (isExtended && data.connectTo) {
-        targetId = Number(data.connectTo);
-      }
-
-      let relRequestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          person1_id: targetId, 
-          person2_id: treeMemberId, 
-          relationshipType: finalRel,
-          relationshipStatus: "active",
-          side: data.matPat || null,
-          userId: currentAccountID
-        })
-      };
-      const relResponse = await fetch(`http://localhost:5000/api/relationships/`, relRequestOptions); // add relationship   
-      const relData = await relResponse.json();
-      if (!relResponse.ok) {
-        const errorDetail = relData.details ? `: ${relData.details}` : '';
-        throw new Error(`${relData.error || 'Failed to add relationship'}${errorDetail}`);
+      for (const rel of relsToCreate) {
+        const relRes = await fetch(`http://localhost:5000/api/relationships/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...rel,
+            relationshipStatus: "active",
+            userId: currentAccountID
+          })
+        });
+        if (!relRes.ok) {
+          const relData = await relRes.json();
+          console.error('SERVER RELATIONSHIP ERROR:', relData);
+          const errorMsg = relData.details || relData.error || 'Failed to add relationship';
+          throw new Error(errorMsg);
+        }
       }
 
       // --- Update treeinfo so the new member appears on the tree visualization ---
@@ -291,28 +307,49 @@ function AddFamilyMemberPopup({ trigger, userid }) {
           "data": {
             "first name": selectedUser.firstname,
             "last name": selectedUser.lastname,
-            "gender": selectedUser.gender || ""
+            "gender": finalGender || ""
           },
           "rels": {}
         };
 
         // Add the relationship links in the tree data
-        addRelationship(treeIndex, accountNodeId, newNodeId, data.selectedMemberRelationship, data.matPat || null, data.connectTo);
+        const res = addRelationship(treeIndex, accountNodeId, newNodeId, data.selectedMemberRelationship, data.matPat || null, data.connectTo);
 
         // Persist updated tree
         const updatedTreeData = Object.values(treeIndex);
         await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
         console.log('Tree info updated with new member');
+        
+        // Show success summary
+        const dbLinkCount = relsToCreate.length;
+        const mainRel = data.selectedMemberRelationship;
+        let factualSummary = `Added as your ${mainRel.charAt(0).toUpperCase() + mainRel.slice(1)}`;
+        if (dbLinkCount > 1 && data.connectTo) {
+          const partnerName = treeInfo[data.connectTo]?.data["first name"] || "Partner";
+          factualSummary += ` and linked to ${partnerName}`;
+        }
+
+        setResult({
+            ...res,
+            name: `${selectedUser.firstname} ${selectedUser.lastname}`,
+            summary: factualSummary,
+            dbStatus: `Saved ${dbLinkCount} relationship record(s) to Database`,
+            treeStatus: "Tree visualization data updated successfully"
+        });
       } catch (treeError) {
         console.error('Warning: Member added but tree visualization update failed:', treeError);
-        // Don't throw - the member was still added successfully
+        setResult({
+            success: true,
+            name: `${selectedUser.firstname} ${selectedUser.lastname}`,
+            summary: "Member added to database, but visualization failed to update.",
+            dbStatus: "Success",
+            treeStatus: "Failed: " + treeError.message
+        });
       }
 
       reset();
-      close();
-
-      console.log(relData.message);
-      return window.location.href = `/tree`; // redirect to tree page to see the update
+      // close(); // Don't close immediately, let user see summary
+      // return window.location.href = `/tree`; 
 
     } catch (error) {
       console.error('Error:', error);
@@ -327,6 +364,10 @@ function AddFamilyMemberPopup({ trigger, userid }) {
     setErrorMessage("");
 
     try {
+      // Final gender enforcement for manual entry
+      const relHint2 = relationshipService.EXTENDED_RELATIONS[data.relationship];
+      const finalGender2 = relHint2?.gender || data.gender;
+
       // add new member to family members table
       let memberData = {
         firstname: data.firstName,
@@ -337,7 +378,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         phonenumber: data.phoneNumber || null,
         userid: currentAccountID, // The user adding the family member
         memberuserid: null, // manually added members do not have associated user accounts
-        gender: data.gender
+        gender: finalGender2
       }
 
       // get account treemember id
@@ -351,39 +392,35 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       const treeMemberId = treeMember.member.id;
       console.log('added user treeMemberId', treeMemberId);
 
-      // determine final relationship and primary contact for mapping
-      let finalRel = data.relationship;
-      let targetId = treeUserId;
-      let isExtended = extendedRelations[data.relationship];
+      // Resolve relationships to create across the database
+      // IMPORTANT: Use treeUserId (the member ID), not currentAccountID (the user ID)
+      const relsToCreate = relationshipService.getRequiredDBRelationships(
+        treeUserId,
+        treeMemberId,
+        data.relationship,
+        data.connectTo2,
+        data.matPat2 || null
+      );
       
-      // ALWAYS map to fundamental type if it's an extended relationship
-      if (isExtended) {
-        finalRel = isExtended.map;
-      }
+      console.log('Relationships to create (Manual):', relsToCreate);
 
-      if (isExtended && data.connectTo2) {
-        targetId = Number(data.connectTo2);
+      for (const rel of relsToCreate) {
+        const relRes = await fetch(`http://localhost:5000/api/relationships/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...rel,
+            relationshipStatus: "active",
+            userId: currentAccountID
+          })
+        });
+        if (!relRes.ok) {
+          const relData = await relRes.json();
+          console.error('SERVER RELATIONSHIP ERROR (Manual):', relData);
+          const errorMsg = relData.details || relData.error || 'Failed to add relationship';
+          throw new Error(errorMsg);
+        }
       }
-
-      const relResponse = await fetch(`http://localhost:5000/api/relationships/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          person1_id: targetId,
-          person2_id: treeMemberId,
-          relationshipType: finalRel,
-          relationshipStatus: "active",
-          side: data.matPat2 || null,
-          userId: userid,
-        })
-      });
-
-      const relData = await relResponse.json();
-      if (!relResponse.ok) {
-        const errorDetail = relData.details ? `: ${relData.details}` : '';
-        throw new Error(`${relData.error || 'Failed to add relationship'}${errorDetail}`);
-      }
-      console.log(relData.message);
 
       // --- Update treeinfo so the new member appears on the tree visualization ---
       try {
@@ -400,27 +437,50 @@ function AddFamilyMemberPopup({ trigger, userid }) {
           "data": {
             "first name": data.firstName,
             "last name": data.lastName,
-            "gender": data.gender || ""
+            "gender": finalGender2 || ""
           },
           "rels": {}
         };
 
         // Add the relationship links in the tree data
         // new integration uses account user as the subject, new member = relative as the actor (newNode is account's <relationship> relative)
-        addRelationship(treeIndex, accountNodeId, newNodeId, data.relationship, data.matPat2 || null, data.connectTo2);
+        const res = addRelationship(treeIndex, accountNodeId, newNodeId, data.relationship, data.matPat2 || null, data.connectTo2);
 
         // Persist updated tree
         const updatedTreeData = Object.values(treeIndex);
         await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
         console.log('Tree info updated with new manual member');
+
+        // Show success summary
+        const dbLinkCount = relsToCreate.length;
+        const mainRel = data.relationship;
+        let factualSummary = `Added as your ${mainRel.charAt(0).toUpperCase() + mainRel.slice(1)}`;
+        if (dbLinkCount > 1 && data.connectTo2) {
+          const partnerName = treeInfo[data.connectTo2]?.data["first name"] || "Partner";
+          factualSummary += ` and linked to ${partnerName}`;
+        }
+
+        setResult({
+            ...res,
+            name: `${data.firstName} ${data.lastName}`,
+            summary: factualSummary,
+            dbStatus: `Saved ${dbLinkCount} relationship record(s)`,
+            treeStatus: "Tree structure updated"
+        });
       } catch (treeError) {
         console.error('Warning: Member added but tree visualization update failed:', treeError);
-        // Don't throw - the member was still added successfully
+        setResult({
+            success: true,
+            name: `${data.firstName} ${data.lastName}`,
+            summary: "Member added, but tree update failed.",
+            dbStatus: "Success",
+            treeStatus: "Failed"
+        });
       }
 
       reset();
-      close();
-      return window.location.href = `/tree`; // redirect to tree page to see the update
+      // close(); 
+      // return window.location.href = `/tree`; 
 
     } catch (error) {
       console.error('Error:', error);
@@ -438,12 +498,51 @@ function AddFamilyMemberPopup({ trigger, userid }) {
           <div style={{ display: manual ? 'none' : 'block' }}>
             {/* close button */}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => { reset(); close(); }} style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer' }}>
+              <button onClick={() => { reset(); setResult(null); close(); }} style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer' }}>
                 <CloseIcon style={{ width: '40px', height: '40px', margin: '10px 10px 0px 10px' }} />
               </button>
             </div>
 
-            <form key={1} onSubmit={handleSubmit(data => onSubmitExisting(data, close))}>
+            {result ? (
+              <div style={styles.MainContainerStyle}>
+                <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
+                  <h2 style={{ color: '#2e7d32', marginBottom: '15px' }}>Member Added!</h2>
+                  <div style={{ 
+                    padding: '20px', 
+                    backgroundColor: '#f1f8e9', 
+                    borderRadius: '8px',
+                    border: '1px solid #c5e1a5',
+                    textAlign: 'left',
+                    marginBottom: '20px'
+                  }}>
+                    <p><strong>Name:</strong> {result.name}</p>
+                    <p><strong>Action:</strong> {result.summary}</p>
+                    
+                    {result.warnings?.length > 0 && (
+                      <div style={{ marginTop: '10px', color: '#af6000' }}>
+                        <p><strong>Note:</strong></p>
+                        <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
+                          {result.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div style={{ marginTop: '15px', paddingTop: '10px', borderTop: '1px dashed #ccc', fontSize: '13px', color: '#666' }}>
+                        <p><strong>Database:</strong> {result.dbStatus}</p>
+                        <p><strong>Tree Visualization:</strong> {result.treeStatus}</p>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => { window.location.href = '/tree'; }} 
+                    style={{ ...styles.ButtonStyle, width: '100%' }}
+                  >
+                    View Updated Tree
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form key={1} onSubmit={handleSubmit(data => onSubmitExisting(data, close))}>
               <div style={styles.MainContainerStyle}>
                 <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
                   <h2 style={{ marginTop: '0px', margin: '0' }}>Add Family Member</h2>
@@ -534,15 +633,21 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   </div>
                 )}
 
-                {/* Extended relationship "Connect To" dropdown */}
-                <div style={{ marginTop: '10px', display: extendedRelations[selectedMemberRelationship] ? 'block' : 'none' }}>
+                {/* Extended relationship "Connect To" dropdown - Hide if auto-detected for ANY relationship */}
+                <div style={{ 
+                  marginTop: '10px', 
+                  display: (extendedRelations[selectedMemberRelationship] && !smartTarget) 
+                           ? 'block' : 'none' 
+                }}>
                   <label>
                     {extendedRelations[selectedMemberRelationship]?.label || "Connect To"}:
                     <select {...register("connectTo", { required: false })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '180px' }} defaultValue={''}>
                       <option value="">Skip / Link Later</option>
-                      {treeMembers.map(member => (
-                        <option key={member.id} value={member.id}>{member.firstname} {member.lastname}</option>
-                      ))}
+                      {treeMembers
+                        .filter(m => String(m.id) !== String(currentAccountID))
+                        .map(member => (
+                          <option key={member.id} value={member.id}>{member.firstname} {member.lastname}</option>
+                        ))}
                     </select>
                   </label>
                   <p style={{ fontSize: '12px', color: '#666', marginTop: '5px', marginLeft: '10px' }}>
@@ -560,6 +665,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 </div>
               </div>
             </form>
+          )}
 
             {/* ----------------------- */}
           </div>
@@ -569,13 +675,52 @@ function AddFamilyMemberPopup({ trigger, userid }) {
           <div style={{ display: manual ? 'block' : 'none' }}>
             {/* close button */}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => { reset(); close(); }} style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer' }}>
+              <button onClick={() => { reset(); setResult(null); close(); }} style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer' }}>
                 <CloseIcon style={{ width: '40px', height: '40px', margin: '10px 10px 0px 10px' }} />
               </button>
             </div>
 
             {/* fill out info about family member */}
-            <form key={2} onSubmit={handleSubmit2(data => onSubmitManual(data, close))} style={styles.FormStyle}>
+            {result ? (
+               <div style={styles.MainContainerStyle}>
+               <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
+                 <h2 style={{ color: '#2e7d32', marginBottom: '15px' }}>Member Added!</h2>
+                 <div style={{ 
+                   padding: '20px', 
+                   backgroundColor: '#f1f8e9', 
+                   borderRadius: '8px',
+                   border: '1px solid #c5e1a5',
+                   textAlign: 'left',
+                   marginBottom: '20px'
+                 }}>
+                   <p><strong>Name:</strong> {result.name}</p>
+                   <p><strong>Action:</strong> {result.summary}</p>
+                   
+                   {result.warnings?.length > 0 && (
+                     <div style={{ marginTop: '10px', color: '#af6000' }}>
+                       <p><strong>Note:</strong></p>
+                       <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
+                         {result.warnings.map((w, i) => <li key={i}>{w}</li>)}
+                       </ul>
+                     </div>
+                   )}
+
+                   <div style={{ marginTop: '15px', paddingTop: '10px', borderTop: '1px dashed #ccc', fontSize: '13px', color: '#666' }}>
+                       <p><strong>Database:</strong> {result.dbStatus}</p>
+                       <p><strong>Tree Visualization:</strong> {result.treeStatus}</p>
+                   </div>
+                 </div>
+
+                 <button 
+                   onClick={() => { window.location.href = '/tree'; }} 
+                   style={{ ...styles.ButtonStyle, width: '100%' }}
+                 >
+                   View Updated Tree
+                 </button>
+               </div>
+             </div>
+            ) : (
+              <form key={2} onSubmit={handleSubmit2(data => onSubmitManual(data, close))} style={styles.FormStyle}>
               <div style={{ textAlign: 'center', fontFamily: 'Alata' }}>
                 <h2 style={{ marginTop: '0px' }}>Manually Add Family Member</h2>
               </div>
@@ -666,15 +811,21 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   </div>
                  )}
 
-                {/* Extended relationship "Connect To" dropdown for manual entry */}
-                <div style={{ marginTop: '10px', display: extendedRelations[selectedManualRelationship] ? 'block' : 'none' }}>
+                {/* Extended relationship "Connect To" dropdown for manual entry - Hide if auto-detected */}
+                <div style={{ 
+                  marginTop: '10px', 
+                  display: (extendedRelations[selectedManualRelationship] && !smartTargetManual) 
+                           ? 'block' : 'none' 
+                }}>
                   <label>
                     {extendedRelations[selectedManualRelationship]?.label || "Connect To"}:
                     <select {...register2("connectTo2", { required: false })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '180px' }} defaultValue={''}>
                       <option value="">Skip / Link Later</option>
-                      {treeMembers.map(member => (
-                        <option key={member.id} value={member.id}>{member.firstname} {member.lastname}</option>
-                      ))}
+                      {treeMembers
+                        .filter(m => String(m.id) !== String(currentAccountID))
+                        .map(member => (
+                          <option key={member.id} value={member.id}>{member.firstname} {member.lastname}</option>
+                        ))}
                     </select>
                   </label>
                   <p style={{ fontSize: '12px', color: '#666', marginTop: '5px', marginLeft: '10px' }}>
@@ -713,6 +864,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 <button type="button" style={styles.GrayButtonStyle} onClick={() => { setManual(false); reset(); }}>Back</button>
               </div>
             </form>
+          )}
           </div>
         </div>
       )}

@@ -146,8 +146,9 @@ export const familyTreeService = {
         });
         const responseData = await response.json();
         if (!response.ok) {
-            console.error('Failed to delete family member:', responseData.error);
-            throw new Error(responseData.error || 'Failed to delete family member');
+            const errorMsg = responseData.details || responseData.error || 'Failed to delete family member';
+            console.error('Failed to delete family member:', errorMsg);
+            throw new Error(errorMsg);
         }
         return responseData;
     },

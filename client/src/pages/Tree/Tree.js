@@ -12,6 +12,8 @@ import { familyTreeService } from '../../services/familyTreeService';
 import { removeNodeFromTree, rebuildTreeFromDatabase } from '../../utils/relationUtil';
 import * as d3 from 'd3';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 
 // see https://github.com/donatso/family-chart/
 
@@ -20,6 +22,53 @@ function FamilyTree() {
     const { currentAccountID } = useCurrentUser();
     const [errorMessage, setErrorMessage] = useState('');
     const [rootMemberId, setRootMemberId] = useState(null);
+    
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState(null); // { id, firstName, lastName }
+
+    const handleDeleteClick = (memberId, firstName, lastName) => {
+        if (String(memberId) === String(rootMemberId)) {
+            setErrorMessage("Action Denied: You cannot delete yourself (the root node) from the family tree.");
+            return;
+        }
+        setDeleteTarget({ id: memberId, firstName, lastName });
+        setIsDeleting(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
+        const { id, firstName, lastName } = deleteTarget;
+        setIsDeleting(false);
+        
+        try {
+            setErrorMessage(`Deleting ${firstName}...`);
+            
+            // GHOST NODE CHECK: Only delete from DB if it's a real record (not a ghost)
+            const isGhost = id.toString().startsWith('ghost_');
+            
+            if (!isGhost) {
+                // 1. Delete from database (real nodes)
+                await familyTreeService.deleteFamilyMember(id);
+            } else {
+                console.log("Skipping DB delete for ghost node:", id);
+            }
+
+            // 2. Update tree JSON (always remove from visualization)
+            const treeData = await familyTreeService.getFamilyTreeByUserId(currentAccountID);
+            const treeIndex = Object.fromEntries(treeData.map(person => [person.id, person]));
+            removeNodeFromTree(treeIndex, id);
+            
+            const updatedTreeData = Object.values(treeIndex);
+            await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
+
+            setErrorMessage(`Successfully removed ${firstName} ${lastName}`);
+            setTimeout(() => window.location.reload(), 1000);
+        } catch (error) {
+            console.error('[DETAILED DEBUG] Deletion Error:', error);
+            setErrorMessage(`Deletion Failed: ${error.message}`);
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -43,37 +92,6 @@ function FamilyTree() {
             }
         };
 
-        async function handleDeleteMember(memberId, firstName, lastName, currentRootId) {
-            const safetyId = currentRootId || rootMemberId;
-            if (String(memberId) === String(safetyId)) {
-                alert("You cannot delete yourself from the family tree.");
-                return;
-            }
-            
-            const confirmed = window.confirm(`Are you sure you want to delete ${firstName} ${lastName} from your family tree? This will also remove any relationships associated with them.`);
-            if (!confirmed) return;
-
-            try {
-                // 1. Delete from database (member and relationships)
-                await familyTreeService.deleteFamilyMember(memberId);
-
-                // 2. Update tree JSON
-                const treeData = await familyTreeService.getFamilyTreeByUserId(currentAccountID);
-                // The treeData is the current JSON array. We need to convert to index, remove, and convert back.
-                const treeIndex = Object.fromEntries(treeData.map(person => [person.id, person]));
-                
-                removeNodeFromTree(treeIndex, memberId);
-                
-                const updatedTreeData = Object.values(treeIndex);
-                await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
-
-                // 3. Refresh page to show updated tree
-                window.location.reload();
-            } catch (error) {
-                console.error('Error deleting family member:', error);
-                alert('Failed to delete family member. Please try again.');
-            }
-        }
 
         function create(data, familyMembers, currentRootId) {
             setErrorMessage('');
@@ -82,6 +100,86 @@ function FamilyTree() {
                 setErrorMessage('No family tree data available to display.');
                 return;
             }
+
+            const treeIndex = Object.fromEntries(data.map(person => [String(person.id), person]));
+
+            function getRelationshipToRoot(rootId, nodeId) {
+                if (String(rootId) === String(nodeId)) return null;
+                const node = treeIndex[nodeId];
+                if (!node) return null;
+                
+                const root = treeIndex[rootId];
+                if (!root) return null;
+                
+                const isM = node.data.gender === 'M';
+                const isF = node.data.gender === 'F';
+
+                if (root.rels?.parents?.includes(nodeId)) return isM ? 'Father' : isF ? 'Mother' : 'Parent';
+                if (root.rels?.children?.includes(nodeId)) return isM ? 'Son' : isF ? 'Daughter' : 'Child';
+                if (root.rels?.spouses?.includes(nodeId)) return isM ? 'Husband' : isF ? 'Wife' : 'Spouse';
+
+                const isSibling = root.rels?.parents?.some(p => treeIndex[p]?.rels?.children?.includes(nodeId));
+                if (isSibling) return isM ? 'Brother' : isF ? 'Sister' : 'Sibling';
+
+                const isGrandparent = root.rels?.parents?.some(p => treeIndex[p]?.rels?.parents?.includes(nodeId));
+                if (isGrandparent) return isM ? 'Grandfather' : isF ? 'Grandmother' : 'Grandparent';
+
+                const isAuntUncle = root.rels?.parents?.some(p => treeIndex[p]?.rels?.parents?.some(gp => treeIndex[gp]?.rels?.children?.includes(nodeId) && String(nodeId) !== String(p)));
+                if (isAuntUncle) return isM ? 'Uncle' : isF ? 'Aunt' : 'Aunt/Uncle';
+
+                const isNieceNephew = node.rels?.parents?.some(pId => String(pId) !== String(rootId) && root.rels?.parents?.some(gp => treeIndex[gp]?.rels?.children?.includes(pId)));
+                if (isNieceNephew) return isM ? 'Nephew' : isF ? 'Niece' : 'Niece/Nephew';
+
+                const isCousin = node.rels?.parents?.some(pId => treeIndex[pId]?.rels?.parents?.some(p => treeIndex[p]?.rels?.children?.includes(pId))); // Simplified Check
+                if (isCousin) return 'Cousin';
+
+                const isGrandchild = root.rels?.children?.some(cId => treeIndex[cId]?.rels?.children?.includes(nodeId));
+                if (isGrandchild) return isM ? 'Grandson' : isF ? 'Granddaughter' : 'Grandchild';
+
+                return null;
+            }
+
+            // Transform data: Change root node name to "You", fix ghost names, and attach subscripts
+            const rootName = data.find(n => String(n.id) === String(currentRootId))?.data["first name"];
+            const displayData = data.map(node => {
+                const subStr = getRelationshipToRoot(currentRootId, String(node.id));
+
+                if (String(node.id) === String(currentRootId)) {
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            "first name": "You",
+                            "last name": "",
+                            "subscript": ""
+                        }
+                    };
+                }
+                
+                // If it's a ghost node, try to make its name relative to "You"
+                if (node.data.isGhost && rootName) {
+                    const firstName = node.data["first name"] || "";
+                    if (firstName.includes(`of ${rootName}`)) {
+                        const relationship = firstName.split(' ')[0]; // E.g., "Parent" or "Sibling"
+                        return {
+                            ...node,
+                            data: {
+                                ...node.data,
+                                "first name": `Your ${relationship}`,
+                                "subscript": ""
+                            }
+                        };
+                    }
+                }
+                
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        subscript: subStr || ""
+                    }
+                };
+            });
 
             // Clean up any existing chart first
             const existingChart = document.querySelector('#FamilyChart');
@@ -92,8 +190,8 @@ function FamilyTree() {
             if (!contRef.current) return;
 
             try { // build chart
-                console.log(data)
-                const f3chart = f3.createChart('#FamilyChart', data)
+                console.log(displayData)
+                const f3chart = f3.createChart('#FamilyChart', displayData)
                     .setTransitionTime(1000)
                     .setCardXSpacing(200)
                     .setCardYSpacing(200)
@@ -112,6 +210,53 @@ function FamilyTree() {
 
                 f3chart.updateTree({ initial: true });
 
+                // Injects delete buttons and relationship subscripts into cards
+                const injectCardElements = () => {
+                    d3.selectAll('#FamilyChart .card').each(function(d) {
+                        if (!d || !d.data) return;
+                        
+                        const card = d3.select(this);
+                        
+                        // Inject Delete Button (if not root)
+                        if (String(d.data.id) !== String(currentRootId) && card.select('.card-delete').empty()) {
+                            card.append('div')
+                                .attr('class', 'card-delete')
+                                .html('×')
+                                .attr('title', 'Delete person');
+                        }
+
+                        // Inject Relationship Subscript
+                        if (d.data.data.subscript && card.select('.card-subscript').empty()) {
+                            const isFemale = d.data.data.gender === 'F';
+                            const isMale = d.data.data.gender === 'M';
+                            const color = isFemale ? '#e91e63' : (isMale ? '#1976d2' : '#666'); // Pink vs Blue
+                            
+                            const labelBox = card.select('.card-label');
+                            
+                            // Style the label box to allow multiple lines
+                            labelBox
+                                .style('display', 'flex')
+                                .style('flex-direction', 'column')
+                                .style('align-items', 'center')
+                                .style('justify-content', 'center')
+                                .style('min-height', 'auto')
+                                .style('padding', '4px 8px')
+                                .style('bottom', '-10px'); // Keep it centered on the bottom edge
+
+                            labelBox.append('div')
+                                .attr('class', 'card-subscript')
+                                .style('font-size', '9px')
+                                .style('font-weight', 'bold')
+                                .style('color', color)
+                                .style('text-transform', 'uppercase')
+                                .style('margin-top', '2px')
+                                .style('line-height', '1')
+                                .style('pointer-events', 'none')
+                                .html(d.data.data.subscript);
+                        }
+                    });
+                };
+
                 // Event delegation for delete buttons
                 const chartElement = document.querySelector('#FamilyChart');
                 const handleChartClick = (e) => {
@@ -119,37 +264,29 @@ function FamilyTree() {
                     if (deleteBtn) {
                         e.stopPropagation();
                         const card = deleteBtn.closest('.card');
-                        // f3 stores data in the __data__ property of the element
                         const nodeData = d3.select(card).datum();
                         if (nodeData && nodeData.data) {
-                            handleDeleteMember(nodeData.data.id, nodeData.data.data["first name"], nodeData.data.data["last name"], currentRootId);
+                            handleDeleteClick(nodeData.data.id, nodeData.data.data["first name"], nodeData.data.data["last name"]);
                         }
                     }
                 };
-                chartElement.addEventListener('click', handleChartClick);
+                // Use .onclick to overwrite any previous listeners
+                chartElement.onclick = handleChartClick;
 
-                // Since we can't easily modify setCardHtml's output without re-implementing it,
-                // we can use a small trick: after the chart is drawn, we inject the buttons into the nodes.
-                // This is a bit hacky but works for this library's structure.
-                setTimeout(() => {
-                    d3.selectAll('#FamilyChart .card').each(function(d) {
-                        // Don't allow deleting the root/account user
-                        // DEBUG: console.log('Checking node:', d.data.id, 'against root:', currentRootId);
-                        if (String(d.data.id) === String(currentRootId)) {
-                            console.log('Skipping delete button for self:', d.data.id);
-                            return;
-                        }
-                        
-                        const card = d3.select(this);
-                        if (card.select('.card-delete').empty()) {
-                            card.append('div')
-                                .attr('class', 'card-delete')
-                                .html('×')
-                                .attr('title', 'Delete person');
-                        }
-                    });
-                }, 500);
+                f3chart.updateTree({ initial: true });
+                
+                // Watch for DOM changes to re-inject buttons after library re-renders nodes (like after transitions)
+                const observer = new MutationObserver(() => injectCardElements());
+                observer.observe(chartElement, { childList: true, subtree: true });
 
+                // Initial injection
+                injectCardElements();
+
+                // CLEANUP: Remove listener and observer when component re-renders or unmounts
+                return () => {
+                    chartElement.onclick = null;
+                    observer.disconnect();
+                };
             }
             catch (error) {
                 console.error('Error creating family tree chart:', error);
@@ -161,13 +298,12 @@ function FamilyTree() {
     }, [currentAccountID, contRef]);
 
 
-    const handleResetTree = async () => {
-        const confirmed = window.confirm("WARNING: This will completely delete all family members and relationships from your tree (except yourself). This cannot be undone. Are you sure?");
-        if (!confirmed) return;
+    const handleResetTree = () => {
+        setIsResetting(true);
+    };
 
-        const doubleCheck = window.confirm("FINAL CONFIRMATION: Are you absolutely certain you want to start from scratch?");
-        if (!doubleCheck) return;
-
+    const confirmReset = async () => {
+        setIsResetting(false);
         try {
             setErrorMessage('Resetting tree...');
             await familyTreeService.clearFamilyTree(currentAccountID);
@@ -218,7 +354,7 @@ function FamilyTree() {
             )}
             <div className="f3 f3-cont" id="FamilyChart" ref={contRef}></div>
             
-            {/* Action Buttons Overlay */}
+            {/* Reset/Sync Buttons Overlay */}
             <div style={{
                 position: 'absolute',
                 bottom: '30px',
@@ -293,6 +429,135 @@ function FamilyTree() {
                     Reset Tree
                 </button>
             </div>
+
+            {/* CUSTOM DELETE CONFIRMATION MODAL */}
+            <Popup
+                open={isDeleting}
+                onClose={() => setIsDeleting(false)}
+                modal
+                nested
+                contentStyle={{ 
+                    borderRadius: '12px', 
+                    padding: '24px', 
+                    border: '1px solid #eee', 
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+                    fontFamily: 'Alata',
+                    width: '380px',
+                    textAlign: 'center',
+                    backgroundColor: '#fff'
+                }}
+            >
+                <div>
+                    <h3 style={{ color: '#333', marginBottom: '12px', fontSize: '20px' }}>Remove Family Member?</h3>
+                    <p style={{ color: '#666', fontSize: '15px', lineHeight: '1.5', margin: '0 0 24px 0' }}>
+                        Are you sure you want to remove <strong>{deleteTarget?.firstName} {deleteTarget?.lastName}</strong>?
+                        <br /><span style={{ fontSize: '12px', color: '#999' }}>This will also remove any relationship links associated with them.</span>
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                        <button 
+                            onClick={confirmDelete}
+                            style={{
+                                backgroundColor: '#e74c3c',
+                                color: 'white',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                fontSize: '14px'
+                            }}
+                        >
+                            Delete Member
+                        </button>
+                        <button 
+                            onClick={() => setIsDeleting(false)}
+                            style={{
+                                backgroundColor: '#f5f5f5',
+                                color: '#666',
+                                border: '1px solid #ddd',
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                fontSize: '14px'
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </Popup>
+
+            {/* CUSTOM RESET CONFIRMATION MODAL (Professional Warning) */}
+            <Popup
+                open={isResetting}
+                onClose={() => setIsResetting(false)}
+                modal
+                nested
+                contentStyle={{ 
+                    borderRadius: '12px', 
+                    padding: '32px', 
+                    border: '1px solid #eee', 
+                    boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
+                    fontFamily: 'Alata',
+                    width: '420px',
+                    textAlign: 'center',
+                    backgroundColor: '#fff'
+                }}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div style={{ 
+                        backgroundColor: '#fff5f5', 
+                        borderRadius: '50%', 
+                        width: '60px', 
+                        height: '60px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        marginBottom: '20px'
+                    }}>
+                        <span style={{ fontSize: '30px', color: '#e74c3c' }}>⚠</span>
+                    </div>
+                    
+                    <h2 style={{ color: '#2c3e50', marginBottom: '12px', fontSize: '22px' }}>Reset Family Tree?</h2>
+                    <p style={{ color: '#666', fontSize: '15px', lineHeight: '1.6', marginBottom: '28px' }}>
+                        This will permanently remove all members and relationships except for your own profile. 
+                        <strong> This action cannot be undone.</strong>
+                    </p>
+                    
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <button 
+                            onClick={confirmReset}
+                            style={{
+                                backgroundColor: '#e74c3c',
+                                color: 'white',
+                                border: 'none',
+                                padding: '12px',
+                                borderRadius: '10px',
+                                fontWeight: 'bold',
+                                fontSize: '15px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Yes, Reset Everything
+                        </button>
+                        <button 
+                            onClick={() => setIsResetting(false)}
+                            style={{
+                                backgroundColor: 'transparent',
+                                color: '#999',
+                                border: 'none',
+                                padding: '8px',
+                                fontSize: '14px',
+                                cursor: 'pointer',
+                                textDecoration: 'underline'
+                            }}
+                        >
+                            Go Back
+                        </button>
+                    </div>
+                </div>
+            </Popup>
         </div>
     );
 }
@@ -334,7 +599,10 @@ function Tree() {
                         </div>
                         {/* add family member button */}
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <AddFamilyMemberPopup trigger={<PlusSign style={{ width: '24px', height: '24px' }} />} userid={currentAccountID} />
+                            <AddFamilyMemberPopup 
+                                trigger={<PlusSign className="tree-plus-button" style={{ width: '24px', height: '24px' }} />} 
+                                userid={currentAccountID} 
+                            />
                         </div>
                     </div>
 

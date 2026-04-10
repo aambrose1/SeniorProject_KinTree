@@ -209,7 +209,8 @@ const deleteTreeMember = async (req, res) => {
     } catch (error) {
         console.error('Error in deleteTreeMember:', error);
         res.status(500).json({
-            error: 'Error deleting family member'
+            error: 'Error deleting family member',
+            details: error.message
         });
     }
 };
