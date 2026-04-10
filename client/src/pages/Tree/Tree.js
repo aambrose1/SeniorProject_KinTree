@@ -17,7 +17,7 @@ import 'reactjs-popup/dist/index.css';
 
 // see https://github.com/donatso/family-chart/
 
-function FamilyTree() {
+function FamilyTree({ refreshKey }) {
     const contRef = React.useRef();
     const { currentAccountID } = useCurrentUser();
     const [errorMessage, setErrorMessage] = useState('');
@@ -63,7 +63,15 @@ function FamilyTree() {
             await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
 
             setErrorMessage(`Successfully removed ${firstName} ${lastName}`);
-            setTimeout(() => window.location.reload(), 1000);
+            setTimeout(() => {
+                setErrorMessage('');
+                // If onTreeUpdate is provided (from props), use it to refresh instead of reload
+                if (window.refreshTree) {
+                    window.refreshTree();
+                } else {
+                    window.location.reload();
+                }
+            }, 1000);
         } catch (error) {
             console.error('[DETAILED DEBUG] Deletion Error:', error);
             setErrorMessage(`Deletion Failed: ${error.message}`);
@@ -295,7 +303,7 @@ function FamilyTree() {
         }
 
         if (currentAccountID) fetchData();
-    }, [currentAccountID, contRef]);
+    }, [currentAccountID, contRef, refreshKey]);
 
 
     const handleResetTree = () => {
@@ -307,32 +315,17 @@ function FamilyTree() {
         try {
             setErrorMessage('Resetting tree...');
             await familyTreeService.clearFamilyTree(currentAccountID);
-            window.location.reload();
+            if (window.refreshTree) {
+                window.refreshTree();
+                setErrorMessage('');
+            } else {
+                window.location.reload();
+            }
         } catch (error) {
             console.error('Failed to reset tree:', error);
             setErrorMessage('Reset failed: ' + error.message);
         }
     };
-
-    const handleSyncTree = async () => {
-        try {
-            setErrorMessage('Syncing with database...');
-            const [members, relationships] = await Promise.all([
-                familyTreeService.getFamilyMembersByUserId(currentAccountID),
-                familyTreeService.getRelationshipsByUser(currentAccountID)
-            ]);
-
-            console.log('Rebuilding tree from:', { members: members.length, relationships: relationships.length });
-            const rebuiltTree = rebuildTreeFromDatabase(members, relationships);
-            
-            await familyTreeService.updateTreeInfo(currentAccountID, rebuiltTree);
-            window.location.reload();
-        } catch (error) {
-            console.error('Failed to sync tree:', error);
-            setErrorMessage('Sync failed: ' + error.message);
-        }
-    };
-
     return (
         <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             {errorMessage && (
@@ -354,48 +347,14 @@ function FamilyTree() {
             )}
             <div className="f3 f3-cont" id="FamilyChart" ref={contRef}></div>
             
-            {/* Reset/Sync Buttons Overlay */}
+            {/* Reset Button Overlay */}
             <div style={{
                 position: 'absolute',
                 bottom: '30px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                zIndex: 100,
-                display: 'flex',
-                gap: '15px'
+                zIndex: 100
             }}>
-                {/* Sync Button */}
-                <button 
-                    onClick={handleSyncTree}
-                    title="Sync tree with database records if missing members"
-                    style={{
-                        backgroundColor: '#fff',
-                        border: '2px solid #333',
-                        borderRadius: '25px',
-                        padding: '10px 25px',
-                        fontFamily: 'Alata',
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                        transition: 'all 0.2s ease'
-                    }}
-                    onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f0f0f0';
-                        e.currentTarget.style.transform = 'scale(1.05)';
-                    }}
-                    onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = '#fff';
-                        e.currentTarget.style.transform = 'scale(1)';
-                    }}
-                >
-                    <ImportIcon style={{ width: '18px', height: '18px' }} />
-                    Sync Tree
-                </button>
-
                 {/* Reset Button */}
                 <button 
                     onClick={handleResetTree}
@@ -568,6 +527,15 @@ function Tree() {
     const { currentAccountID, supabaseUser } = useCurrentUser();
     const isTreePage = location.pathname === '/tree';
 
+    const [refreshKey, setRefreshKey] = useState(0);
+    
+    // Attach to window so child components like AddFamilyMemberPopup can trigger it
+    // Note: In a larger app, we'd use Context or Redux, but this works for this structure
+    useEffect(() => {
+        window.refreshTree = () => setRefreshKey(prev => prev + 1);
+        window.refreshKey = refreshKey;
+    }, [refreshKey]);
+
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         document.body.style.width = '100%';
@@ -609,7 +577,7 @@ function Tree() {
 
                     {/* family tree container */}
                     {/* using a border for now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
-                    <div style={styles.FamilyTreeContainerStyle}> <FamilyTree /> </div>
+                    <div style={styles.FamilyTreeContainerStyle}> <FamilyTree refreshKey={refreshKey} /> </div>
                 </div>
             ) : (
                 <Outlet />

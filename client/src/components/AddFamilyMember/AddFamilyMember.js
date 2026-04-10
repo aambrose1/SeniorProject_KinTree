@@ -534,10 +534,17 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                   </div>
 
                   <button 
-                    onClick={() => { window.location.href = '/tree'; }} 
+                    onClick={() => { 
+                      if (window.refreshTree) {
+                        window.refreshTree();
+                      }
+                      reset(); 
+                      setResult(null); 
+                      close(); 
+                    }} 
                     style={{ ...styles.ButtonStyle, width: '100%' }}
                   >
-                    View Updated Tree
+                    Return to Tree
                   </button>
                 </div>
               </div>
@@ -712,10 +719,17 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                  </div>
 
                  <button 
-                   onClick={() => { window.location.href = '/tree'; }} 
+                   onClick={() => { 
+                     if (window.refreshTree) {
+                       window.refreshTree();
+                     }
+                     reset(); 
+                     setResult(null); 
+                     close(); 
+                   }} 
                    style={{ ...styles.ButtonStyle, width: '100%' }}
                  >
-                   View Updated Tree
+                   Return to Tree
                  </button>
                </div>
              </div>
