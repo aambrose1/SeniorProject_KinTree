@@ -59,16 +59,16 @@ const getSharedTreeBySender = async (req, res) => {
     }
 }
 
-const getSharedTreebyReciever = async (req, res) => {
+const getSharedTreebyReceiver = async (req, res) => {
     try{
         const { id } = req.params;
-        const trees = await sharedTrees.getSharedTreebyReciever(id);
+        const trees = await sharedTrees.getSharedTreebyReceiver(id);
         res.status(200).json(trees);
     }
     catch(error){
         console.error(error);
         res.status(500).json({
-            error: 'Error fetching shared tree by reciever'
+            error: 'Error fetching shared tree by receiver'
         });
         
     }
@@ -230,9 +230,9 @@ const mergeMembers = async (req, res) => {
 
 const assignNewMemberRelationship = async (req, res) => {
     try{
-        const { recieverID, memberId, relationshipType} = req.body;
-        await treeMember.assignNewMemberRelationship(recieverID,memberId,relationshipType);
-        res.json({message: 'Relationshi[ assigning successful.'})
+        const { receiverID, memberId, relationshipType} = req.body;
+        await treeMember.assignNewMemberRelationship(receiverID,memberId,relationshipType);
+        res.json({message: 'Relationship assigning successful.'})
 
     }
     catch(error){
@@ -321,6 +321,4 @@ const updateSharedTreeStatus = async (req, res) => {
     }
 };
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-module.exports = {getSharedTreeById, getSharedTreeByToken, getSharedTreeBySender, getSharedTreebyReciever, shareTree, assignNewMemberRelationship, mergeMembers, deleteSharedTree, processPendingInvitations, updateSharedTreeStatus }
+module.exports = {getSharedTreeById, getSharedTreeByToken, getSharedTreeBySender, getSharedTreebyReceiver, shareTree, assignNewMemberRelationship, mergeMembers, deleteSharedTree, processPendingInvitations, updateSharedTreeStatus }

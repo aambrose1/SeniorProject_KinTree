@@ -56,7 +56,7 @@ const sharedTrees = {
         return data;
     },
 
-    getSharedTreebyReciever: async (id) => {
+    getSharedTreebyReceiver: async (id) => {
         const { data, error } = await supabase
             .from('sharedtrees')
             .select('*')

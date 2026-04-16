@@ -118,12 +118,12 @@ const treeMember = {
         return updated;
     },
 
-    assignNewMemberRelationship: async (recieverId, getMemberById, relationshipType) => {
+    assignNewMemberRelationship: async (receiverId, getMemberById, relationshipType) => {
         // Update an existing relationship record tying two members together
         const { error } = await supabase
             .from('relationships')
             .update({ relationshipType })
-            .match({ person1_id: recieverId, person2_id: getMemberById });
+            .match({ person1_id: receiverId, person2_id: getMemberById });
         if (error) throw error;
         return { success: true };
     },
