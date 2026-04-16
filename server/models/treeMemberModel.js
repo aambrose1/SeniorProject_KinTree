@@ -135,6 +135,14 @@ const treeMember = {
             .eq('userid', userId);
         if (error) throw error;
     },
+
+    deleteMember: async (id) => {
+        const { error } = await supabase
+            .from('treemembers')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+    },
       
     getActiveMemberId: async (id) => {
         const { data, error } = await supabase

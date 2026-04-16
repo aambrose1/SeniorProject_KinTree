@@ -158,7 +158,7 @@ const getRelationshipBetween = async (req, res) => {
     try {
         const { viewerId, profileId } = req.params;
 
-        // viewerId and profileId are auth_uids (UUIDs)
+        // viewerId and profileId are auth_uids (UUIDs) OR numerical member IDs
         const viewerUserId = await User.resolveUserIdFromAuthUid(viewerId);
         if (!viewerUserId) {
             return res.status(404).json({ error: 'Viewer not found' });
@@ -170,22 +170,34 @@ const getRelationshipBetween = async (req, res) => {
             return res.status(404).json({ error: 'Viewer root member not found' });
         }
 
-        // Find profile owner's member record in the VIEWER'S tree
-        // If profile owner is a registered user, they might have a member record linked via memberuserid
-        const profileUserId = await User.resolveUserIdFromAuthUid(profileId);
+        const isUuid = (id) => typeof id === 'string' && id.includes('-');
 
         let profileMember;
-        if (profileUserId) {
-            // Looking for a member in viewer's tree that is linked to profileUserId
-            const { data, error } = await require('../lib/supabase')
-                .from('treemembers')
-                .select('*')
-                .eq('userid', viewerUserId)
-                .eq('memberuserid', profileUserId)
-                .maybeSingle();
+        if (isUuid(profileId)) {
+            // Find profile owner's member record in the VIEWER'S tree
+            // If profile owner is a registered user, they might have a member record linked via memberuserid
+            const profileUserId = await User.resolveUserIdFromAuthUid(profileId);
 
-            if (error) throw error;
-            profileMember = data;
+            if (profileUserId) {
+                // Looking for a member in viewer's tree that is linked to profileUserId
+                const { data, error } = await require('../lib/supabase')
+                    .from('treemembers')
+                    .select('*')
+                    .eq('userid', viewerUserId)
+                    .eq('memberuserid', profileUserId)
+                    .maybeSingle();
+
+                if (error) throw error;
+                profileMember = data;
+            }
+        } else {
+            // profileId is likely a numerical treemember ID
+            profileMember = await treeMember.getMemberbyMemberId(profileId);
+
+            // Security check: ensure this member belongs to the viewer's tree
+            if (profileMember && profileMember.userid !== viewerUserId) {
+                profileMember = null;
+            }
         }
 
         // If not found (maybe viewerId === profileId or they aren't linked yet), return nothing
