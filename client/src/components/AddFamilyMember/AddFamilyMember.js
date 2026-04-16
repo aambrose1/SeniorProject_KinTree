@@ -9,6 +9,7 @@ import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
 import { useCurrentUser } from '../../CurrentUserProvider';
 import { familyTreeService } from '../../services/familyTreeService';
+import { SERVER_URL } from '../../config/urls';
 
 // TODO: make form clear when dismissed by clicking outside of modal
 //       make sync contact button functional
@@ -166,7 +167,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
           userId: currentAccountID
         })
       };
-      const relResponse = await fetch(`http://localhost:5000/api/relationships/`, relRequestOptions); // add relationship   
+      const relResponse = await fetch(`${SERVER_URL}/api/relationships/`, relRequestOptions); // add relationship   
       const relData = await relResponse.json();
       if (!relResponse.ok) {
         throw new Error(relData.error || 'Failed to add relationship');
@@ -216,7 +217,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       console.log('added user treeMemberId', treeMemberId);
 
       // add relationship to relationship table
-      const relResponse = await fetch(`http://localhost:5000/api/relationships/`, {
+      const relResponse = await fetch(`${SERVER_URL}/api/relationships/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

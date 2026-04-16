@@ -7,6 +7,7 @@ import * as styles from './styles'
 import logo from '../../assets/kintreelogo-adobe.png';
 import { useSearchParams } from 'react-router-dom';
 import {familyTreeService} from '../../services/familyTreeService';
+import { SERVER_URL } from '../../config/urls';
 
 //validation functionality
 const yupValidation = yup.object().shape(
@@ -60,7 +61,7 @@ const CreateAccount = () => {
             setInviteToken(token);
             setIsLoadingInvite(true);
             // Fetch invitation details to get the email
-            fetch(`http://localhost:5000/api/share-trees/token/${token}`)
+            fetch(`${SERVER_URL}/api/share-trees/token/${token}`)
                 .then(response => response.json())
                 .then(data => {
                     console.log('Invitation data:', data);
@@ -123,13 +124,13 @@ const CreateAccount = () => {
             if (inviteToken || inviteEmail) {
                 try {
                     // Find that user if exists
-                    const userResponse = await fetch('http://localhost:5000/api/auth/users');
+                    const userResponse = await fetch(`${SERVER_URL}/api/auth/users`);
                     const allUsers = await userResponse.json();
                     const dbUser = allUsers.find(u => u.email === data.email);
                     
                     if (dbUser && dbUser.id) {
                         // Process pending invitations
-                        const processResponse = await fetch('http://localhost:5000/api/share-trees/process-pending', {
+                        const processResponse = await fetch(`${SERVER_URL}/api/share-trees/process-pending`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

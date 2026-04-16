@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as styles from './styles';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../../CurrentUserProvider';
+import { SERVER_URL } from '../../../config/urls';
 
 // const defaultAvatar = require('../../../assets/default-avatar.png');
 
@@ -28,7 +29,7 @@ function ViewSharedTrees() {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/share-trees/${sharedTreeId}`, {
+            const response = await fetch(`${SERVER_URL}/api/share-trees/${sharedTreeId}`, {
                 method: 'DELETE',
             });
 
@@ -48,7 +49,7 @@ function ViewSharedTrees() {
 
     const handleUpdateStatus = async (sharedTreeId, status) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/share-trees/${sharedTreeId}/status`, {
+            const response = await fetch(`${SERVER_URL}/api/share-trees/${sharedTreeId}/status`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status }),
@@ -77,7 +78,7 @@ function ViewSharedTrees() {
 
     useEffect(() => {
         async function fetchTrees() {
-            const response = await fetch(`http://localhost:5000/api/share-trees/receiver/${currentAccountID}`)
+            const response = await fetch(`${SERVER_URL}/api/share-trees/receiver/${currentAccountID}`)
             if (response.ok) {
                 let responseData = await response.json();
                 console.log(responseData);
@@ -89,7 +90,7 @@ function ViewSharedTrees() {
         }
     
         async function fetchUserData() {
-            const response = await fetch(`http://localhost:5000/api/auth/users/`);
+            const response = await fetch(`${SERVER_URL}/api/auth/users/`);
             if (response.ok) {
                 const userData = await response.json();
                 return userData;

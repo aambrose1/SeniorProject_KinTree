@@ -3,6 +3,7 @@ import * as styles from './styles';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../../CurrentUserProvider';
+import { SERVER_URL } from '../../../config/urls';
 
 function ShareTree() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -50,7 +51,7 @@ function ShareTree() {
             requestBody.receiverEmail = inviteEmail;
         }
         
-        fetch(`http://localhost:5000/api/share-trees/share`, {
+        fetch(`${SERVER_URL}/api/share-trees/share`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -80,7 +81,7 @@ function ShareTree() {
     useEffect(() => {
         const fetchData = async () => {
             // Fetch family members
-            fetch(`http://localhost:5000/api/family-members/user/${currentAccountID}`)
+            fetch(`${SERVER_URL}/api/family-members/user/${currentAccountID}`)
                 .then(async (response) => {
                     if (response.ok) {
                         let responseData = await response.json();
@@ -93,7 +94,7 @@ function ShareTree() {
                 });
 
             // Fetch users
-            fetch(`http://localhost:5000/api/auth/users`)
+            fetch(`${SERVER_URL}/api/auth/users`)
                 .then(async (response) => {
                     if (response.ok) {
                         let responseData = await response.json();
@@ -104,7 +105,7 @@ function ShareTree() {
                 });
 
             // Fetch tree info
-            fetch(`http://localhost:5000/api/tree-info/${currentAccountID}`)
+            fetch(`${SERVER_URL}/api/tree-info/${currentAccountID}`)
                 .then(async (response) => {
                     if (response.ok) {
                         let responseData = await response.json();

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
+import { SERVER_URL } from '../../config/urls';
 
 function EditEventPopup({ trigger, event, onEventUpdated }) {
 
@@ -27,7 +28,7 @@ function EditEventPopup({ trigger, event, onEventUpdated }) {
     console.log(`FRONTEND: Sending PUT request for Event ID ${event.id} ->`, updatePayload);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/events/${event.id}`, {
+      const response = await fetch(`${SERVER_URL}/api/events/${event.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatePayload), 

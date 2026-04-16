@@ -1,6 +1,7 @@
 import { React, useState, createContext, useContext, useEffect } from "react"
 import { supabase } from "./utils/supabaseClient";
 import { buildSyncPayload } from "./utils/metadataHelpers";
+import { SERVER_URL } from "./config/urls";
 
 export const currentContext = createContext();
 
@@ -36,7 +37,7 @@ export const CurrentUserProvider = ({ children }) => {
   const fetchCurrentUserID = async () => {
     // temp
     // setCurrentUserIDState('23');
-    fetch(`http://localhost:5000/api/family-members/active/${currentAccountID}`)
+    fetch(`${SERVER_URL}/api/family-members/active/${currentAccountID}`)
       .then(async(response) => {
         if (response.ok) {
           const data = await response.json();
@@ -81,7 +82,7 @@ export const CurrentUserProvider = ({ children }) => {
       async (event, session) => {
         if (session?.user) {
           setSupabaseUser(session.user);
-          let response = await fetch(`http://localhost:5000/api/auth/user/${session.user.id}`, {
+          let response = await fetch(`${SERVER_URL}/api/auth/user/${session.user.id}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
           });
@@ -104,7 +105,7 @@ export const CurrentUserProvider = ({ children }) => {
               
               if (hasExtendedMetadata) {
                 const syncPayload = buildSyncPayload(session.user.id, session.user.email, m);
-                const syncResponse = await fetch('http://localhost:5000/api/auth/sync', {
+                const syncResponse = await fetch(`${SERVER_URL}/api/auth/sync`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(syncPayload)

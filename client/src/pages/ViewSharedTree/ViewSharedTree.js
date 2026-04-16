@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import f3 from 'family-chart';
 import NavBar from '../../components/NavBar/NavBar';
 import { Outlet } from 'react-router-dom';
+import { SERVER_URL } from '../../config/urls';
 
 function FamilyTree({ treeData }) {
     const contRef = useRef();
@@ -64,7 +65,7 @@ function ViewSharedTree() {
 
         async function fetchData() {
             try {
-                const treeResponse = await fetch(`http://localhost:5000/api/share-trees/${id}`);
+                const treeResponse = await fetch(`${SERVER_URL}/api/share-trees/${id}`);
                 if (!treeResponse.ok) {
                     console.error('Error fetching tree:', treeResponse);
                     return;
@@ -78,7 +79,7 @@ function ViewSharedTree() {
                 }
                 setTreeData(parsedTreeData);
 
-                const userResponse = await fetch(`http://localhost:5000/api/auth/user/${data.senderid}`);
+                const userResponse = await fetch(`${SERVER_URL}/api/auth/user/${data.senderid}`);
                 if (!userResponse.ok) {
                     console.error('Error fetching user:', userResponse);
                     return;

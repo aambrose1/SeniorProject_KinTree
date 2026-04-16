@@ -8,6 +8,7 @@ import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as UploadIcon } from '../../assets/upload.svg';
 import { useCurrentUser } from '../../CurrentUserProvider'; 
 import { supabase } from "../../utils/supabaseClient";
+import { SERVER_URL } from '../../config/urls';
 
 function CreateEventPopup({ trigger, onEventCreated }) {
   const { register, handleSubmit, reset } = useForm();
@@ -33,7 +34,7 @@ function CreateEventPopup({ trigger, onEventCreated }) {
     console.log("FRONTEND: Sending payload to server ->", eventPayload);
     
     try {
-      const response = await fetch('http://localhost:5000/api/events', {
+      const response = await fetch(`${SERVER_URL}/api/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(eventPayload),
