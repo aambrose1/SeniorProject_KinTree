@@ -81,6 +81,14 @@ const Relationships = {
         if (error) throw error;
     },
 
+    deleteRelationshipsByMemberId: async (memberId) => {
+        const { error } = await supabase
+            .from('relationships')
+            .delete()
+            .or(`person1_id.eq.${memberId},person2_id.eq.${memberId}`);
+        if (error) throw error;
+    },
+
     getRelationshipBetweenMembers: async (person1Id, person2Id, userId) => {
         // Find relationship where person1 is one and person2 is the other, or vice versa
         // AND it belongs to the viewer's tree (userId)
