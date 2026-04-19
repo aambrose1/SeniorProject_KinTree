@@ -12,16 +12,21 @@ const handleCreateMemory = async (req, res) => {
     const { description, date, profileID } = req.body;
     const file = req.file; 
 
+    // STRICT CHECK: Reject if no profileID is provided
+    if (!profileID) {
+      return res.status(400).json({ error: 'profileID is strictly required.' });
+    }
+
     if (!file) {
       return res.status(400).json({ error: 'No media file provided' });
     }
 
-    //Prepare file path for Supabase Storage
+    // Prepare file path for Supabase Storage (strictly using profileID)
     const fileExt = file.originalname.split('.').pop();
     const fileName = `${Date.now()}-${Math.round(Math.random() * 1E9)}.${fileExt}`;
-    const filePath = `${profileID || 'unassigned'}/${fileName}`;
+    const filePath = `${profileID}/${fileName}`;
 
-    //Upload the file buffer to Supabase Storage
+    // Upload the file buffer to Supabase Storage
     const { error: storageError } = await supabase.storage
       .from('memory-files') 
       .upload(filePath, file.buffer, {
@@ -30,21 +35,21 @@ const handleCreateMemory = async (req, res) => {
 
     if (storageError) throw storageError;
 
-    //Get the Public URL of the uploaded image
+    // Get the Public URL of the uploaded image
     const { data: { publicUrl } } = supabase.storage
       .from('memory-files')
       .getPublicUrl(filePath);
 
-    //Prepare data for the database
+    // Prepare data for the database (strictly using profileID)
     const memoryData = {
       description,
       date,
       file_url: publicUrl,
       file_type: file.mimetype,
-      profileID: profileID || null, 
+      profileID: profileID, 
     };
 
-    //Create the memory record
+    // Create the memory record
     const newMemory = await memoryModel.createMemory(memoryData);
     res.status(201).json(newMemory);
 

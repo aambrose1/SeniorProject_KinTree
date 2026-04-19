@@ -130,6 +130,11 @@ function Dashboard() {
     setSearchResults(searched);
   }, [searchItem, sortDate, allEvents]);
 
+
+  // --- DEBUG LOG ADDED HERE ---
+  console.log("DEBUG: currentUserID inside Dashboard is:", currentUserID);
+
+
   if (loading) return <div style={styles.DefaultStyle}><NavBar /><p>Loading...</p></div>;
 
   return (

@@ -13,15 +13,20 @@ function CreateMemoryPopup({ trigger, profileID, onMemoryCreated }) {
 
   const onSubmit = async (data, close) => {
     try {
+      // STRICT CHECK: Stop execution if profileID is missing from props
+      if (!profileID) {
+        alert("Error: A valid profile is required to create a memory.");
+        return;
+      }
+
       const formData = new FormData();
       
       formData.append('description', data.description);
       formData.append('date', data.date);
       
-      if (profileID) {
-        formData.append('profileID', profileID);
-        console.log("DEBUG: Appending profileID:", profileID);
-      }
+      // Unconditionally append profileID since we enforced it above
+      formData.append('profileID', profileID);
+      console.log("DEBUG: Appending profileID:", profileID);
 
       if (data.fileUpload && data.fileUpload.length > 0) {
         formData.append('fileUpload', data.fileUpload[0]);
@@ -36,7 +41,8 @@ function CreateMemoryPopup({ trigger, profileID, onMemoryCreated }) {
       });
 
       if (!response.ok) {
-        throw new Error(`Server Error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server Error: ${response.status}`);
       }
 
       const result = await response.json();
@@ -51,7 +57,7 @@ function CreateMemoryPopup({ trigger, profileID, onMemoryCreated }) {
 
     } catch (error) {
       console.error('Error creating memory:', error);
-      alert('Upload failed. Check terminal for errors.');
+      alert(`Upload failed: ${error.message}`);
     }
   };
 
