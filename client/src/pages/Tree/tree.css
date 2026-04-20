@@ -36,7 +36,7 @@
     height: 100%;
   }
   .f3 svg.main_svg text {
-    fill: currentColor;
+    fill: var(--background-color);
   }
   
   /* card-html */
@@ -46,8 +46,23 @@
     color: var(--text-color);
     position: relative;
     line-height: 1.2;
+    
+  }
+  .f3 div.card .mini-tree g {
+    transform: translate(18px, 15px);
+  }
+  .f3 div.card .mini-tree line {
+    stroke-width: 2px;
+    stroke: var(--background-color);
+    stroke-linecap: round;
   }
 
+  .f3 div.card .mini-tree rect.card-male{
+    color: var(--male-color);
+  }
+  .f3 div.card .mini-tree rect.card-female{
+    color: var(--female-color)
+  }
   .f3 div.card-image-circle {
     border-radius: 50%;
     padding: 5px;
@@ -138,4 +153,56 @@
 .f3 .card-main-outline {
   stroke: currentColor;
   stroke-width: 3px;
+}
+
+.f3 .card-delete {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background-color: #ff4d4d;
+  color: white;
+  border-radius: 50%;
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 10;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.f3 div.card:hover .card-delete {
+  display: flex; /* Show on hover */
+}
+
+.f3 .card-delete:hover {
+  background-color: #ff1a1a;
+  transform: scale(1.1);
+}
+
+/* PLUS BUTTON HOVER EFFECTS */
+.tree-plus-button {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  transform-origin: center;
+}
+
+.tree-plus-button:hover {
+  transform: scale(1.25);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+}
+
+.tree-plus-button:hover path {
+  fill: #000;
+  transition: fill 0.3s ease;
+}
+
+.tree-plus-button:active {
+  transform: scale(0.95);
+  transition: all 0.1s ease !important;
 }

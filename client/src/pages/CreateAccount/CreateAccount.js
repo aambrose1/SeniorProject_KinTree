@@ -65,6 +65,7 @@ const CreateAccount = () => {
                 first_name: data.firstname,
                 last_name: data.lastname,
                 birthdate: data.birthdate,
+                gender: data.gender,
                 address: data.address,
                 city: data.city,
                 state: data.state,
