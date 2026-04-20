@@ -3,8 +3,8 @@ export const DefaultStyle = {
   justifyContent: 'center',
   alignItems: 'center',
   minHeight: '100vh',
-  backgroundColor: '#e7f3e1',
-  fontFamily: '"Alata", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  backgroundColor: 'var(--bg-color)',
+  fontFamily: 'inherit',
 };
 
 export const Container = {
@@ -12,39 +12,39 @@ export const Container = {
   flexDirection: 'column',
   width: '100%',
   maxWidth: '440px',
-  backgroundColor: '#ffffff',
-  padding: '40px',
-  borderRadius: '24px',
-  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.04)',
+  backgroundColor: 'var(--card-bg)',
+  padding: 'var(--space-10)',
+  borderRadius: 'var(--radius-xl)',
+  boxShadow: 'var(--shadow-lg)',
   boxSizing: 'border-box',
 };
 
 export const LogoContainer = {
   display: 'flex',
   justifyContent: 'center',
-  marginBottom: '24px',
+  marginBottom: 'var(--space-6)',
 };
 
 export const Logo = {
   width: '80px',
   height: 'auto',
-  borderRadius: '16px',
+  borderRadius: 'var(--radius-lg)',
 };
 
 export const WelcomeHeader = {
   fontSize: '24px',
   fontWeight: '600',
-  color: '#111827',
+  color: 'var(--text-color)',
   textAlign: 'center',
-  margin: '0 0 8px 0',
+  margin: '0 0 var(--space-2) 0',
   fontFamily: 'inherit',
 };
 
 export const Subtitle = {
   fontSize: '14px',
-  color: '#6b7280',
+  color: 'var(--text-secondary)',
   textAlign: 'center',
-  margin: '0 0 32px 0',
+  margin: '0 0 var(--space-8) 0',
 };
 
 export const FormStyle = {
@@ -56,14 +56,14 @@ export const FormStyle = {
 export const InputGroup = {
   display: 'flex',
   flexDirection: 'column',
-  marginBottom: '20px',
+  marginBottom: 'var(--space-5)',
 };
 
 export const Label = {
   fontSize: '14px',
   fontWeight: '500',
-  color: '#374151',
-  marginBottom: '8px',
+  color: 'var(--text-secondary)',
+  marginBottom: 'var(--space-2)',
 };
 
 export const InputWrapper = {
@@ -76,10 +76,10 @@ export const FieldStyle = {
   width: '100%',
   padding: '12px 16px',
   fontSize: '15px',
-  color: '#111827',
-  backgroundColor: '#ffffff',
-  border: '1px solid #d1d5db',
-  borderRadius: '10px',
+  color: 'var(--text-color)',
+  backgroundColor: 'var(--input-bg)',
+  border: '1px solid var(--input-border)',
+  borderRadius: 'var(--radius-md)',
   outline: 'none',
   boxSizing: 'border-box',
   transition: 'border-color 0.2s',
@@ -94,7 +94,7 @@ export const EyeButton = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: '#9ca3af',
+  color: 'var(--text-muted)',
   padding: '4px',
 };
 
@@ -102,30 +102,30 @@ export const OptionsRow = {
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  marginBottom: '24px',
+  marginBottom: 'var(--space-6)',
 };
 
 export const CheckboxLabel = {
   display: 'flex',
   alignItems: 'center',
   fontSize: '14px',
-  color: '#6b7280',
+  color: 'var(--text-secondary)',
   cursor: 'pointer',
   userSelect: 'none',
 };
 
 export const Checkbox = {
-  marginRight: '8px',
+  marginRight: 'var(--space-2)',
   width: '16px',
   height: '16px',
   cursor: 'pointer',
-  accentColor: '#1f2937',
+  accentColor: 'var(--kt-green-primary)',
 };
 
 export const ForgotPassword = {
   fontSize: '14px',
   fontWeight: '600',
-  color: '#3a5a40',
+  color: 'var(--kt-green-primary)',
   textDecoration: 'none',
   cursor: 'pointer',
 };
@@ -133,33 +133,33 @@ export const ForgotPassword = {
 export const SignInButton = {
   width: '100%',
   padding: '12px',
-  backgroundColor: '#3a5a40', // kin tree dark green
+  backgroundColor: 'var(--kt-green-primary)',
   color: '#ffffff',
   fontSize: '16px',
   fontWeight: '600',
   border: 'none',
-  borderRadius: '10px',
+  borderRadius: 'var(--radius-md)',
   cursor: 'pointer',
   transition: 'background-color 0.2s',
-  marginBottom: '24px',
+  marginBottom: 'var(--space-6)',
 };
 
 export const DividerRow = {
   display: 'flex',
   alignItems: 'center',
-  marginBottom: '24px',
+  marginBottom: 'var(--space-6)',
 };
 
 export const DividerLine = {
   flex: 1,
   height: '1px',
-  backgroundColor: '#e5e7eb',
+  backgroundColor: 'var(--border-color)',
 };
 
 export const DividerText = {
-  margin: '0 16px',
+  margin: '0 var(--space-4)',
   fontSize: '12px',
-  color: '#9ca3af',
+  color: 'var(--text-muted)',
 };
 
 export const GoogleButton = {
@@ -169,27 +169,27 @@ export const GoogleButton = {
   gap: '12px',
   width: '100%',
   padding: '12px',
-  backgroundColor: '#ffffff',
-  border: '1px solid #d1d5db',
-  borderRadius: '10px',
+  backgroundColor: 'var(--card-bg)',
+  border: '1px solid var(--border-color)',
+  borderRadius: 'var(--radius-md)',
   fontSize: '15px',
   fontWeight: '500',
-  color: '#374151',
+  color: 'var(--text-color)',
   cursor: 'pointer',
   transition: 'background-color 0.2s',
-  marginBottom: '32px',
+  marginBottom: 'var(--space-8)',
 };
 
 export const RegisterRow = {
   textAlign: 'center',
   fontSize: '14px',
-  color: '#6b7280',
+  color: 'var(--text-secondary)',
 };
 
 export const RegisterLink = {
   fontWeight: '600',
-  color: '#3a5a40',
+  color: 'var(--kt-green-primary)',
   textDecoration: 'none',
   cursor: 'pointer',
-  marginLeft: '4px',
-};
+  marginLeft: 'var(--space-1)',
+};

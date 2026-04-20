@@ -1,9 +1,11 @@
 export const DefaultStyle = {
     display: 'flex',
     flexDirection: 'row',
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
     alignItems: 'flex-start',
     textAlign: 'center',
+    backgroundColor: 'var(--bg-color)',
+    minHeight: '100vh',
 };
 
 export const RightSide = {  
@@ -18,34 +20,43 @@ export const Container = {
     alignItems: 'center',
     justifyContent: 'flex-start',
     minWidth: '290px',
-    width: '100%',
-    borderRadius: '30px',
-    backgroundColor: '#faf9f6',
-    padding: '20px 5vw',
-    margin: '5% 20%',
-    boxShadow: 'gray 0px 10px 10px -8px',
-    border: '0.5px solid #000000',
+    width: '90%',
+    maxWidth: '1200px',
+    borderRadius: 'var(--radius-xl)',
+    backgroundColor: 'var(--card-bg)',
+    padding: 'var(--space-6) 5vw',
+    margin: 'var(--space-10) auto',
+    boxShadow: 'var(--shadow-lg)',
+    border: '1px solid var(--border-color)',
+    boxSizing: 'border-box',
 };
 
 export const SearchBar = {
-    width: '50%',
-    padding: '10px',
+    width: '100%',
+    maxWidth: '500px',
+    padding: '10px 16px',
     margin: '20px 0',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-    fontSize: '16px'
+    border: '1px solid var(--input-border)',
+    borderRadius: 'var(--radius-md)',
+    fontSize: '16px',
+    backgroundColor: 'var(--input-bg)',
+    color: 'var(--text-color)',
+    outline: 'none',
+    transition: 'border-color 0.2s',
 };
 
 export const Header = {
-    fontSize: 'xx-large',
+    fontSize: '32px',
+    fontWeight: '700',
     display: 'flex',
+    color: 'var(--text-color)',
     flexDirection: 'row',
     alignContent: 'center',
     justifyContent: 'center',
 };
 
 export const ButtonDivStyle = {
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -57,8 +68,9 @@ export const PlusButton = {
     margin: '10px',
     cursor: 'pointer',
     position: 'absolute',
-    right: '0px',
-    bottom: '60px'
+    right: '20px',
+    bottom: '60px',
+    filter: 'drop-shadow(var(--shadow-md))',
 };
 
 export const ListStyle = {

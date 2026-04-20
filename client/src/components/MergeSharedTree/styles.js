@@ -1,50 +1,59 @@
 export const DefaultStyle = {
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
+    color: 'var(--text-color)',
 };
 
 export const ButtonDivStyle = {
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
     display: 'flex',
     justifyContent: 'center',
+    gap: 'var(--space-3)',
+    marginTop: 'var(--space-4)',
 }
 
 export const ButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#3a5a40',
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--kt-green-primary)',
     color: 'white',
-    borderRadius: '10px',
+    borderRadius: 'var(--radius-md)',
     border: 'none',
     padding: '10px 30px',
-    margin: '10px',
+    margin: 'var(--space-2)',
     cursor: 'pointer',
+    fontWeight: '600',
+    transition: 'background-color 0.2s',
 }
 
 export const FormStyle = {
     paddingTop: '0px',
-    height: '500px',
+    height: '600px',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    width: 'auto'
+    width: '100%',
+    backgroundColor: 'var(--card-bg)',
 }
 
 export const ItemStyle = {
     display: 'flex',
     alignItems: 'center',
-    margin: '10px 0',
-    border: '1px solid rgb(87, 87, 87)',
-    width: '80%',
-    height: '10%',
-    padding: '10px'
+    margin: 'var(--space-2) 0',
+    border: '1px solid var(--border-color)',
+    width: '100%',
+    padding: 'var(--space-3)',
+    borderRadius: 'var(--radius-sm)',
+    backgroundColor: 'var(--surface-alt)',
+    boxSizing: 'border-box',
 }
 
 export const CheckboxListStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    margin: '0px 30px',
-    overflow: 'scroll',
-    height: '50%',
-    border: '1px solid rgb(87, 87, 87)',
-    borderRadius: '10px'
+    margin: 'var(--space-4) 0',
+    overflowY: 'auto',
+    height: '400px',
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-md)',
+    padding: 'var(--space-2)',
 }

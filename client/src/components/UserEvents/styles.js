@@ -87,6 +87,38 @@ export const TextAreaStyle = {
     boxSizing: 'border-box',
 };
 
+export const EventsContainer = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--space-4)',
+    fontFamily: 'inherit',
+    color: 'var(--text-color)',
+};
+
+export const EventCard = {
+    backgroundColor: 'var(--card-bg)',
+    borderRadius: 'var(--radius-md)',
+    padding: 'var(--space-4)',
+    border: '1px solid var(--border-color)',
+    boxShadow: 'var(--shadow-sm)',
+    fontFamily: 'inherit',
+};
+
+export const EventTitle = {
+    margin: 0,
+    fontSize: '18px',
+    fontWeight: '600',
+    color: 'var(--kt-green-primary)',
+    fontFamily: 'inherit',
+};
+
+export const EventMeta = {
+    fontSize: '14px',
+    color: 'var(--text-secondary)',
+    marginTop: 'var(--space-1)',
+    fontFamily: 'inherit',
+};
+
 // --- MOVED FROM ACTIVITYDASHBOARD STYLES ---
 
 export const CardContainer = {

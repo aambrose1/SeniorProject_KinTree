@@ -1,15 +1,15 @@
 .navbar {
     height: 100%;
     width: 150px;
-    background-color: #ccdfcd;
+    background-color: var(--kt-green-accent); /* Standard background color for sidebar */
     text-decoration: none;
-    /* position: fixed; */
     justify-content: center;
-    font-family: Alata;
+    font-family: inherit;
     position: fixed;
-    /* top: 0; */
     z-index: 10;
     text-align: center;
+    transition: background-color 0.3s ease;
+    border-right: 1px solid var(--border-color);
 }
 
 @media screen and (max-width: 768px) {
@@ -22,41 +22,37 @@
     height: 100%;
     width: 160px;
     top: 0px;
-    background-color: #ebffec;
+    background-color: var(--kt-green-light);
     position: absolute;
-    padding-top: 30px;
+    padding-top: var(--space-8);
     margin-left: 85px;
     z-index: 100;
+    border-right: 1px solid var(--border-color);
 }
 
 .nav-item {
     display: block;
-    border-radius: 4px;
-    padding-top: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-    color: black;
-    background-color: #ccdfcd;
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-color);
+    background-color: transparent;
     text-decoration: none;
-    font: Alata;
+    font-family: inherit;
     font-size: 16pt;
-    transition: all .5s;
+    transition: all .3s;
 }
 
 .nav-item:hover {
-    background-color: #ebffec; 
+    background-color: var(--kt-green-light); 
+    color: var(--kt-green-primary);
 }
 
 .nav-item-active {
     display: block;
-    border-radius: 4px;
-    padding-top: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-    background-color: #ebffec;
-    color: black;
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    background-color: var(--kt-green-light);
+    color: var(--kt-green-primary);
     text-decoration: none;
     font-weight: bold;
     font-size: 16pt;
@@ -64,32 +60,27 @@
 
 .nav-item-nested {
     display: block;
-    border-radius: 4px;
-    padding-top: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-    color: black;
-    background-color: #ebffec;
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-color);
+    background-color: var(--kt-green-light);
     font-weight: normal;
     text-decoration: none;
-    font: Alata;
+    font-family: inherit;
     font-size: 16pt;
+    transition: all .3s;
 }
 
 .nav-item-nested:hover {
-    background-color: #ffffff;
+    background-color: var(--card-bg);
 }
 
 .nav-item-nested-active {
     display: block;
-    border-radius: 4px;
-    padding-top: 5px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 5px;
-    background: #ffffff;
-    color: black;
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    background: var(--card-bg);
+    color: var(--kt-green-primary);
     font-weight: bold;
     text-decoration: none;
     font-size: 16pt;
@@ -98,91 +89,63 @@
 .settings-and-help {
     display: flex;
     margin-top: 50vh;
-    margin-bottom: 5vh;
+    margin-bottom: var(--space-5);
     gap: 26%;
     align-items: center;
+    justify-content: center;
 }
 
 .settings-icon {
     display: flex;
-    background-color: #ccdfcd;
-    margin-left: 2%;
+    background-color: transparent;
     height: 30px;
     width: 30px;
-    color: black;
+    color: var(--text-color);
+    transition: all 0.3s;
 }
 
 .settings-icon:hover {
-    color: #ebffec;
+    color: var(--kt-green-primary);
+    transform: rotate(30deg);
 }
 
 .help-icon {
-    color: black;
-    background-color: #ccdfcd;
+    color: var(--text-color);
+    background-color: transparent;
     height: 35px;
-    width: 30px
+    width: 30px;
+    transition: all 0.3s;
 }
 
 .help-icon:hover {
-    color: #ebffec;
+    color: var(--kt-green-primary);
+    transform: scale(1.1);
 }
 
 .divider {
-    border-bottom-width: flex;
-    border-bottom-color: #ccc;
+    border-bottom: 1px solid var(--border-color);
 }
 
-/* Dark Mode Styles */
+/* Dark Mode Overrides (if variables aren't enough) */
 .dark-mode .navbar {
-    background-color: #2d2d2d;
+    background-color: var(--card-bg);
 }
 
-.dark-mode .nav-item {
-    background-color: #2d2d2d;
-    color: #e0e0e0;
-}
-
-.dark-mode .nav-item:hover {
-    background-color: #3a3a3a;
-}
-
+.dark-mode .nav-item:hover, 
 .dark-mode .nav-item-active {
-    background-color: #3a3a3a;
-    color: #e0e0e0;
+    background-color: var(--kt-green-primary);
+    color: white;
 }
 
 .dark-mode .nested-navbar {
-    background-color: #3a3a3a;
+    background-color: var(--surface-alt);
 }
 
 .dark-mode .nav-item-nested {
-    background-color: #3a3a3a;
-    color: #e0e0e0;
+    background-color: var(--surface-alt);
 }
 
-.dark-mode .nav-item-nested:hover {
-    background-color: #4a4a4a;
-}
-
+.dark-mode .nav-item-nested:hover,
 .dark-mode .nav-item-nested-active {
-    background-color: #4a4a4a;
-    color: #e0e0e0;
-}
-
-.dark-mode .settings-icon {
-    background-color: #2d2d2d;
-    color: #e0e0e0;
-}
-
-.dark-mode .settings-icon:hover {
-    color: #4CAF50;
-}
-
-.dark-mode .help-icon {
-    background-color: #2d2d2d;
-    color: #e0e0e0;
-}
-
-.dark-mode .help-icon:hover {
-    color: #4CAF50;
-}
+    background-color: var(--card-bg);
+}
