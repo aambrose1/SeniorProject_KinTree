@@ -1,15 +1,151 @@
 .navbar {
-    height: 100%;
-    width: 150px;
-    background-color: var(--kt-green-accent); /* Standard background color for sidebar */
+    height: 100vh;
+    width: 220px;
+    background-color: var(--surface-alt);
     text-decoration: none;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     font-family: inherit;
     position: fixed;
-    z-index: 10;
-    text-align: center;
-    transition: background-color 0.3s ease;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    transition: all var(--timing-smooth);
     border-right: 1px solid var(--border-color);
+    padding: var(--space-8) var(--space-4);
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
+    box-sizing: border-box;
+}
+
+.nav-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-8);
+}
+
+.nav-logo-img {
+    width: 80px;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(58, 90, 64, 0.1));
+}
+
+.nav-logo-text {
+    font-family: 'Aboreto', sans-serif;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--kt-green-primary);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.nav-options-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-6);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all var(--timing-standard);
+    background-color: transparent;
+}
+
+.nav-item:hover {
+    background-color: var(--kt-green-soft);
+    color: var(--kt-green-primary);
+    transform: translateX(4px);
+}
+
+.nav-item-active {
+    background-color: var(--kt-green-primary);
+    color: #ffffff !important;
+    box-shadow: var(--shadow-md);
+}
+
+.nav-item-container {
+    list-style: none;
+}
+
+.nested-navbar {
+    position: absolute;
+    left: 90%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    background-color: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    padding: var(--space-2);
+    z-index: 1001;
+    animation: animate-in 0.3s ease-out;
+}
+
+.nested-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.nav-item-nested {
+    display: block;
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-4);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all var(--timing-standard);
+}
+
+.nav-item-nested:hover {
+    background-color: var(--kt-green-soft);
+    color: var(--kt-green-primary);
+}
+
+.nav-item-nested-active {
+    background-color: var(--kt-green-soft);
+    color: var(--kt-green-primary);
+    font-weight: bold;
+}
+
+.settings-and-help {
+    margin-top: auto;
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6) 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.settings-icon, .help-icon {
+    display: block;
+    height: 28px;
+    width: 28px;
+    color: var(--text-muted);
+    transition: all var(--timing-standard);
+    cursor: pointer;
+}
+
+.settings-icon:hover, .help-icon:hover {
+    color: var(--kt-green-primary);
+    transform: scale(1.1);
+}
+
+.settings-icon:hover {
+    transform: scale(1.1) rotate(30deg);
 }
 
 @media screen and (max-width: 768px) {
@@ -18,134 +154,16 @@
     }
 }
 
-.nested-navbar {
-    height: 100%;
-    width: 160px;
-    top: 0px;
-    background-color: var(--kt-green-light);
-    position: absolute;
-    padding-top: var(--space-8);
-    margin-left: 85px;
-    z-index: 100;
-    border-right: 1px solid var(--border-color);
-}
-
-.nav-item {
-    display: block;
-    border-radius: var(--radius-sm);
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-color);
-    background-color: transparent;
-    text-decoration: none;
-    font-family: inherit;
-    font-size: 16pt;
-    transition: all .3s;
-}
-
-.nav-item:hover {
-    background-color: var(--kt-green-light); 
-    color: var(--kt-green-primary);
-}
-
-.nav-item-active {
-    display: block;
-    border-radius: var(--radius-sm);
-    padding: var(--space-2) var(--space-3);
-    background-color: var(--kt-green-light);
-    color: var(--kt-green-primary);
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 16pt;
-}
-
-.nav-item-nested {
-    display: block;
-    border-radius: var(--radius-sm);
-    padding: var(--space-2) var(--space-3);
-    color: var(--text-color);
-    background-color: var(--kt-green-light);
-    font-weight: normal;
-    text-decoration: none;
-    font-family: inherit;
-    font-size: 16pt;
-    transition: all .3s;
-}
-
-.nav-item-nested:hover {
-    background-color: var(--card-bg);
-}
-
-.nav-item-nested-active {
-    display: block;
-    border-radius: var(--radius-sm);
-    padding: var(--space-2) var(--space-3);
-    background: var(--card-bg);
-    color: var(--kt-green-primary);
-    font-weight: bold;
-    text-decoration: none;
-    font-size: 16pt;
-}
-
-.settings-and-help {
-    display: flex;
-    margin-top: 50vh;
-    margin-bottom: var(--space-5);
-    gap: 26%;
-    align-items: center;
-    justify-content: center;
-}
-
-.settings-icon {
-    display: flex;
-    background-color: transparent;
-    height: 30px;
-    width: 30px;
-    color: var(--text-color);
-    transition: all 0.3s;
-}
-
-.settings-icon:hover {
-    color: var(--kt-green-primary);
-    transform: rotate(30deg);
-}
-
-.help-icon {
-    color: var(--text-color);
-    background-color: transparent;
-    height: 35px;
-    width: 30px;
-    transition: all 0.3s;
-}
-
-.help-icon:hover {
-    color: var(--kt-green-primary);
-    transform: scale(1.1);
-}
-
-.divider {
-    border-bottom: 1px solid var(--border-color);
-}
-
-/* Dark Mode Overrides (if variables aren't enough) */
+/* Dark mode overrides */
 .dark-mode .navbar {
     background-color: var(--card-bg);
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.4);
 }
 
-.dark-mode .nav-item:hover, 
+.dark-mode .nav-item:hover {
+    background-color: var(--kt-green-subtle);
+}
+
 .dark-mode .nav-item-active {
     background-color: var(--kt-green-primary);
-    color: white;
 }
-
-.dark-mode .nested-navbar {
-    background-color: var(--surface-alt);
-}
-
-.dark-mode .nav-item-nested {
-    background-color: var(--surface-alt);
-}
-
-.dark-mode .nav-item-nested:hover,
-.dark-mode .nav-item-nested-active {
-    background-color: var(--card-bg);
-}

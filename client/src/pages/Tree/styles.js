@@ -7,6 +7,20 @@ export const DefaultStyle = {
     minHeight: '100vh'
 }
 
+export const ButtonStyle = {
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--kt-green-primary)',
+    color: 'white',
+    borderRadius: 'var(--radius-full)',
+    border: 'none',
+    padding: '12px 30px',
+    margin: 'var(--space-2)',
+    cursor: 'pointer',
+    fontWeight: '600',
+    transition: 'all 0.2s',
+    boxShadow: 'var(--shadow-sm)',
+}
+
 export const ArrowContainerStyle = {
     display: 'flex', 
     flexWrap: 'wrap', 
@@ -17,53 +31,36 @@ export const ArrowContainerStyle = {
 }
 
 export const MainContainerStyle = {
-    width: '100%', 
-    height: '100%', 
-    top: '0', 
-    left: '0', 
-    zIndex: '1', 
-    overflow: 'hidden', 
-    alignItems: 'center', 
-    justifyContent: 'flex-start', 
-    display: 'flex', 
-    margin: 'var(--space-6) 14%',
-}
-
-export const TopRightArrowStyle = {
-    width: '370px', 
-    height: '370px', 
-    margin: 'var(--space-5) var(--space-5)', 
-    flex: '50%', 
-    textAlign: 'right', 
-    paddingLeft: '70%'
-}
-
-export const BottomLeftArrowStyle = {
-    width: '370px', 
-    height: '370px', 
-    margin: 'var(--space-5) var(--space-5)', 
-    flex: '50%', 
-    paddingRight: '70%'
+    flex: 1,
+    height: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: 'var(--space-8)',
+    backgroundColor: 'var(--bg-color)',
+    marginLeft: '220px', // width of navbar
+    boxSizing: 'border-box',
 }
 
 export const HeaderStyle = {
     display: 'flex',
-    width: '20%', 
-    marginLeft: '9%',
-    marginRight: '10%',
-    marginBottom: 'var(--space-5)',
-    flexDirection: 'column',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    zIndex: '-1'
+    marginBottom: 'var(--space-6)',
+    width: '100%',
+    maxWidth: '1200px',
+    margin: '0 auto var(--space-6) auto',
 }
 
 export const FamilyTreeContainerStyle = { 
-    width: '80%', 
-    height: '90vh', 
-    margin: 'auto',
-    borderStyle: 'double', 
+    flex: 1,
+    width: '100%',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    border: '1px solid var(--border-color)', 
     borderRadius: 'var(--radius-xl)',
     backgroundColor: 'var(--card-bg)',
-    boxShadow: 'var(--shadow-lg)',
-    borderColor: 'var(--border-color)'
+    boxShadow: 'var(--shadow-premium)',
+    overflow: 'hidden',
+    position: 'relative',
+    animation: 'animate-in var(--timing-smooth) forwards'
 }

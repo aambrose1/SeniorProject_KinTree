@@ -4,14 +4,29 @@ export const DefaultStyle = {
 };
 
 export const FieldStyle = {
-    borderRadius: 'var(--radius-sm)',
-    border: '1px solid var(--input-border)',
-    backgroundColor: 'var(--input-bg)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--surface-alt)',
     color: 'var(--text-color)',
-    padding: 'var(--space-2) var(--space-3)',
+    padding: 'var(--space-2) var(--space-4)',
     marginLeft: 'var(--space-2)',
     outline: 'none',
-    transition: 'border-color 0.2s',
+    fontFamily: 'inherit',
+    fontSize: '0.95rem',
+    transition: 'all var(--timing-standard)',
+    width: '100%',
+    boxSizing: 'border-box',
+};
+
+export const SelectStyle = {
+    ...FieldStyle,
+    cursor: 'pointer',
+    appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 0.7rem center',
+    backgroundSize: '1rem',
+    paddingRight: '2.5rem',
 };
 
 export const ListStyle = {

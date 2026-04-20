@@ -19,16 +19,17 @@ export const Container = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    minWidth: '290px',
-    width: '90%',
-    maxWidth: '1200px',
+    minWidth: '320px',
+    width: '95%',
+    maxWidth: '1000px',
     borderRadius: 'var(--radius-xl)',
     backgroundColor: 'var(--card-bg)',
-    padding: 'var(--space-6) 5vw',
+    padding: 'var(--space-10) var(--space-8)',
     margin: 'var(--space-10) auto',
-    boxShadow: 'var(--shadow-lg)',
+    boxShadow: 'var(--shadow-premium)',
     border: '1px solid var(--border-color)',
     boxSizing: 'border-box',
+    animation: 'animate-in var(--timing-smooth) forwards',
 };
 
 export const SearchBar = {
@@ -46,31 +47,50 @@ export const SearchBar = {
 };
 
 export const Header = {
-    fontSize: '32px',
-    fontWeight: '700',
-    display: 'flex',
-    color: 'var(--text-color)',
-    flexDirection: 'row',
-    alignContent: 'center',
-    justifyContent: 'center',
+    fontSize: '2.5rem',
+    fontWeight: '800',
+    color: 'var(--kt-green-primary)',
+    marginBottom: 'var(--space-2)',
+    fontFamily: 'Aboreto',
 };
 
-export const ButtonDivStyle = {
-    fontFamily: 'inherit',
+export const ActionRow = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 'var(--space-4)',
+    margin: 'var(--space-4) 0',
+};
+
+export const SortButton = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--space-2)',
+    padding: 'var(--space-2) var(--space-4)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--card-bg)',
+    color: 'var(--text-secondary)',
+    cursor: 'pointer',
+    fontSize: '14px',
+    transition: 'all var(--timing-standard)',
 };
 
 export const PlusButton = {
-    width: '40px',
-    height: '40px',
-    margin: '10px',
+    width: '60px',
+    height: '60px',
+    borderRadius: 'var(--radius-full)',
+    backgroundColor: 'var(--kt-green-primary)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     cursor: 'pointer',
-    position: 'absolute',
-    right: '20px',
-    bottom: '60px',
-    filter: 'drop-shadow(var(--shadow-md))',
+    position: 'fixed',
+    right: '40px',
+    bottom: '40px',
+    boxShadow: 'var(--shadow-premium)',
+    transition: 'all var(--timing-standard)',
+    zIndex: '100',
 };
 
 export const ListStyle = {

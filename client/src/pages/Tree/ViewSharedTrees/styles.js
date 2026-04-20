@@ -12,24 +12,28 @@ export const DefaultStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    width: '60%',
+    width: '90%',
     maxWidth: '600px',
-    height: 'auto',
-    borderRadius: '30px',
-    backgroundColor: '#faf9f6',
-    padding: '20px',
-    boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
-    marginTop: '5vh'
+    borderRadius: 'var(--radius-xl)',
+    backgroundColor: 'var(--card-bg)',
+    padding: 'var(--space-10) var(--space-8)',
+    boxShadow: 'var(--shadow-premium)',
+    border: '1px solid var(--border-color)',
+    marginTop: '5vh',
+    animation: 'animate-in var(--timing-smooth) forwards'
 }
 
 export const ItemStyle = {
-    margin: '10px 0px',
+    margin: 'var(--space-2) 0',
     width: '100%',
     display: 'flex',
-    flexDirection: 'column',
-    border: '1px solid rgb(87, 87, 87)',
-    padding: '10px 20px',
+    flexDirection: 'row',
+    backgroundColor: 'var(--surface-alt)',
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-md)',
+    padding: 'var(--space-4) var(--space-6)',
     alignItems: 'center',
+    transition: 'all var(--timing-standard)',
 };
 
 export const ListStyle = {

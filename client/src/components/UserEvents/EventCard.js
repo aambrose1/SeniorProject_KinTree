@@ -37,18 +37,17 @@ export function EventCard({ event, onDeleted, onUpdated }) {
         </span>
       )}
       
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '15px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '12px', marginTop: '20px' }}>
         
-        {/* 2. Pass onUpdated to the Edit popup */}
         <EditEventPopup 
           event={event} 
           onEventUpdated={onUpdated} 
-          trigger={<button style={styles.GrayButtonStyle}>Edit</button>} 
+          trigger={<button className="kt-button kt-button-primary" style={{ padding: '8px 24px' }}>Edit</button>} 
         />
 
-        {/* 3. Pass onDeleted to the Delete action */}
         <button 
-          style={{ ...styles.GrayButtonStyle, backgroundColor: '#ffcccc' }} 
+          className="kt-button"
+          style={{ backgroundColor: 'var(--surface-alt)', color: 'var(--kt-danger)', border: '1px solid var(--kt-danger)' }} 
           onClick={() => deleteEvent(event.id, onDeleted)}
         >
           Delete

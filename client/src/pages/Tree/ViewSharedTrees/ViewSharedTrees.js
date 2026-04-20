@@ -50,24 +50,47 @@ function ViewSharedTrees() {
             <div style={styles.RightSide}>
             <div style={styles.ContainerStyle}>
                 {/* title */}
-                <h1 style={{ margin: '0px' }}>Shared Trees</h1>
-                <hr style={{ width: '50%', border: '1px solid #000', margin: '1px 0' }} />
+                <h1 style={{ margin: '0px', color: 'var(--text-color)' }}>Shared Trees</h1>
+                <hr style={{ width: '50px', border: 'none', height: '2px', backgroundColor: 'var(--kt-green-primary)', margin: 'var(--space-2) 0 var(--space-6) 0' }} />
 
                 {/* dynamic list of results */}
                 <ul style={styles.ListStyle}>
-                    {trees?.map(tree => (
-                        <li key={tree.sharedTreeID} style={styles.ItemStyle}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    {/* name */}
-                                    <span>{userData.find(user => user.id === tree.senderID)?.username}</span>
+                    {trees && trees.length > 0 ? (
+                        trees.map(tree => (
+                            <li key={tree.sharedTreeID} style={styles.ItemStyle} className="kt-card-interactive">
+                                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <span style={{ fontWeight: '600', color: 'var(--text-color)' }}>
+                                            {userData.find(user => user.id === tree.senderID)?.username || 'Someone'}'s Tree
+                                        </span>
+                                    </div>
+                                    <Link 
+                                        to={`/sharedtree/${tree.sharedTreeID}`} 
+                                        className="kt-button kt-button-primary"
+                                        style={{ padding: '6px 16px', textDecoration: 'none', fontSize: '13px' }}
+                                    >
+                                        View Tree
+                                    </Link>
                                 </div>
-                                <Link to={`/sharedtree/${tree.sharedTreeID}`} style={{ color: '#000' }}>
-                                    View Tree
-                                </Link>
-                            </div>
-                        </li>
-                    ))}
+                            </li>
+                        ))
+                    ) : (
+                        <div style={{ 
+                            textAlign: 'center', 
+                            padding: 'var(--space-8) var(--space-4)',
+                            color: 'var(--text-muted)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 'var(--space-4)'
+                        }}>
+                             <div style={{ fontSize: '40px', opacity: 0.5 }}>🌳</div>
+                             <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: '500' }}>No shared trees yet.</p>
+                             <p style={{ margin: 0, fontSize: '0.9rem', maxWidth: '300px', lineHeight: '1.5' }}>
+                                Invite family members and start building your story together!
+                             </p>
+                        </div>
+                    )}
                 </ul>
             </div>
             </div>

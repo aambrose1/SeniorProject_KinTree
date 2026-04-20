@@ -7,7 +7,7 @@ import CreateEventPopup from "../UserEvents/CreateEvent";
 import { EventCard } from "../UserEvents/EventCard"; 
 
 import CreateMemoryPopup from "../CreateMemory/CreateMemory";
-import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
+import { AiOutlinePlus } from "react-icons/ai";
 import { useCurrentUser } from "../../CurrentUserProvider";
 import { supabase } from "../../utils/supabaseClient"; 
 
@@ -21,20 +21,6 @@ function Dashboard() {
   const [isHovering, setIsHovering] = useState(false);
 
   const { currentAccountID, loading } = useCurrentUser();
-
-  const ButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: isHovering ? '#3a5a40' : '#ccdecc',
-    color: isHovering ? 'white' : 'black',
-    borderRadius: '10px',
-    border: 'none',
-    padding: '10px 20px',
-    cursor: 'pointer',
-    width: '45%',
-    marginLeft: '30%',
-    marginRight: '30%',
-    height: '45px'
-  };
 
   const fetchEvents = useCallback(async () => {
     // 1. Grab the real Auth UUID from the active session
@@ -113,25 +99,21 @@ function Dashboard() {
             onChange={(e) => setSearchItem(e.target.value)} 
           />
 
-          <div style={styles.ButtonDivStyle}>
+          <div className="animate-in" style={styles.ActionRow}>
             <CreateEventPopup
               onEventCreated={handleEventCreated} 
               trigger={
-                <button
-                  style={ButtonStyle}
-                  onMouseEnter={() => setIsHovering(true)}
-                  onMouseLeave={() => setIsHovering(false)}
-                >
-                  Create Event
+                <button className="kt-button kt-button-primary">
+                   Create Event
                 </button>
               }
             />
             <button
-              style={{ margin: "10px" }}
+              style={styles.SortButton}
               onClick={() => setSortDate(sortDate === "newest" ? "oldest" : "newest")}
             >
-              Sort by: {sortDate === "newest" ? "Newest First" : "Oldest First"}
-              <DropDown style={{ width: "23px", height: "25px" }} />
+              Sorted by {sortDate === "newest" ? "Newest" : "Oldest"}
+              <DropDown style={{ width: "20px", height: "20px" }} />
             </button>
           </div>
 
@@ -150,7 +132,11 @@ function Dashboard() {
             )}
           </div>
         </div>
-        <CreateMemoryPopup trigger={<PlusIcon style={styles.PlusButton} />} />
+        <CreateMemoryPopup trigger={
+          <div className="fab-hover" style={styles.PlusButton}>
+            <AiOutlinePlus size={30} color="white" />
+          </div>
+        } />
       </div>
     </div>
   );

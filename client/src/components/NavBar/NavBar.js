@@ -4,6 +4,7 @@ import { NavLink, useParams } from 'react-router-dom';
 import { AiOutlineSetting, AiOutlineQuestion } from 'react-icons/ai'; //this is for the settings icon and help icon
 import './NavBar.css';
 import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
+import logo from '../../assets/kintreelogo-adobe.png';
 
 //ToDO: import * as styles from './styles';
 //ToDo: Add mobile version of navbar (collapsible)
@@ -16,78 +17,84 @@ function NavBar() {
 
     return (
         <nav className="navbar">
-            <ul className="nav-options-list">
-                
-                <NavLink to="/account" 
-                    className={({isActive}) => 
-                        isActive && Number(id) === Number(currentAccountID) ? "nav-item-active" : "nav-item"} 
-                    onClick={() => setShowNestedNav(false)}> 
-                    Account 
-                </NavLink>
-                <br></br>
-                <NavLink to="/" 
-                    className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} 
-                    onClick={() => setShowNestedNav(false)}> 
-                    Home 
-                </NavLink>
-                <br></br>
-                <NavLink to="/family" 
-                    className={({isActive}) => isActive ? "nav-item-active" : "nav-item"}  
-                    onClick={() => setShowNestedNav(false)}> 
-                    Family 
-                </NavLink>
-                <br></br>
-                {/* <NavLink to="/tree" className="nav-item"> Tree </NavLink> */}
-                <li 
-    className="nav-item"
-    onMouseEnter={() => setShowNestedNav(true)} 
-    onMouseLeave={() => setShowNestedNav(false)}
->
-    <NavLink 
-        to="/tree" 
-        className={({isActive}) => isActive ? "nav-item-active" : "nav-item"}
-        onClick={() => setShowNestedNav(true)}
-    >
-        Tree
-    </NavLink>
-    {showNestedNav && (
-        <div className="nested-navbar">
-            <div>
-                <NavLink 
-                    to="/tree/sharetree" 
-                    className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} 
-                >
-                    Share Tree
-                </NavLink>
-                <br />
-                <NavLink 
-                    to="/tree/viewsharedtrees" 
-                    className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} 
-                >
-                    View Shared Trees
-                </NavLink>
+            <div className="nav-header">
+                <img src={logo} className="nav-logo-img" alt="KinTree Logo" />
+                <div className="nav-logo-text">KinTree</div>
             </div>
-        </div>
-    )}
-</li>
-                <br/>
-                <NavLink to="/chat" 
-                    className={({isActive}) => isActive ? "nav-item-active" : "nav-item"} 
-                    onClick={() => setShowNestedNav(false)}> 
-                    Chat  
-                </NavLink>
-
-                <div className="settings-and-help">
-                    <NavLink to="/websitesettings" >
-                        <AiOutlineSetting className="settings-icon"></AiOutlineSetting>
+            
+            <ul className="nav-options-list">
+                <li>
+                    <NavLink to="/account" 
+                        className={({isActive}) => {
+                            const isOwnAccount = !id || Number(id) === Number(currentAccountID);
+                            return isActive && isOwnAccount ? "nav-item nav-item-active" : "nav-item";
+                        }} 
+                        onClick={() => setShowNestedNav(false)}> 
+                        Account 
                     </NavLink>
-                    <NavLink to="/help">
-                        <AiOutlineQuestion className="help-icon"></AiOutlineQuestion>
+                </li>
+                <li>
+                    <NavLink to="/" 
+                        className={({isActive}) => isActive ? "nav-item nav-item-active" : "nav-item"} 
+                        onClick={() => setShowNestedNav(false)}> 
+                        Home 
                     </NavLink>
-                </div>
-                
+                </li>
+                <li>
+                    <NavLink to="/family" 
+                        className={({isActive}) => isActive ? "nav-item nav-item-active" : "nav-item"}  
+                        onClick={() => setShowNestedNav(false)}> 
+                        Family 
+                    </NavLink>
+                </li>
+                <li 
+                    className="nav-item-container"
+                    onMouseEnter={() => setShowNestedNav(true)} 
+                    onMouseLeave={() => setShowNestedNav(false)}
+                >
+                    <NavLink 
+                        to="/tree" 
+                        className={({isActive}) => isActive ? "nav-item nav-item-active" : "nav-item"}
+                        onClick={() => setShowNestedNav(true)}
+                    >
+                        Tree
+                    </NavLink>
+                    {showNestedNav && (
+                        <div className="nested-navbar">
+                            <div className="nested-inner">
+                                <NavLink 
+                                    to="/tree/sharetree" 
+                                    className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} 
+                                >
+                                    Share Tree
+                                </NavLink>
+                                <NavLink 
+                                    to="/tree/viewsharedtrees" 
+                                    className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} 
+                                >
+                                    View Shared Trees
+                                </NavLink>
+                            </div>
+                        </div>
+                    )}
+                </li>
+                <li>
+                    <NavLink to="/chat" 
+                        className={({isActive}) => isActive ? "nav-item nav-item-active" : "nav-item"} 
+                        onClick={() => setShowNestedNav(false)}> 
+                        Chat  
+                    </NavLink>
+                </li>
             </ul>
 
+            <div className="settings-and-help">
+                <NavLink to="/websitesettings" >
+                    <AiOutlineSetting className="settings-icon" />
+                </NavLink>
+                <NavLink to="/help">
+                    <AiOutlineQuestion className="help-icon" />
+                </NavLink>
+            </div>
         </nav>
     );
 };

@@ -350,41 +350,41 @@ function FamilyTree({ refreshKey }) {
             {/* Reset Button Overlay */}
             <div style={{
                 position: 'absolute',
-                bottom: '30px',
-                left: '50%',
-                transform: 'translateX(-50%)',
+                bottom: '20px',
+                right: '20px',
                 zIndex: 100
             }}>
-                {/* Reset Button */}
                 <button 
                     onClick={handleResetTree}
                     title="Clear everything and start fresh"
+                    className="kt-card-interactive"
                     style={{
-                        backgroundColor: '#fff',
-                        border: '2px solid #e74c3c',
-                        color: '#e74c3c',
-                        borderRadius: '25px',
-                        padding: '10px 25px',
-                        fontFamily: 'Alata',
-                        fontSize: '14px',
-                        fontWeight: 'bold',
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        backdropFilter: 'blur(4px)',
+                        border: '1px solid var(--border-color)',
+                        color: 'var(--text-muted)',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '8px 16px',
+                        fontFamily: 'inherit',
+                        fontSize: '12px',
+                        fontWeight: '600',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
-                        transition: 'all 0.2s ease'
+                        gap: '6px',
+                        transition: 'all 0.2s ease',
+                        boxShadow: 'var(--shadow-sm)'
                     }}
                     onMouseOver={(e) => {
-                        e.currentTarget.style.backgroundColor = '#fff5f5';
-                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.color = 'var(--kt-danger)';
+                        e.currentTarget.style.borderColor = 'var(--kt-danger)';
                     }}
                     onMouseOut={(e) => {
-                        e.currentTarget.style.backgroundColor = '#fff';
-                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.color = 'var(--text-muted)';
+                        e.currentTarget.style.borderColor = 'var(--border-color)';
                     }}
                 >
-                    <span style={{ fontSize: '18px', lineHeight: '1' }}>↺</span>
+                    <span style={{ fontSize: '14px' }}>↺</span>
                     Reset Tree
                 </button>
             </div>
@@ -554,16 +554,11 @@ function Tree() {
                     {/* header content */}
                     <div style={styles.HeaderStyle}>
                         {/* titles */}
-                        <div>
-                            <h1 style={{ marginBottom: "0px" }}>Your Tree</h1>
-                            <hr style={{
-                                color: '#000000',
-                                backgroundColor: '#000000',
-                                height: .1,
-                                width: '200px',
-                                borderColor: '#000000'
-                            }} />
-                            <h2 style={{ fontFamily: "Aboreto", marginTop: "0px" }}>The {supabaseUser?.user_metadata?.last_name} Family</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+                            <h1 style={{ margin: 0, color: 'var(--text-color)', fontSize: '2rem' }}>Your Tree</h1>
+                            <h2 style={{ fontFamily: "Aboreto", margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', letterSpacing: '1px' }}>
+                                THE {supabaseUser?.user_metadata?.last_name || 'Family'} TREE
+                            </h2>
                         </div>
                         {/* add family member button */}
                         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -574,9 +569,7 @@ function Tree() {
                         </div>
                     </div>
 
-
                     {/* family tree container */}
-                    {/* using a border for now to differentiate tree's viewable/draggable area, and to contain automatic scaling of the tree */}
                     <div style={styles.FamilyTreeContainerStyle}> <FamilyTree refreshKey={refreshKey} /> </div>
                 </div>
             ) : (

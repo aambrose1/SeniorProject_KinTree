@@ -13,9 +13,8 @@
     box-sizing: border-box;
   }
   .f3.f3-cont {
-    width:100%;
-    height:90vh;
-    max-height:90vh;
+    width: 100%;
+    height: 100%;
     color: var(--text-color);
   }
   .f3 {
@@ -129,15 +128,50 @@
   }
 
   /* branches between nodes */
+  @keyframes draw-vine {
+    from {
+      stroke-dashoffset: 1000;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
   .f3 .link {
-    transition: stroke-width 0.2s ease-in-out;
-    stroke: var(--kt-green-dark);
-    stroke-width: 4;
+    transition: all var(--timing-standard);
+    stroke: var(--kt-green-accent);
+    stroke-width: 3;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw-vine 1.5s var(--timing-smooth) forwards;
+    stroke-linecap: round;
+    opacity: 0.6;
   }
   
   .f3 .link.f3-path-to-main {
-    stroke-width: 6px;
+    stroke-width: 5px;
     stroke: var(--kt-green-primary);
+    opacity: 1;
+    stroke-dasharray: none; /* No animation for main path after initial growth */
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  /* Node Hover Effects */
+  .f3 div.card-inner {
+    transition: all var(--timing-standard);
+    border: 2px solid transparent;
+  }
+
+  .f3 div.card:hover div.card-inner {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--kt-green-primary);
+  }
+
+  .f3 div.card-main .card-inner {
+    border: 3px solid var(--kt-green-primary);
+    box-shadow: 0 0 15px var(--kt-green-subtle);
   }
 
 

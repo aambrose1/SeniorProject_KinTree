@@ -610,7 +610,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 <div>
                   <label>
                     Relationship:
-                    <select {...register("selectedMemberRelationship", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''}>
+                    <select {...register("selectedMemberRelationship", { required: true })} style={styles.SelectStyle} defaultValue={''}>
                       <option value="" disabled hidden>Select</option>
                       <option value="spouse">Spouse</option>
                       <option value="child">Child</option>
@@ -648,7 +648,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 }}>
                   <label>
                     {extendedRelations[selectedMemberRelationship]?.label || "Connect To"}:
-                    <select {...register("connectTo", { required: false })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '180px' }} defaultValue={''}>
+                    <select {...register("connectTo", { required: false })} style={styles.SelectStyle} defaultValue={''}>
                       <option value="">Skip / Link Later</option>
                       {treeMembers
                         .filter(m => String(m.id) !== String(currentAccountID))
@@ -781,9 +781,9 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                     <input {...register2("lastName", { required: true })} type="text" placeholder="" style={styles.FieldStyle} required />
                   </label>
                 </li>
-                <li style={styles.ItemStyle} >
+                <li style={styles.ItemStyle}>
                   <label>*Gender:
-                    <select {...register2("gender", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '85px' }} defaultValue={''} required>
+                    <select {...register2("gender", { required: true })} style={styles.SelectStyle} defaultValue={''} required>
                       <option value="" disabled hidden>Select</option>
                       <option value="M">Male</option>
                       <option value="F">Female</option>
@@ -795,7 +795,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
                 <li style={styles.ItemStyle}>
                   <label>
                     *Relationship:
-                    <select {...register2("relationship", { required: true })} style={{ fontFamily: 'Alata', marginLeft: '10px', width: '145px' }} defaultValue={''} required>
+                    <select {...register2("relationship", { required: true })} style={styles.SelectStyle} defaultValue={''} required>
                       <option value="" disabled hidden>Select</option>
                       <option value="spouse">Spouse</option>
                       <option value="child">Child</option>

@@ -118,11 +118,13 @@ export const CardStyle = {
     borderRadius: 'var(--radius-lg)',
     border: '1px solid var(--border-color)',
     padding: 'var(--space-6) var(--space-8)',
-    boxShadow: 'var(--shadow-lg)',
+    boxShadow: 'var(--shadow-md)',
     display: 'flex',
     flexDirection: 'column',
     gap: 'var(--space-5)',
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    transition: 'transform var(--timing-smooth), box-shadow var(--timing-smooth)',
+    animation: 'animate-in var(--timing-smooth) forwards'
 };
 
 export const CardHeader = {
@@ -149,15 +151,17 @@ export const CardSubtitle = {
 
 export const EditButton = {
     fontFamily: 'inherit',
-    backgroundColor: 'transparent',
+    backgroundColor: 'var(--kt-green-subtle)',
     color: 'var(--kt-green-primary)',
     borderRadius: 'var(--radius-full)',
     border: '1px solid var(--kt-green-primary)',
-    padding: '8px 16px',
+    padding: '8px 20px',
     cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '600',
-    transition: 'all 0.2s ease'
+    fontSize: '13px',
+    fontWeight: '700',
+    transition: 'all var(--timing-smooth)',
+    outline: 'none',
+    boxShadow: '0 2px 4px rgba(58, 90, 64, 0.05)'
 };
 
 export const ProfileCardBody = {
@@ -193,14 +197,16 @@ export const AvatarImage = {
 export const AvatarFallback = {
     width: '96px',
     height: '96px',
-    borderRadius: '50%',
+    borderRadius: 'var(--radius-xl)',
     backgroundColor: 'var(--kt-green-light)',
     color: 'var(--kt-green-primary)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '34px',
-    fontWeight: '600'
+    fontWeight: '600',
+    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.05)',
+    border: '2px solid var(--card-bg)'
 };
 
 export const AvatarAction = {
@@ -251,11 +257,16 @@ export const PrimaryButton = {
     color: '#ffffff',
     border: 'none',
     borderRadius: 'var(--radius-md)',
-    padding: '8px 18px',
+    padding: '10px 22px',
     cursor: 'pointer',
     fontSize: '14px',
     fontWeight: '600',
-    transition: 'background-color 0.2s'
+    transition: 'all var(--timing-smooth)',
+    boxShadow: '0 4px 6px rgba(58, 90, 64, 0.15)',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px'
 };
 
 export const TertiaryButton = {
