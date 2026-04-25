@@ -4,7 +4,7 @@ import { LoginPage } from './pages/Login';
 
 const authFile = 'playwright/.auth/user.json';
 
-const registrationEmail = process.env.E2E_SETUP_EMAIL || `e2e-setup-${Date.now()}@msstate.edu`;
+const registrationEmail = process.env.E2E_SETUP_EMAIL || `e2e-setup-${Date.now()}@example.com`;
 const registrationPassword = process.env.E2E_SETUP_PASSWORD || 'StrongPass1!';
 
 setup('authenticate', async ({ page }) => {

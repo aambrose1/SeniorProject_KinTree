@@ -9,7 +9,7 @@ const supabase = createClient(
 
 const appUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000';
 
-const resetEmail = process.env.E2E_RESET_EMAIL || `flow4-reset-${Date.now()}@msstate.edu`;
+const resetEmail = process.env.E2E_RESET_EMAIL || `flow4-reset-${Date.now()}@example.com`;
 const initialPassword = process.env.E2E_RESET_INITIAL_PASSWORD || 'ResetPass1!';
 const newPassword = process.env.E2E_RESET_NEW_PASSWORD || 'ResetPass2!';
 

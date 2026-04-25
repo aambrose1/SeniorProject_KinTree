@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from './pages/Login';
 
-const validEmail = process.env.E2E_LOGIN_EMAIL || 'e2e-test@msstate.edu';
+const validEmail = process.env.E2E_LOGIN_EMAIL || 'e2e-test@example.com';
 const validPassword = process.env.E2E_LOGIN_PASSWORD || 'test123!';
 
 // Flow #2 should verify unauthenticated and post-login behavior.

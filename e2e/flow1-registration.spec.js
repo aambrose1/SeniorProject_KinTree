@@ -26,8 +26,8 @@ test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe('Flow #1: Register a New Account', () => {
 
-	const testEmail = 'new-user@msstate.edu';
-  	const duplicateEmail = 'existing-user@msstate.edu';
+	const testEmail = 'new-user@example.com';
+  	const duplicateEmail = 'existing-user@example.com';
 
   	// Setup
 	test.beforeAll(async () => { 
