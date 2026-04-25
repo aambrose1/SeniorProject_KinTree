@@ -75,7 +75,7 @@ export default function UpdatePassword() {
         <h1 style={styles.WelcomeHeader}>Update Password</h1>
         <p style={{ ...styles.Subtitle, marginBottom: '24px' }}>Enter your new password below.</p>
 
-        <form onSubmit={onSubmit} style={styles.FormStyle}>
+        <form onSubmit={onSubmit} style={styles.FormStyle} noValidate>
           {message && (
             <div style={{ color: '#059669', marginBottom: '20px', padding: '12px', backgroundColor: '#d1fae5', border: '1px solid #10b981', borderRadius: '10px', fontSize: '14px', textAlign: 'center' }}>
               {message}
@@ -94,7 +94,6 @@ export default function UpdatePassword() {
                   ...styles.FieldStyle,
                   paddingRight: '44px'
                 }}
-                required
               />
               <button
                 type="button"
