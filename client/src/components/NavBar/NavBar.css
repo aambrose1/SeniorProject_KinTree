@@ -76,11 +76,12 @@
 
 .nav-item-container {
     list-style: none;
+    position: relative; /* Ensure the absolute positioned child is relative to this */
 }
 
 .nested-navbar {
     position: absolute;
-    left: 90%;
+    left: 100%; /* Position it exactly at the edge of the sidebar */
     top: 50%;
     transform: translateY(-50%);
     width: 200px;
@@ -90,7 +91,30 @@
     border: 1px solid var(--border-color);
     padding: var(--space-2);
     z-index: 1001;
-    animation: animate-in 0.3s ease-out;
+    margin-left: -10px; /* Slight overlap to prevent a gap */
+    animation: nested-nav-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Invisible bridge to prevent mouse-out when moving toward the menu */
+.nested-navbar::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: transparent;
+}
+
+@keyframes nested-nav-in {
+    from {
+        opacity: 0;
+        transform: translateY(-48%) translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
 }
 
 .nested-inner {
