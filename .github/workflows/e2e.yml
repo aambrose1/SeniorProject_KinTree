@@ -37,7 +37,7 @@ jobs:
         PORT: 5000
       run: |
         cd server
-        npm run start:test & 
+        npm run start:ci-test & 
         wait-on http://localhost:5000
 
     - name: Start React Client
