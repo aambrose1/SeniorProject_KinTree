@@ -332,31 +332,6 @@ Expected results:
 - Relationship badge appears for linked members.
 - Missing relationship returns neutral UI without crash.
 
-### Flow 15A: Add Existing Profile to Tree Structure
-
-Routes:
-- /account/:id (other profile)
-- /tree
-
-APIs touched:
-- GET /api/family-members/user/:userId
-- GET /api/tree-info/:id
-- PUT /api/tree-info/:id
-
-Steps:
-1. Open another profile not yet placed in your current tree structure.
-2. Launch Add to Tree popup.
-3. Search and choose an existing related member already in the tree.
-4. Select relationship direction/type and submit.
-
-Expected results:
-- Selected profile is added into tree object with correct relationship edge.
-- Navigating to /tree shows the newly linked profile.
-
-Negative coverage:
-- Prevent adding a profile already present in tree object.
-- Show useful error if tree update fails.
-
 ### Flow 16: Event Dashboard CRUD
 
 Routes:
