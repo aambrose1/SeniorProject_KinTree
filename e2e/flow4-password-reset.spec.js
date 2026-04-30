@@ -72,11 +72,16 @@ test.describe('Flow #4: Password Reset and Update Password', () => {
 
   test('submits a reset request, follows the recovery link, and updates the password', async ({ page }) => {
     const loginPage = new LoginPage(page);
+    // authenticate user
+    await loginPage.goto();
+    await loginPage.login({ email: resetEmail, password: initialPassword });
+    await expect(resetUser).toBeTruthy();
 
     await page.goto('/reset-password');
     await expect(page.getByRole('heading', { name: /reset password/i })).toBeVisible();
 
     await page.getByPlaceholder('Enter your email address').fill(resetEmail);
+    await expect(page.getByPlaceholder('Enter your email address')).toHaveValue(resetEmail);
     await page.getByRole('button', { name: /send reset email/i }).click();
     await expect(page.getByText(/check your email for a reset link/i)).toBeVisible();
 

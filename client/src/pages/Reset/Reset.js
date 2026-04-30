@@ -9,11 +9,13 @@ export default function ResetPassword() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    // Make sure the confirmation message is displayed
+    setMessage('Check your email for a reset link.');
     try {
       await handleResetPassword(email);
-      setMessage('Check your email for a reset link.');
     } catch (error) {
-      // message handled by handler alert
+        // message handled by handler alert
+      setMessage('');
     }
   };
 
