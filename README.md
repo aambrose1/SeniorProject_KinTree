@@ -59,9 +59,9 @@ Tree structure:
   .env.test
 ```
 
-Move into the /server/ directory and run `npm run start:test` to setup the auth storage and test environment.
+Move into the /server/ directory and run `npm run start:dev-test` to setup the auth storage and test environment.
 
-Cd into the /client/ directory and run `npm run start:test` to start the frontend in test mode.
+Cd into the /client/ directory and run `npm run start:dev-test` to start the frontend in test mode.
 
 Then, navigate back to the /SeniorProject_KinTree/ root directory and run:
 
