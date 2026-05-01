@@ -1,3 +1,5 @@
+import { SERVER_URL } from '../config/urls';
+
 export const familyTreeService = {
     /**
      * 
@@ -6,7 +8,7 @@ export const familyTreeService = {
      */
     async createFamilyMember(memberData) {
         console.log('Creating family member with data:', memberData);
-        const response = await fetch(`http://localhost:5000/api/family-members/`, {
+        const response = await fetch(`${SERVER_URL}/api/family-members/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -40,7 +42,7 @@ export const familyTreeService = {
     async initializeTreeInfo(memberId, memberData, userid) {
         // get resolved user id for member if needed
         if (memberId.includes('-')) {
-            const memberResponse = await fetch(`http://localhost:5000/api/auth/user/${memberId}`, {
+            const memberResponse = await fetch(`${SERVER_URL}/api/auth/user/${memberId}`, {
                 method: 'GET',
             });
             const member = await memberResponse.json();
@@ -52,7 +54,7 @@ export const familyTreeService = {
         }
        
         console.log('Initializing tree info for memberId:', memberId, 'with data:', memberData, 'for userId:', userid);
-        const response = await fetch(`http://localhost:5000/api/tree-info/`, {
+        const response = await fetch(`${SERVER_URL}/api/tree-info/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -83,7 +85,7 @@ export const familyTreeService = {
      * @returns JSON Object of ALL the user's family members
      */
     async getFamilyMembersByUserId(userId) {
-        const response = await fetch(`http://localhost:5000/api/family-members/user/${userId}`, {
+        const response = await fetch(`${SERVER_URL}/api/family-members/user/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -102,7 +104,7 @@ export const familyTreeService = {
      * @returns the single users primary treeMember object
      */
     async getFamilyMemberByUserId(userId) {
-        const response = await fetch(`http://localhost:5000/api/family-members/active/${userId}`, {
+        const response = await fetch(`${SERVER_URL}/api/family-members/active/${userId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -121,7 +123,7 @@ export const familyTreeService = {
      * @returns a treeMember object by treememberid
      */
     async getFamilyMemberByFamilyMemberId(id) {
-        const response = await fetch(`http://localhost:5000/api/family-members/member/${id}`, {
+        const response = await fetch(`${SERVER_URL}/api/family-members/member/${id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -157,7 +159,7 @@ export const familyTreeService = {
      * @returns JSON Array of all registered users
      */
     async getRegisteredUsers() {
-        const response = await fetch(`http://localhost:5000/api/auth/users/`, {
+        const response = await fetch(`${SERVER_URL}/api/auth/users/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -177,7 +179,7 @@ export const familyTreeService = {
      * @returns Array of the user's treeInfo Object [{object: [Object]}]
      */
     async getFamilyTreeByUserId(userId) {
-        const response = await fetch(`http://localhost:5000/api/tree-info/${userId}`, {
+        const response = await fetch(`${SERVER_URL}/api/tree-info/${userId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         })  
@@ -204,7 +206,7 @@ export const familyTreeService = {
      */
     async updateTreeInfo(userId, updatedData) {
         console.log('Updating tree info for userId:', userId, 'with data:', updatedData);
-        const response = await fetch(`http://localhost:5000/api/tree-info/${userId}`, {
+        const response = await fetch(`${SERVER_URL}/api/tree-info/${userId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import React from 'react';
 // We no longer need the supabase client here!
+import { SERVER_URL } from '../../config/urls';
 
 export async function deleteEvent(eventId, onDeleted) {
   const confirmed = window.confirm("Are you sure you want to delete this event?");
@@ -8,8 +9,7 @@ export async function deleteEvent(eventId, onDeleted) {
     console.log("THE EVENT ID IS:", eventId);
     try {
       // Send the DELETE request with the eventId in the URL
-      // Update the localhost URL if your server runs on a different port
-      const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+      const response = await fetch(`${SERVER_URL}/api/events/${eventId}`, {
         method: 'DELETE',
       });
 
