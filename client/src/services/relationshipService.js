@@ -43,22 +43,23 @@ export const relationshipService = {
         if (!userNode) return null;
 
         const parents = userNode.rels?.parents || [];
+        const isRealNode = (id) => !String(id).startsWith('ghost_');
 
         // CASE: Adding Mother when Father exists
         if (relationshipType === 'mother' && parents.length > 0) {
             // Find a parent who is Male
-            return parents.find(pId => treeInfo[pId]?.data?.gender === 'M') || parents[0];
+            return parents.find(pId => isRealNode(pId) && treeInfo[pId]?.data?.gender === 'M') || parents.find(isRealNode) || null;
         }
 
         // CASE: Adding Father when Mother exists
         if (relationshipType === 'father' && parents.length > 0) {
             // Find a parent who is Female
-            return parents.find(pId => treeInfo[pId]?.data?.gender === 'F') || parents[0];
+            return parents.find(pId => isRealNode(pId) && treeInfo[pId]?.data?.gender === 'F') || parents.find(isRealNode) || null;
         }
 
         // CASE: Adding Sibling
         if (["sibling", "sister", "brother"].includes(relationshipType)) {
-            return parents[0] || null; // Link to first available parent
+            return parents.find(isRealNode) || null; // Link to first available real parent
         }
 
         // CASE: Grandparents, Aunts, Uncles (Recursive through parents)
@@ -67,11 +68,11 @@ export const relationshipService = {
             
             if (side === "maternal") {
                 // Find Mother
-                return parents.find(pId => treeInfo[pId]?.data?.gender === 'F') || parents[0];
+                return parents.find(pId => isRealNode(pId) && treeInfo[pId]?.data?.gender === 'F') || parents.find(isRealNode) || null;
             }
             if (side === "paternal") {
                 // Find Father
-                return parents.find(pId => treeInfo[pId]?.data?.gender === 'M') || (parents[1] || parents[0]);
+                return parents.find(pId => isRealNode(pId) && treeInfo[pId]?.data?.gender === 'M') || parents.find(isRealNode) || null;
             }
         }
 
@@ -90,6 +91,7 @@ export const relationshipService = {
     getRequiredDBRelationships(currentUserId, newMemberId, relationshipType, connectToId, side = null) {
         const rels = [];
         const config = this.EXTENDED_RELATIONS[relationshipType];
+        const safeConnectToId = String(connectToId || '').startsWith('ghost_') ? null : connectToId;
         
         // 1. Specialized Logic for Mothers/Fathers
         if (relationshipType === 'mother' || relationshipType === 'father') {
@@ -102,9 +104,9 @@ export const relationshipService = {
             });
 
             // If a partner (connectToId) was found, ALSO link them as spouses
-            if (connectToId) {
+            if (safeConnectToId) {
                 rels.push({
-                    person1_id: connectToId,
+                    person1_id: safeConnectToId,
                     person2_id: newMemberId,
                     relationshipType: 'spouse',
                     side: null
@@ -113,10 +115,10 @@ export const relationshipService = {
         } 
         // 2. Specialized Logic for Siblings
         else if (["sibling", "sister", "brother"].includes(relationshipType)) {
-            if (connectToId) {
+            if (safeConnectToId) {
                 // Link sibling to the parent identified
                 rels.push({
-                    person1_id: connectToId,
+                    person1_id: safeConnectToId,
                     person2_id: newMemberId,
                     relationshipType: 'parent',
                     side: null
@@ -134,7 +136,7 @@ export const relationshipService = {
         // 3. Default Case (Spouse, Child, Grandparent, etc.)
         else {
              // If connectToId is provided, we map via that person
-             const target = connectToId || currentUserId;
+               const target = safeConnectToId || currentUserId;
              rels.push({
                 person1_id: target,
                 person2_id: newMemberId,

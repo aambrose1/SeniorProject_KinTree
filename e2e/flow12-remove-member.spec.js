@@ -32,6 +32,10 @@ test.beforeAll(async ({ browser }) => {
 });
 
 test.afterAll(async () => {
+  if (!currentAccountId) {
+    return;
+  }
+
   try {
     const response = await fetch(`${apiUrl}/api/family-members/user/${currentAccountId}`);
     if (!response.ok) return;
@@ -46,7 +50,6 @@ test.afterAll(async () => {
       await fetch(`${apiUrl}/api/family-members/${member.id}`, { method: 'DELETE' });
     }
   } catch {
-    // Best-effort cleanup only.
   }
 });
 
@@ -62,9 +65,16 @@ test('Flow #12: remove family member and verify treeinfo updates on tree page', 
   await manualForm.getByLabel(/last name/i).fill(removableMemberSeed.lastname);
   await manualForm.getByLabel(/gender/i).selectOption('F');
   await manualForm.getByLabel(/relationship/i).selectOption('sibling');
-  await manualForm.evaluate((form) => form.requestSubmit());
+  const createMemberRequest = page.waitForResponse((response) => {
+    return response.request().method() === 'POST' && response.url().includes('/api/family-members');
+  });
 
-  await expect(page.getByRole('heading', { name: /member added!/i })).toBeVisible();
+  await Promise.all([
+    createMemberRequest,
+    manualForm.evaluate((form) => form.requestSubmit()),
+  ]);
+
+  await expect(page.getByRole('heading', { name: /member added!/i })).toBeVisible({ timeout: 15000 });
   await page.getByRole('button', { name: /return to tree/i }).click();
   await expect(page).toHaveURL(/\/tree$/);
 
@@ -80,6 +90,7 @@ test('Flow #12: remove family member and verify treeinfo updates on tree page', 
   expect(existedBefore).toBeTruthy();
 
   const targetCard = page.locator('#FamilyChart .card').filter({ hasText: memberNamePattern }).first();
+  await expect(targetCard.locator('.card-delete')).toHaveCount(1);
   await targetCard.evaluate((card) => {
     const deleteButton = card.querySelector('.card-delete');
     if (!deleteButton) {
