@@ -10,6 +10,7 @@ const sharedTreeRoutes = require('./routes/sharedTreeRoutes');
 const backupRoutes = require('./routes/backupRoutes');
 const treeInfoRoutes = require('./routes/treeInfoRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const memoryRoutes = require('./routes/memoryRoutes');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/tree-info', treeInfoRoutes);
 app.use('/api/events', eventRoutes); 
+app.use('/api/memories', memoryRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
