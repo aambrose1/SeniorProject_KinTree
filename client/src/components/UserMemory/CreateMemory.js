@@ -2,14 +2,20 @@
 import React from 'react';
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import * as styles from './styles';
 import './popup.css';
 import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as UploadIcon } from '../../assets/upload.svg';
 
 function CreateMemoryPopup({ trigger, profileID, onMemoryCreated }) { 
-  const { register, handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset, control } = useForm();
+  const fileUploadValue = useWatch({
+    control,
+    name: 'fileUpload',
+  });
+  
+  const hasFile = fileUploadValue && fileUploadValue.length > 0;
 
   const onSubmit = async (data, close) => {
     try {
@@ -95,7 +101,7 @@ function CreateMemoryPopup({ trigger, profileID, onMemoryCreated }) {
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', flexDirection: 'row',  justifyContent: 'center', alignItems: 'center' }}>
                         <input 
                           {...register("fileUpload", { required: true })} 
                           type="file" 
@@ -103,8 +109,12 @@ function CreateMemoryPopup({ trigger, profileID, onMemoryCreated }) {
                           style={styles.FileUploadDefault} 
                           accept="image/*" 
                         />
-                        <label htmlFor="fileUpload" style={styles.GrayButtonStyle}>
-                            Upload Media
+                        <label htmlFor="fileUpload" style={{
+                          ...styles.GrayButtonStyle,
+                          backgroundColor: hasFile ? '#4CAF50' : styles.GrayButtonStyle.backgroundColor,
+                          color: hasFile ? 'white' : styles.GrayButtonStyle.color,
+                        }}>
+                            {hasFile ? 'File Selected: ✓' : 'Upload Media'}
                             <UploadIcon style={{ width: '20px', height: '20px', margin: '0px 0px 0px 10px' }} />
                         </label>
                     </div>

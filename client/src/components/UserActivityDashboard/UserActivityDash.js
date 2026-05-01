@@ -11,20 +11,12 @@ import MemoryCard from "../UserMemory/MemoryCard";
 import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
 import { useCurrentUser } from "../../CurrentUserProvider";
 import { supabase } from "../../utils/supabaseClient"; 
+import { SERVER_URL } from "../../config/urls";
 
 function Dashboard() {
   document.body.style.width = "100%";
 
   // State for Events
-
-import CreateMemoryPopup from "../CreateMemory/CreateMemory";
-import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
-import { useCurrentUser } from "../../CurrentUserProvider";
-import { supabase } from "../../utils/supabaseClient"; 
-import { SERVER_URL } from "../../config/urls";
-
-function Dashboard() {
-  document.body.style.width = "100%";
 
   const [allEvents, setAllEvents] = useState([]);
   const [searchItem, setSearchItem] = useState("");
@@ -34,13 +26,9 @@ function Dashboard() {
   // State for Memories
   const [allMemories, setAllMemories] = useState([]); 
   
-  const [isHovering, setIsHovering] = useState(false);
-
   // Pulling the Tree Member integer ID from your context
   const { currentUserID, loading } = useCurrentUser();
   const [isHovering, setIsHovering] = useState(false);
-
-  const { currentAccountID, loading } = useCurrentUser();
 
   const ButtonStyle = {
     fontFamily: 'Alata',
@@ -57,18 +45,31 @@ function Dashboard() {
   };
 
   // --- FETCH EVENTS ---
+  // Sort and filter events
   const fetchEvents = useCallback(async () => {
+    // 1. Grab the real Auth UUID from the active session
     const { data: { session } } = await supabase.auth.getSession();
     const trueUuid = session?.user?.id;
 
     if (!trueUuid) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/events/${trueUuid}`);
-      if (!response.ok) throw new Error("Failed to fetch events");
+      // 2. Send the GET request to your backend route
+      const response = await fetch(`${SERVER_URL}/api/events/${trueUuid}`);
       
+      if (!response.ok) {
+        throw new Error("Failed to fetch events from server");
+      }
+
+      // 3. Parse the data
       const data = await response.json();
+      
+      // 🟢 THE NEW LOG: See the full list of events the server sent back
+      console.log("FRONTEND: Dashboard successfully fetched events ->", data);
+
+      // 4. Set the state
       setAllEvents(data || []);
+
     } catch (error) {
       console.error("Error fetching events:", error);
     }
@@ -80,7 +81,7 @@ function Dashboard() {
     if (!currentUserID || isNaN(currentUserID)) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/memories/${currentUserID}`);
+      const response = await fetch(`${SERVER_URL}/api/memories/${currentUserID}`);
       if (!response.ok) throw new Error("Failed to fetch memories");
       
       const data = await response.json();
@@ -126,54 +127,6 @@ function Dashboard() {
   const handleMemoryUpdated = (updatedMemory) => {
     setAllMemories((prev) => prev.map(m => 
       m.id === updatedMemory.id ? updatedMemory : m
-    ));
-  };
-
-  // Sort and filter events
-  const fetchEvents = useCallback(async () => {
-    // 1. Grab the real Auth UUID from the active session
-    const { data: { session } } = await supabase.auth.getSession();
-    const trueUuid = session?.user?.id;
-
-    if (!trueUuid) return;
-
-    try {
-      // 2. Send the GET request to your backend route
-      const response = await fetch(`${SERVER_URL}/api/events/${trueUuid}`);
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch events from server");
-      }
-
-      // 3. Parse the data
-      const data = await response.json();
-      
-      // 🟢 THE NEW LOG: See the full list of events the server sent back
-      console.log("FRONTEND: Dashboard successfully fetched events ->", data);
-
-      // 4. Set the state
-      setAllEvents(data || []);
-
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    }
-  }, []); 
-
-  useEffect(() => {
-    if (!loading) fetchEvents();
-  }, [loading, fetchEvents]);
-
-  const handleEventCreated = (newEvent) => {
-    setAllEvents((prev) => [newEvent, ...prev]);
-  };
-
-  const handleEventDeleted = (id) => {
-    setAllEvents((prev) => prev.filter(event => event.id !== id));
-  };
-
-  const handleEventUpdated = (updatedEvent) => {
-    setAllEvents((prev) => prev.map(event => 
-      event.id === updatedEvent.id ? updatedEvent : event
     ));
   };
 
@@ -233,7 +186,6 @@ function Dashboard() {
               style={{ margin: "10px" }}
               onClick={() => setSortDate(sortDate === "newest" ? "oldest" : "newest")}
             >
-              Sort: {sortDate === "newest" ? "Newest" : "Oldest"}
               Sort by: {sortDate === "newest" ? "Newest First" : "Oldest First"}
               <DropDown style={{ width: "23px", height: "25px" }} />
             </button>
@@ -271,16 +223,12 @@ function Dashboard() {
               <p style={{ textAlign: 'center', width: '100%' }}>No memories yet!</p>
             )}
           </div>
-
-        </div>
-
         <CreateMemoryPopup 
           trigger={<PlusIcon style={styles.PlusButton} />} 
           onMemoryCreated={handleMemoryCreated} 
           profileID={currentUserID} 
         />
         </div>
-        <CreateMemoryPopup trigger={<PlusIcon style={styles.PlusButton} />} />
       </div>
     </div>
   );

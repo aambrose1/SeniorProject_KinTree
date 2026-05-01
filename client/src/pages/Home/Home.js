@@ -6,7 +6,6 @@ import { ReactComponent as CalendarIcon } from '../../assets/calendar.svg';
 import { ReactComponent as PlusIcon } from '../../assets/plus-sign.svg';
 import CreateEventPopup from '../../components/UserEvents/CreateEvent';
 import CreateMemoryPopup from '../../components/UserMemory/CreateMemory';
-import CreateMemoryPopup from '../../components/CreateMemory/CreateMemory';
 import NavBar from '../../components/NavBar/NavBar';
 
 function Home() {    
