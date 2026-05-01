@@ -64,11 +64,17 @@ create table relationships (
 create table sharedTrees (
     sharedTreeID serial primary key,
     senderID integer not null references users(id),
-    recieverID integer,
+    receiverID integer references users(id),
+    receiveremail text,  -- Email for pending invitations (when receiverID is null)
     perms text check (perms in ('view','edit')),
     parentalSide text check (parentalSide in ('paternal','maternal','both')),
-    sahreDate timestamp,
-    treeInfo json
+    shareDate timestamp,
+    treeInfo json,
+    comment text,  -- Optional message from sender
+    token text unique,  -- Unique invitation token for email invitations
+    status text default 'pending' check (status in ('pending','accepted','rejected','expired')),
+    created_at timestamp with time zone default now(),
+    updated_at timestamp with time zone default now()
 );
 
 -- 5. Backups Table

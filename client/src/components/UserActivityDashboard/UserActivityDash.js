@@ -21,6 +21,7 @@ import CreateMemoryPopup from "../CreateMemory/CreateMemory";
 import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
 import { useCurrentUser } from "../../CurrentUserProvider";
 import { supabase } from "../../utils/supabaseClient"; 
+import { SERVER_URL } from "../../config/urls";
 
 function Dashboard() {
   document.body.style.width = "100%";
@@ -138,7 +139,7 @@ function Dashboard() {
 
     try {
       // 2. Send the GET request to your backend route
-      const response = await fetch(`http://localhost:5000/api/events/${trueUuid}`);
+      const response = await fetch(`${SERVER_URL}/api/events/${trueUuid}`);
       
       if (!response.ok) {
         throw new Error("Failed to fetch events from server");

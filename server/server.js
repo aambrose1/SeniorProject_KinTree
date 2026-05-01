@@ -1,6 +1,7 @@
 // server.js
 const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const treeMemberRoutes = require('./routes/treeMemberRoute');
@@ -10,8 +11,6 @@ const backupRoutes = require('./routes/backupRoutes');
 const treeInfoRoutes = require('./routes/treeInfoRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const memoryRoutes = require('./routes/memoryRoutes');
-
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;

@@ -5,6 +5,7 @@ import NavBar from '../../components/NavBar/NavBar';
 import { useCurrentUser } from '../../CurrentUserProvider';
 import { supabase } from '../../utils/supabaseClient';
 import { handleLogout } from '../../utils/authHandlers';
+import { SERVER_URL } from '../../config/urls';
 
 function Account() {
     const navigate = useNavigate(); // used to change route without refreshing page, used to prevent infinite refreshes
@@ -94,7 +95,7 @@ function Account() {
 
         if (id === supabaseUser?.id) {
             // Database is source of truth - fetch from database first
-            fetch(`http://localhost:5000/api/auth/user/email/${encodeURIComponent(supabaseUser.email)}`)
+            fetch(`${SERVER_URL}/api/auth/user/email/${encodeURIComponent(supabaseUser.email)}`)
                 .then(async (response) => {
                     if (response.ok) {
                         const dbUser = await response.json();
@@ -175,7 +176,7 @@ function Account() {
         setSaveError('');
 
         // Attempt fetching from the registered users table first (like bug/edit-acc)
-        fetch(`http://localhost:5000/api/auth/user/${id}`)
+        fetch(`${SERVER_URL}/api/auth/user/${id}`)
             .then(async (response) => {
                 if (response.ok) {
                     const dbUser = await response.json();
@@ -202,7 +203,7 @@ function Account() {
                         headers: { 'Content-Type': 'application/json' },
                     };
 
-                    fetch(`http://localhost:5000/api/family-members/member/${id}`, requestOptions)
+                    fetch(`${SERVER_URL}/api/family-members/member/${id}`, requestOptions)
                         .then(async (response) => {
                             if (response.ok) {
                                 const data = await response.json();
@@ -266,7 +267,7 @@ function Account() {
             return;
         }
 
-        fetch(`http://localhost:5000/api/relationships/between/${supabaseUser.id}/${id}`)
+        fetch(`${SERVER_URL}/api/relationships/between/${supabaseUser.id}/${id}`)
             .then(async (response) => {
                 if (response.ok) {
                     const data = await response.json();
@@ -315,7 +316,7 @@ function Account() {
 
         const loadBackendUserId = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/auth/user/email/${encodeURIComponent(supabaseUser.email)}`);
+                const response = await fetch(`${SERVER_URL}/api/auth/user/email/${encodeURIComponent(supabaseUser.email)}`);
                 if (!isMounted) {
                     return;
                 }
@@ -430,7 +431,7 @@ function Account() {
                 formData.append('auth_uid', supabaseUser.id);
 
                 // Upload via backend using service role (bypasses RLS)
-                const uploadResponse = await fetch('http://localhost:5000/api/auth/upload-profile-picture', {
+                const uploadResponse = await fetch(`${SERVER_URL}/api/auth/upload-profile-picture`, {
                     method: 'POST',
                     // Don't set Content-Type header - browser will set it with boundary for FormData
                     body: formData
@@ -476,7 +477,7 @@ function Account() {
                 profilePictureUrl: nextProfileUrl || null
             };
 
-            const response = await fetch('http://localhost:5000/api/auth/profile', {
+            const response = await fetch(`${SERVER_URL}/api/auth/profile`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(profilePayload)
@@ -699,7 +700,7 @@ function Account() {
             // Get backend user ID
             let apiUserId = backendUserId;
             if (!apiUserId && supabaseUser.email) {
-                const response = await fetch(`http://localhost:5000/api/auth/user/email/${encodeURIComponent(supabaseUser.email)}`);
+                const response = await fetch(`${SERVER_URL}/api/auth/user/email/${encodeURIComponent(supabaseUser.email)}`);
                 if (response.ok) {
                     const data = await response.json();
                     apiUserId = data?.id;
@@ -713,7 +714,7 @@ function Account() {
 
             // Delete account from backend (handles database, tree members, relationships, and Supabase auth)
             console.log('Attempting to delete account - User ID:', apiUserId);
-            const response = await fetch(`http://localhost:5000/api/auth/remove/${apiUserId}`, {
+            const response = await fetch(`${SERVER_URL}/api/auth/remove/${apiUserId}`, {
                 method: 'DELETE'
             });
 
