@@ -1,6 +1,7 @@
 import { React, useState, createContext, useContext, useEffect } from "react"
 import { supabase } from "./utils/supabaseClient";
 import { buildSyncPayload } from "./utils/metadataHelpers";
+import { SERVER_URL } from "./config/urls";
 
 export const currentContext = createContext();
 
@@ -11,12 +12,12 @@ export const CurrentUserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [supabaseUser, setSupabaseUser] = useState(null);
 
-  const setCurrentAccountID = (accountID) => { // logging in will trigger this
+  const setCurrentAccountID = (accountID) => { 
     localStorage.setItem("currentAccountID", accountID);
     setCurrentAccountIDState(accountID);
   }
 
-  const setCurrentUserID = (userID) => { // this then needs to be called to get the family member ID
+  const setCurrentUserID = (userID) => { 
     localStorage.setItem("currentUserID", userID);
     setCurrentUserIDState(userID);
   }
@@ -34,24 +35,29 @@ export const CurrentUserProvider = ({ children }) => {
   }
 
   const fetchCurrentUserID = async () => {
-    // temp
-    // setCurrentUserIDState('23');
-    fetch(`http://localhost:5000/api/family-members/active/${currentAccountID}`)
+    if (!currentAccountID) return; // Prevent fetching if we don't have the auth UUID yet
+    fetch(`${SERVER_URL}/api/family-members/active/${currentAccountID}`)
       .then(async(response) => {
         if (response.ok) {
           const data = await response.json();
-          // console.log('Current user ID:', data);
           setCurrentUserID(data.id);
           setCurrentUserName(data.firstname + " " + data.lastname);
         } 
         else {
-          console.error('Error:', response);
+          console.error('Error fetching tree member:', response);
         }
       })
       .catch(error => {
         console.error('Error fetching current user ID:', error);
       });
   }
+
+  // Automatically fetch the tree member ID whenever the Supabase Account ID is set
+  useEffect(() => {
+    if (currentAccountID) {
+      fetchCurrentUserID();
+    }
+  }, [currentAccountID]);
 
 
   // Initialize Supabase auth state
@@ -81,7 +87,7 @@ export const CurrentUserProvider = ({ children }) => {
       async (event, session) => {
         if (session?.user) {
           setSupabaseUser(session.user);
-          let response = await fetch(`http://localhost:5000/api/auth/user/${session.user.id}`, {
+          let response = await fetch(`${SERVER_URL}/api/auth/user/${session.user.id}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
           });
@@ -89,40 +95,33 @@ export const CurrentUserProvider = ({ children }) => {
           setCurrentAccountIDState(response.id);
           setCurrentUserNameState(session.user.email);
           
-          // Only sync on SIGNED_IN event to avoid redundant syncs
-          // The trigger handles initial user creation, and registration sync handles new users
           if (event === 'SIGNED_IN') {
-            // Auto-sync profile into public.users using auth metadata when available
-            // Note: The trigger handle_new_auth_user should already create the user,
-            // but we sync here to ensure metadata is up to date
             try {
               const m = session.user.user_metadata || {};
-              // Only sync if metadata has extended fields (to avoid unnecessary updates)
               const hasExtendedMetadata = m.address || m.city || m.state || m.country || m.zipcode || 
                                           m.firstName || m.first_name || m.lastName || m.last_name ||
                                           m.phoneNumber || m.phone_number;
               
               if (hasExtendedMetadata) {
                 const syncPayload = buildSyncPayload(session.user.id, session.user.email, m);
-                const syncResponse = await fetch('http://localhost:5000/api/auth/sync', {
+                const syncResponse = await fetch(`${SERVER_URL}/api/auth/sync`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(syncPayload)
                 });
                 
                 if (!syncResponse.ok) {
-                  // Don't fail login - trigger may have already created the user
                   console.warn('Auth sync failed on login');
                 }
               }
             } catch (e) {
-              // Don't fail login - trigger may have already created the user
               console.warn('Auth sync error on login:', e?.message || e);
             }
           }
         } else {
           setSupabaseUser(null);
           setCurrentAccountIDState('');
+          setCurrentUserIDState(''); 
           setCurrentUserNameState('');
         }
         setLoading(false);
@@ -153,7 +152,6 @@ export const CurrentUserProvider = ({ children }) => {
 
 export const useCurrentUser = () => {
   const context = useContext(currentContext);
-  // console.log('CurrentUserContext:', context);
   if (!context) {
     throw new Error("useCurrentUser must be used within a CurrentUserProvider");
   }

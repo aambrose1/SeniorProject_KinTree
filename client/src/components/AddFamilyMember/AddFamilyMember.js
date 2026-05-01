@@ -9,6 +9,7 @@ import { ReactComponent as CloseIcon } from '../../assets/exit.svg';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
 import { useCurrentUser } from '../../CurrentUserProvider';
 import { familyTreeService } from '../../services/familyTreeService';
+import { SERVER_URL } from '../../config/urls';
 import { relationshipService } from '../../services/relationshipService';
 import { addRelationship } from '../../utils/relationUtil';
 

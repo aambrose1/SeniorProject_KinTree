@@ -1,10 +1,13 @@
 import { useForm } from 'react-hook-form'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { yupResolver } from "@hookform/resolvers/yup"
 import { handleRegister } from '../../utils/authHandlers';
 import * as yup from "yup"
 import * as styles from './styles'
 import logo from '../../assets/kintreelogo-adobe.png';
+import { useSearchParams } from 'react-router-dom';
+import {familyTreeService} from '../../services/familyTreeService';
+import { SERVER_URL } from '../../config/urls';
 
 //validation functionality
 const yupValidation = yup.object().shape(
@@ -48,13 +51,41 @@ const yupValidation = yup.object().shape(
 );
 
 const CreateAccount = () => {
-    const { register, handleSubmit, formState: { errors } } = useForm({
-        resolver: yupResolver(yupValidation),
-        defaultValues: { gender: '' }
-    });
+    const { register, handleSubmit, formState: { errors }, setValue } = useForm({ resolver: yupResolver(yupValidation) });
     const [errorMessage, setErrorMessage] = useState("");
     const [isHovering, setIsHovering] = useState(false);
+    const [searchParams] = useSearchParams();
+    const [inviteToken, setInviteToken] = useState(null);
+    const [inviteEmail, setInviteEmail] = useState(null);
+    const [isLoadingInvite, setIsLoadingInvite] = useState(false);
 
+    // Check for invitation token on mount
+    useEffect(() => {
+        const token = searchParams.get('inviteToken');
+        if (token) {
+            setInviteToken(token);
+            setIsLoadingInvite(true);
+            // Fetch invitation details to get the email
+            fetch(`${SERVER_URL}/api/share-trees/token/${token}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Invitation data:', data);
+                    if (data && data.receiveremail) {
+                        setInviteEmail(data.receiveremail);
+                        setValue('email', data.receiveremail);
+                        console.log('Invitation found for email:', data.receiveremail);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching invitation:', error);
+                })
+                .finally(() => {
+                    setIsLoadingInvite(false);
+                });
+        }
+    }, [searchParams, setValue]);
+
+    // TODO: find out what happened to the family tree creation on registration :(
     const onSubmit = async (data) => {
         setErrorMessage(""); // clear previous errors
 
@@ -79,6 +110,48 @@ const CreateAccount = () => {
             const user = await handleRegister(data.email, data.password, metadata);
 
             console.log('Registration successful:', user);
+
+            // add new user as family member 
+            const memberData = {
+                firstname: data.firstname,
+                lastname: data.lastname,
+                birthdate: data.birthdate,
+                location: `${data.city}, ${data.state}, ${data.country}`,
+                phonenumber: data.phonenum,
+                userid: user.user.id,
+                memberuserid: user.user.id,
+                gender: data.gender
+            };
+
+            // If this registration is from an invitation, process pending invitations
+            if (inviteToken || inviteEmail) {
+                try {
+                    // Find that user if exists
+                    const userResponse = await fetch(`${SERVER_URL}/api/auth/users`);
+                    const allUsers = await userResponse.json();
+                    const dbUser = allUsers.find(u => u.email === data.email);
+                    
+                    if (dbUser && dbUser.id) {
+                        // Process pending invitations
+                        const processResponse = await fetch(`${SERVER_URL}/api/share-trees/process-pending`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: data.email,
+                                userId: dbUser.id
+                            })
+                        });
+                        
+                        if (processResponse.ok) {
+                            const processData = await processResponse.json();
+                            console.log('Processed pending invitations:', processData);
+                            alert(`Account created successfully! ${processData.count > 0 ? `You now have access to ${processData.count} shared tree(s).` : ''}`);
+                        }
+                    }
+                } catch (inviteError) {
+                    console.error('Error processing invitations:', inviteError);
+                }
+            }
 
             // Redirect to login - email verification can be done later from account page
             window.location.href = '/login'; // redirect after registration to login
@@ -107,6 +180,21 @@ const CreateAccount = () => {
             <div style={styles.Container}>
                 <img src={logo} alt="KinTree Logo" style={styles.Logo} />
                 <h1 style={styles.Header}>Create Account</h1>
+                
+                {inviteToken && (
+                    <div style={{ 
+                        backgroundColor: '#e8f5e9', 
+                        color: '#2e7d32', 
+                        padding: '10px', 
+                        borderRadius: '5px', 
+                        marginBottom: '15px',
+                        fontFamily: 'Alata',
+                        textAlign: 'center'
+                    }}>
+                        🎉 You've been invited to view a family tree! Complete your registration to accept.
+                    </div>
+                )}
+                
                 <form onSubmit={handleSubmit(onSubmit)} style={styles.FormStyle}>
 
                     {/* Error Message Display */}
@@ -143,8 +231,13 @@ const CreateAccount = () => {
                             {errors.gender && <p>{errors.gender.message}</p>}
                         </div>
                         <div style={styles.ItemStyle}>
-                            <label>Email</label>
-                            <input id="email" {...register("email")} style={styles.FieldStyle} />
+                            <label>Email {inviteToken && <span style={{ color: '#2e7d32', fontSize: '12px' }}>(from invitation)</span>}</label>
+                            <input 
+                                id="email" 
+                                {...register("email")} 
+                                style={inviteToken ? {...styles.FieldStyle, backgroundColor: '#f5f5f5'} : styles.FieldStyle}
+                                readOnly={!!inviteToken}
+                            />
                             {errors.email && <p>{errors.email.message}</p>}
                         </div>
                         <div style={styles.ItemStyle}>

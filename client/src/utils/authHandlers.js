@@ -1,7 +1,6 @@
 // src/handlers/authHandlers.js
 import { loginUser, registerUser, logoutUser, resetPassword, updatePassword, signInWithGoogle } from '../utils/auth';
-
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
+import { CLIENT_URL } from '../config/urls';
 
 // This page is used to handle authentication and includes redirects and error handling.
 
@@ -42,7 +41,7 @@ export async function handleLogout() {
 
 export async function handleResetPassword(email) {
   try {
-    const url = `${BASE_URL}/update-password`;
+    const url = `${CLIENT_URL}/update-password`;
     await resetPassword(email, url);
   } catch (error) {
     console.error('Reset Password error:', error.message);

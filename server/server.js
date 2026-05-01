@@ -1,6 +1,7 @@
 // server.js
 const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const treeMemberRoutes = require('./routes/treeMemberRoute');
@@ -9,6 +10,7 @@ const sharedTreeRoutes = require('./routes/sharedTreeRoutes');
 const backupRoutes = require('./routes/backupRoutes');
 const treeInfoRoutes = require('./routes/treeInfoRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const memoryRoutes = require('./routes/memoryRoutes');
 
 if (process.env.NODE_ENV === 'test') {
   dotenv.config({ path: '.env.test' });
@@ -34,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/tree-info', treeInfoRoutes);
 app.use('/api/events', eventRoutes); 
+app.use('/api/memories', memoryRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

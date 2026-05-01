@@ -66,3 +66,8 @@ Cd into the /client/ directory and run `npm run start:dev-test` to start the fro
 Then, navigate back to the /SeniorProject_KinTree/ root directory and run:
 
 `npm run test`
+### Emails setup
+
+Follow the steps on [sending emails with Resend](https://github.com/resend/resend-examples/tree/main/express-resend-examples) to verify your domain and obtain your RESEND_API_KEY to store in `.env`.
+
+Set EMAIL_FROM in `.env`.
