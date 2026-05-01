@@ -118,9 +118,6 @@ const CreateAccount = () => {
                 gender: data.gender
             };
 
-            await familyTreeService.createFamilyMember(memberData);
-            await familyTreeService.initializeTreeInfo(user.user.id, memberData, user.user.id);
-
             // If this registration is from an invitation, process pending invitations
             if (inviteToken || inviteEmail) {
                 try {
