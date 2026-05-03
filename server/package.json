@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:dev-test": "node --env-file=.env.test server.js",
+    "start:ci-test": "cross-env NODE_ENV=test node server.js"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +26,7 @@
     "resend": "^6.9.3"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "cross-env": "^10.1.0"
   }
 }

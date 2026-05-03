@@ -265,11 +265,12 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
       // Resolve relationships to create across the database
       // IMPORTANT: Use treeUserId (the member ID), not currentAccountID (the user ID)
+      const safeConnectTo = String(data.connectTo || '').startsWith('ghost_') ? null : data.connectTo;
       const relsToCreate = relationshipService.getRequiredDBRelationships(
         treeUserId,
         treeMemberId,
         data.selectedMemberRelationship,
-        data.connectTo,
+        safeConnectTo,
         data.matPat || null
       );
       
@@ -325,8 +326,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         const dbLinkCount = relsToCreate.length;
         const mainRel = data.selectedMemberRelationship;
         let factualSummary = `Added as your ${mainRel.charAt(0).toUpperCase() + mainRel.slice(1)}`;
-        if (dbLinkCount > 1 && data.connectTo) {
-          const partnerName = treeInfo[data.connectTo]?.data["first name"] || "Partner";
+        if (dbLinkCount > 1 && safeConnectTo) {
+          const partnerName = treeInfo[safeConnectTo]?.data["first name"] || "Partner";
           factualSummary += ` and linked to ${partnerName}`;
         }
 
@@ -395,11 +396,12 @@ function AddFamilyMemberPopup({ trigger, userid }) {
 
       // Resolve relationships to create across the database
       // IMPORTANT: Use treeUserId (the member ID), not currentAccountID (the user ID)
+      const safeConnectTo2 = String(data.connectTo2 || '').startsWith('ghost_') ? null : data.connectTo2;
       const relsToCreate = relationshipService.getRequiredDBRelationships(
         treeUserId,
         treeMemberId,
         data.relationship,
-        data.connectTo2,
+        safeConnectTo2,
         data.matPat2 || null
       );
       
@@ -456,8 +458,8 @@ function AddFamilyMemberPopup({ trigger, userid }) {
         const dbLinkCount = relsToCreate.length;
         const mainRel = data.relationship;
         let factualSummary = `Added as your ${mainRel.charAt(0).toUpperCase() + mainRel.slice(1)}`;
-        if (dbLinkCount > 1 && data.connectTo2) {
-          const partnerName = treeInfo[data.connectTo2]?.data["first name"] || "Partner";
+        if (dbLinkCount > 1 && safeConnectTo2) {
+          const partnerName = treeInfo[safeConnectTo2]?.data["first name"] || "Partner";
           factualSummary += ` and linked to ${partnerName}`;
         }
 
