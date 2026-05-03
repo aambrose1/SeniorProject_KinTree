@@ -39,6 +39,33 @@ Then, from the same directory, run the following command to run the server/API:
 
 `node server.js`
 
+### Testing
+
+This project uses a separate test database to run tests against. Therefore, make sure to paste in the proper env variables.
+
+Paste `TEST_SUPABASE_URL` and `TEST_SUPABASE_SERVICE_ROLE_KEY` into a .env.test file in the root directory of the project. 
+
+Additionally, add `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_ANON_KEY` to a .env.test file in the /client/ directory. 
+
+Finally, `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` should be added to the .env.test file in the /server/ directory as well.
+
+Tree structure:
+```
+/SeniorProject_KinTree
+  /client
+    .env.test
+  /server
+    .env.test
+  .env.test
+```
+
+Move into the /server/ directory and run `npm run start:dev-test` to setup the auth storage and test environment.
+
+Cd into the /client/ directory and run `npm run start:dev-test` to start the frontend in test mode.
+
+Then, navigate back to the /SeniorProject_KinTree/ root directory and run:
+
+`npm run test`
 ### Emails setup
 
 Follow the steps on [sending emails with Resend](https://github.com/resend/resend-examples/tree/main/express-resend-examples) to verify your domain and obtain your RESEND_API_KEY to store in `.env`.
