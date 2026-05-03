@@ -8,7 +8,7 @@ import { EventCard } from "../UserEvents/EventCard";
 
 import CreateMemoryPopup from "../UserMemory/CreateMemory";
 import MemoryCard from "../UserMemory/MemoryCard"; 
-import { ReactComponent as PlusIcon } from "../../assets/plus-sign.svg";
+import { AiOutlinePlus } from "react-icons/ai";
 import { useCurrentUser } from "../../CurrentUserProvider";
 import { supabase } from "../../utils/supabaseClient"; 
 import { SERVER_URL } from "../../config/urls";
@@ -27,22 +27,8 @@ function Dashboard() {
   const [allMemories, setAllMemories] = useState([]); 
   
   // Pulling the Tree Member integer ID from your context
-  const { currentUserID, loading } = useCurrentUser();
+  const { currentUserID, currentAccountID, loading } = useCurrentUser();
   const [isHovering, setIsHovering] = useState(false);
-
-  const ButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: isHovering ? '#3a5a40' : '#ccdecc',
-    color: isHovering ? 'white' : 'black',
-    borderRadius: '10px',
-    border: 'none',
-    padding: '10px 20px',
-    cursor: 'pointer',
-    width: '45%',
-    marginLeft: '30%',
-    marginRight: '30%',
-    height: '45px'
-  };
 
   // --- FETCH EVENTS ---
   // Sort and filter events
@@ -163,31 +149,26 @@ function Dashboard() {
           <input 
             style={styles.SearchBar} 
             type="text" 
-            placeholder="Search events..." 
             placeholder="Search by title or date..." 
             value={searchItem} 
             onChange={(e) => setSearchItem(e.target.value)} 
           />
 
-          <div style={styles.ButtonDivStyle}>
+          <div className="animate-in" style={styles.ActionRow}>
             <CreateEventPopup
               onEventCreated={handleEventCreated} 
               trigger={
-                <button
-                  style={ButtonStyle}
-                  onMouseEnter={() => setIsHovering(true)}
-                  onMouseLeave={() => setIsHovering(false)}
-                >
-                  Create Event
+                <button className="kt-button kt-button-primary">
+                   Create Event
                 </button>
               }
             />
             <button
-              style={{ margin: "10px" }}
+              style={styles.SortButton}
               onClick={() => setSortDate(sortDate === "newest" ? "oldest" : "newest")}
             >
-              Sort by: {sortDate === "newest" ? "Newest First" : "Oldest First"}
-              <DropDown style={{ width: "23px", height: "25px" }} />
+              Sorted by {sortDate === "newest" ? "Newest" : "Oldest"}
+              <DropDown style={{ width: "20px", height: "20px" }} />
             </button>
           </div>
 
@@ -224,7 +205,11 @@ function Dashboard() {
             )}
           </div>
         <CreateMemoryPopup 
-          trigger={<PlusIcon style={styles.PlusButton} />} 
+          trigger={
+            <div className="fab-hover" style={styles.PlusButton}>
+              <AiOutlinePlus size={30} color="white" />
+            </div>
+          } 
           onMemoryCreated={handleMemoryCreated} 
           profileID={currentUserID} 
         />

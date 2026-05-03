@@ -1,101 +1,125 @@
 export const DefaultStyle = {
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
+    color: 'var(--text-color)',
 };
 
 export const FieldStyle = {
-    borderRadius: '5px',
-    border: '1px solid #000000',
-    marginLeft: '10px'
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--input-border)',
+    backgroundColor: 'var(--input-bg)',
+    color: 'var(--text-color)',
+    padding: 'var(--space-2) var(--space-3)',
+    marginLeft: 'var(--space-2)',
+    outline: 'none',
+    transition: 'border-color 0.2s',
 };
 
 export const ListStyle = {
     listStyleType: 'none',
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '10px',
-    margin: '0px'
+    padding: 'var(--space-3)',
+    margin: '0px',
+    width: '100%',
 };
 
 export const ButtonDivStyle = {
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
     display: 'flex',
     justifyContent: 'center',
+    gap: 'var(--space-3)',
 }
 
 export const ButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#3a5a40',
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--kt-green-primary)',
     color: 'white',
-    borderRadius: '20px',
+    borderRadius: 'var(--radius-full)',
     border: 'none',
     padding: '10px 30px',
-    margin: '10px',
+    margin: 'var(--space-2)',
     cursor: 'pointer',
+    fontWeight: '600',
+    transition: 'background-color 0.2s',
 }
 
 export const GrayButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#D9D9D9',
-    color: 'black',
-    borderRadius: '20px',
-    border: 'none',
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--surface-alt)',
+    color: 'var(--text-color)',
+    borderRadius: 'var(--radius-full)',
+    border: '1px solid var(--border-color)',
     padding: '10px 20px',
-    margin: '10px',
+    margin: 'var(--space-2)',
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'row',
-    boxShadow: 'gray 0px 10px 10px -8px',
+    alignItems: 'center',
+    boxShadow: 'var(--shadow-sm)',
+    fontWeight: '500',
+    transition: 'all 0.2s',
 }
 
 export const FormStyle = {
-    padding: '2vw',
+    padding: 'var(--space-4)',
     paddingTop: '0px',
-    minWidth: '100px',
+    width: '100%',
     maxWidth: '500px',
 }
 
 export const ItemStyle = {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
+    alignItems: 'center',
+    margin: 'var(--space-3) 0',
 }
 
 export const DateFieldStyle = {
-    borderRadius: '5px',
-    border: '1px solid #000000',
-    marginLeft: '10px',
-    width: '147px',
-    fontFamily: 'Alata'
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--input-border)',
+    backgroundColor: 'var(--input-bg)',
+    color: 'var(--text-color)',
+    marginLeft: 'var(--space-2)',
+    width: '150px',
+    padding: 'var(--space-1) var(--space-2)',
+    fontFamily: 'inherit',
+    outline: 'none',
 };
 
 
 export const MainContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
-    padding: '2vw',
+    padding: 'var(--space-6)',
     paddingTop: '0px',
     alignItems: 'center',
     minWidth: '360px',
     minHeight: '150px',
     justifyContent: 'space-between',
+    backgroundColor: 'var(--card-bg)',
 }
 
 export const AddOptionsStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    width: '90%',
-    padding: '10px',
-    fontFamily: 'Alata',
-    marginTop: '10px',
-    height: '20%',
-    overflow: 'auto'
+    width: '100%',
+    padding: 'var(--space-3)',
+    fontFamily: 'inherit',
+    marginTop: 'var(--space-3)',
+    height: '250px',
+    overflow: 'auto',
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-md)',
 }
 
 export const ListingStyle = {
-    padding: '10px', 
-    border: '1px solid gray', 
-    width: '90%'
-}
+    padding: 'var(--space-3)', 
+    border: '1px solid var(--border-color)', 
+    width: '100%',
+    marginBottom: 'var(--space-2)',
+    borderRadius: 'var(--radius-sm)',
+    backgroundColor: 'var(--surface-alt)',
+}

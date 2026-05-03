@@ -7,25 +7,24 @@
     --background-color: none;
     position: relative;
     display: flex;
-    font-family: 'Alata';
+    font-family: inherit;
   }
   .f3 * {
     box-sizing: border-box;
   }
   .f3.f3-cont {
-    width:100%;
-    height:90vh;
-    max-height:90vh;
-    color:#fff
+    width: 100%;
+    height: 100%;
+    color: var(--text-color);
   }
   .f3 {
     --female-color: rgb(196, 138, 146);
     --male-color: rgb(120, 159, 172);
-    --genderless-color: lightgray;
-    --background-color: rgb(33, 33, 33);
-    --text-color: #0e0e0e;
+    --genderless-color: #cbd5e1;
+    --background-color: var(--card-bg);
+    --text-color: var(--text-color);
 
-    font-family: 'Alata', sans-serif;
+    font-family: inherit;
   }
 
   .f3 .cursor-pointer {
@@ -36,7 +35,7 @@
     height: 100%;
   }
   .f3 svg.main_svg text {
-    fill: var(--background-color);
+    fill: var(--text-color);
   }
   
   /* card-html */
@@ -53,7 +52,7 @@
   }
   .f3 div.card .mini-tree line {
     stroke-width: 2px;
-    stroke: var(--background-color);
+    stroke: var(--text-color);
     stroke-linecap: round;
   }
 
@@ -65,7 +64,7 @@
   }
   .f3 div.card-image-circle {
     border-radius: 50%;
-    padding: 5px;
+    padding: var(--space-1);
     width: 90px;
     height: 90px;
   }
@@ -79,11 +78,13 @@
     min-height: 22px;
     text-align: center;
     background-color: var(--genderless-color);
+    color: #333;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    border-radius: 3px;
-    padding: 0 5px;
+    border-radius: var(--radius-sm);
+    padding: 0 var(--space-1);
+    font-weight: 600;
   }
 
   .f3 div.card-image-circle img {
@@ -96,24 +97,25 @@
   .f3 div.card-image-circle svg {
     width: 100%;
     height: 100%;
-    padding: 5px;
+    padding: var(--space-1);
     border-radius: 50%;
     object-fit: cover;
   }
 
   .f3 div.card:hover > div {
-  transform: translate(0, -2px);
+    transform: translate(0, -4px);
+    transition: transform 0.2s ease;
   }
   .f3 div.card-main .card-inner, .f3 div.card:hover .card-inner {
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.8);
+    box-shadow: var(--shadow-lg);
   }
 
   .f3 div.card-main .card-inner {
-    outline: 4px solid rgba(220, 220, 220, 1);
+    outline: 4px solid var(--kt-green-primary);
   }
 
   .f3 div.card-inner.f3-path-to-main {
-    outline: 4px solid rgba(255, 255, 255, 1);
+    outline: 4px solid var(--kt-green-accent);
   }
   .f3 div.card-female .card-inner, .f3 div.card-female .person-icon svg {
   background-color: var(--female-color);
@@ -126,14 +128,50 @@
   }
 
   /* branches between nodes */
+  @keyframes draw-vine {
+    from {
+      stroke-dashoffset: 1000;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
   .f3 .link {
-    transition: stroke-width 0.2s ease-in-out;
-    stroke: #76380C;
-    stroke-width: 4;
+    transition: all var(--timing-standard);
+    stroke: var(--kt-green-accent);
+    stroke-width: 3;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: draw-vine 1.5s var(--timing-smooth) forwards;
+    stroke-linecap: round;
+    opacity: 0.6;
   }
   
   .f3 .link.f3-path-to-main {
-    stroke-width: 4px;
+    stroke-width: 5px;
+    stroke: var(--kt-green-primary);
+    opacity: 1;
+    stroke-dasharray: none; /* No animation for main path after initial growth */
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  /* Node Hover Effects */
+  .f3 div.card-inner {
+    transition: all var(--timing-standard);
+    border: 2px solid transparent;
+  }
+
+  .f3 div.card:hover div.card-inner {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--kt-green-primary);
+  }
+
+  .f3 div.card-main .card-inner {
+    border: 3px solid var(--kt-green-primary);
+    box-shadow: 0 0 15px var(--kt-green-subtle);
   }
 
 
@@ -159,9 +197,9 @@
   position: absolute;
   top: 5px;
   right: 5px;
-  width: 20px;
-  height: 20px;
-  background-color: #ff4d4d;
+  width: 24px;
+  height: 24px;
+  background-color: var(--kt-danger);
   color: white;
   border-radius: 50%;
   display: none; /* Hidden by default */
@@ -171,7 +209,7 @@
   font-weight: bold;
   cursor: pointer;
   border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-md);
   z-index: 10;
   transition: transform 0.2s, background-color 0.2s;
 }
@@ -198,7 +236,7 @@
 }
 
 .tree-plus-button:hover path {
-  fill: #000;
+  fill: var(--text-color);
   transition: fill 0.3s ease;
 }
 

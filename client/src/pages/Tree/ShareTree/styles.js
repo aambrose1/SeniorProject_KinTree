@@ -1,102 +1,108 @@
 export const DefaultStyle = {
     display: 'flex',
     flexDirection: 'row',
-    padding: '10px',
-    fontFamily: 'Alata',
-    alignItems: 'center',
+    minHeight: '100vh',
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--bg-color)',
     width: '100%',
-  }
+}
 
-  export const ContainerStyle = {
+export const ContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    width: '60%',
-    maxWidth: '600px',
+    width: '90%',
+    maxWidth: '650px',
     height: 'auto',
-    borderRadius: '30px',
-    backgroundColor: '#faf9f6',
-    padding: '20px',
-    boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
-    marginTop: '5vh'
+    borderRadius: 'var(--radius-lg)',
+    backgroundColor: 'var(--card-bg)',
+    padding: 'var(--space-8)',
+    boxShadow: 'var(--shadow-lg)',
+    marginTop: 'var(--space-10)',
+    border: '1px solid var(--border-color)',
 }
-  export const FormStyle = {
-    fontFamily: 'Aboreto',
+
+export const FormStyle = {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
     flexDirection: 'column',
-  }
+    marginTop: 'var(--space-4)',
+}
 
-  export const ListStyle = {
+export const ListStyle = {
     listStyleType: 'none',
-    fontFamily: 'Alata',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    width: '80%',
-    padding: '0'
-  };
-
-  export const ItemStyle = {
-    margin: '10px 0px',
     width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
+    padding: '0',
+    gap: 'var(--space-4)',
 };
 
-export const FieldStyle = {
-    borderRadius: '5px',
-    border: '1px solid #000000',
+export const ItemStyle = {
     width: '100%',
-    height: '25px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--space-2)',
+};
+
+export const LabelStyle = {
+    fontWeight: '600',
+    color: 'var(--text-color)',
+    fontSize: '0.9rem',
+    marginLeft: 'var(--space-1)',
+};
+
+export const InputStyle = {
+    width: '100%',
+    padding: 'var(--space-3) var(--space-4)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--input-border)',
+    backgroundColor: 'var(--input-bg)',
+    fontFamily: 'inherit',
+    fontSize: '1rem',
+    color: 'var(--text-color)',
+    transition: 'all var(--timing-standard)',
+    boxSizing: 'border-box',
 };
 
 export const TextAreaStyle = {
-    borderRadius: '5px',
-    border: '1px solid #000000',
-    height: '70px',
-    width: '100%',
-    resize: 'none'
+    ...InputStyle,
+    height: '100px',
+    resize: 'none',
+    lineHeight: '1.5',
 };
 
-export const ButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#3a5a40',
-    color: 'white',
-    borderRadius: '20px',
-    border: 'none',
-    padding: '10px 30px',
-    margin: '10px',
-    cursor: 'pointer',
-}
-
 export const ListingStyle = {
-    padding: '10px', 
-    border: '1px solid gray', 
-    width: '90%',
-    display: 'flex'
+    padding: 'var(--space-3) var(--space-4)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border-color)',
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--space-3)',
+    backgroundColor: 'var(--surface-alt)',
+    transition: 'all var(--timing-standard)',
+    boxSizing: 'border-box',
 }
 
 export const AddOptionsStyle = {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    width: '90%',
-    padding: '10px',
-    fontFamily: 'Alata',
-    // border: '1px solid gray',
-    // borderRadius: '5px',
-    marginTop: '10px',
-    height: '200px',
-    overflow: 'auto'
+    gap: 'var(--space-2)',
+    width: '100%',
+    marginTop: 'var(--space-2)',
+    maxHeight: '250px',
+    overflowY: 'auto',
+    paddingRight: 'var(--space-2)',
 }
 
 export const RightSide = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
     width: '100%',
-};
+    paddingBottom: 'var(--space-10)',
+};

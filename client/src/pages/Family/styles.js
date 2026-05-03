@@ -26,13 +26,15 @@ export const ContainerStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    width: '70%',
-    height: '85vh',
-    borderRadius: '30px',
-    backgroundColor: '#faf9f6',
-    padding: '20px',
-    margin: '2% 10% 10% 15%',
-    boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+    width: '92%',
+    maxWidth: '1000px',
+    minHeight: '85vh',
+    borderRadius: 'var(--radius-xl)',
+    backgroundColor: 'var(--card-bg)',
+    padding: 'var(--space-8)',
+    margin: 'var(--space-6) auto',
+    boxShadow: 'var(--shadow-premium)',
+    animation: 'animate-in var(--timing-smooth) forwards'
 }
 
 export const MemberLinkStyle = {
@@ -47,14 +49,19 @@ export const AvatarStyle = {
 }
 
 export const MemberStyle = {
-    border: '1px solid rgb(87, 87, 87)',
-    width: '80%',
-    margin: '5px 0',
-    padding: '10px',
+    backgroundColor: 'var(--bg-color)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border-color)',
+    width: '100%',
+    maxWidth: '800px',
+    margin: 'var(--space-2) 0',
+    padding: 'var(--space-4) var(--space-6)',
     alignItems: 'center',
-    alignContent: 'flex-start',
     display: 'flex',
     justifyContent: 'space-between',
+    transition: 'all var(--timing-standard)',
+    cursor: 'pointer',
+    boxShadow: 'var(--shadow-sm)'
 }
 
 export const MemberListStyle = {
@@ -62,7 +69,10 @@ export const MemberListStyle = {
     alignItems: 'center',
     flexDirection: 'column',
     width: '100%',
-    overflow: 'auto'
+    gap: 'var(--space-2)',
+    marginTop: 'var(--space-6)',
+    overflow: 'auto',
+    padding: 'var(--space-2)'
 }
 
 export const DropdownButtonStyle = {

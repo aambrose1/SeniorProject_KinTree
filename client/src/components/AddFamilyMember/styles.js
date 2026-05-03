@@ -1,99 +1,140 @@
 export const DefaultStyle = {
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
+    color: 'var(--text-color)',
 };
 
 export const FieldStyle = {
-    borderRadius: '5px',
-    border: '1px solid #000000',
-    marginLeft: '10px'
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--surface-alt)',
+    color: 'var(--text-color)',
+    padding: 'var(--space-2) var(--space-4)',
+    marginLeft: 'var(--space-2)',
+    outline: 'none',
+    fontFamily: 'inherit',
+    fontSize: '0.95rem',
+    transition: 'all var(--timing-standard)',
+    width: '100%',
+    boxSizing: 'border-box',
+};
+
+export const SelectStyle = {
+    ...FieldStyle,
+    cursor: 'pointer',
+    appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 0.7rem center',
+    backgroundSize: '1rem',
+    paddingRight: '2.5rem',
 };
 
 export const ListStyle = {
     listStyleType: 'none',
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
     display: 'flex',
     flexDirection: 'column',
     textAlign: 'left',
-    marginRight: '15%'
+    marginRight: '15%',
+    width: '100%',
 };
 
 export const ButtonDivStyle = {
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
     display: 'flex',
     justifyContent: 'center',
+    gap: 'var(--space-3)',
+    marginTop: 'var(--space-4)',
 }
 
 export const ButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#3a5a40',
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--kt-green-primary)',
     color: 'white',
-    borderRadius: '20px',
+    borderRadius: 'var(--radius-full)',
     border: 'none',
     padding: '10px 30px',
-    margin: '10px',
+    margin: 'var(--space-2)',
     cursor: 'pointer',
+    fontWeight: '600',
+    transition: 'background-color 0.2s',
 }
 
 export const GrayButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#D9D9D9',
-    color: 'black',
-    borderRadius: '20px',
-    border: 'none',
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--surface-alt)',
+    color: 'var(--text-color)',
+    borderRadius: 'var(--radius-full)',
+    border: '1px solid var(--border-color)',
     padding: '10px 20px',
-    margin: '10px',
+    margin: 'var(--space-2)',
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'row',
-    boxShadow: 'gray 0px 10px 10px -8px',
+    alignItems: 'center',
+    boxShadow: 'var(--shadow-sm)',
+    fontWeight: '500',
+    transition: 'all 0.2s',
 }
 
 export const FormStyle = {
-    padding: '2vw',
+    padding: 'var(--space-4)',
     paddingTop: '0px',
     minWidth: '360px',
+    width: '100%',
 }
 
 export const ItemStyle = {
-    margin: '10px 0px'
+    margin: 'var(--space-3) 0px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--space-1)',
 }
 
 export const DateFieldStyle = {
-    borderRadius: '5px',
-    border: '1px solid #000000',
-    marginLeft: '10px',
-    width: '147px',
-    fontFamily: 'Alata'
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--input-border)',
+    backgroundColor: 'var(--input-bg)',
+    color: 'var(--text-color)',
+    marginLeft: 'var(--space-2)',
+    width: '150px',
+    padding: 'var(--space-1) var(--space-2)',
+    fontFamily: 'inherit',
+    outline: 'none',
 };
 
 
 export const MainContainerStyle = {
     display: 'flex',
     flexDirection: 'column',
-    padding: '2vw',
+    padding: 'var(--space-6)',
     paddingTop: '0px',
     alignItems: 'center',
     minWidth: '360px',
     minHeight: '150px',
     justifyContent: 'space-between',
+    backgroundColor: 'var(--card-bg)',
 }
 
 export const AddOptionsStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    width: '90%',
-    padding: '10px',
-    fontFamily: 'Alata',
-    // border: '1px solid gray',
-    // borderRadius: '5px',
-    marginTop: '10px',
-    height: '200px',
-    overflow: 'auto'
+    width: '100%',
+    padding: 'var(--space-3)',
+    fontFamily: 'inherit',
+    marginTop: 'var(--space-3)',
+    height: '250px',
+    overflow: 'auto',
+    border: '1px solid var(--border-color)',
+    borderRadius: 'var(--radius-md)',
 }
 
 export const ListingStyle = {
-    padding: '10px', 
-    border: '1px solid gray', 
-    width: '90%'
-}
+    padding: 'var(--space-3)', 
+    border: '1px solid var(--border-color)', 
+    width: '100%',
+    marginBottom: 'var(--space-2)',
+    borderRadius: 'var(--radius-sm)',
+    backgroundColor: 'var(--surface-alt)',
+}

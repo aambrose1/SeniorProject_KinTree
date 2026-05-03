@@ -3,11 +3,13 @@ export const DefaultStyle = {
 };
 
 export const FieldStyle = {
-    borderRadius: '5px',
-    border: '1px solid #000000',
-    marginLeft: '10px',
-    width: '145px',
-    fontFamily: 'Alata'
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--input-border)',
+    backgroundColor: 'var(--input-bg)',
+    color: 'var(--text-color)',
+    padding: 'var(--space-2) var(--space-3)',
+    fontFamily: 'inherit',
+    transition: 'border-color var(--timing-fast)'
 };
 
 export const DateFieldStyle = {
@@ -34,28 +36,30 @@ export const ButtonDivStyle = {
 };
 
 export const ButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#3a5a40',
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--kt-green-primary)',
     color: 'white',
-    borderRadius: '10px',
+    borderRadius: 'var(--radius-md)',
     border: 'none',
     padding: '10px 30px',
-    margin: '10px',
+    margin: 'var(--space-2)',
     cursor: 'pointer',
+    fontWeight: '600',
+    transition: 'all var(--timing-standard)',
+    boxShadow: 'var(--shadow-sm)'
 };
 
 export const GrayButtonStyle = {
-    fontFamily: 'Alata',
-    backgroundColor: '#D9D9D9',
-    color: 'black',
-    borderRadius: '10px',
-    border: 'none',
-    padding: '10px 20px',
-    margin: '10px',
+    fontFamily: 'inherit',
+    backgroundColor: 'var(--surface-alt)',
+    color: 'var(--text-secondary)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border-color)',
+    padding: '8px 16px',
     cursor: 'pointer',
-    display: 'flex',
-    flexDirection: 'row',
-    boxShadow: 'gray 0px 10px 10px -8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    transition: 'all var(--timing-standard)',
 };
 
 export const FormStyle = {
@@ -87,23 +91,72 @@ export const TextAreaStyle = {
     boxSizing: 'border-box',
 };
 
+export const EventsContainer = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--space-4)',
+    fontFamily: 'inherit',
+    color: 'var(--text-color)',
+};
+
+export const EventCard = {
+    backgroundColor: 'var(--card-bg)',
+    borderRadius: 'var(--radius-md)',
+    padding: 'var(--space-5)',
+    border: '1px solid var(--border-color)',
+    boxShadow: 'var(--shadow-md)',
+    fontFamily: 'inherit',
+    transition: 'transform var(--timing-standard), box-shadow var(--timing-standard)',
+    cursor: 'pointer',
+    animation: 'animate-in var(--timing-smooth) forwards'
+};
+
+export const EventTitle = {
+    margin: 0,
+    fontSize: '18px',
+    fontWeight: '600',
+    color: 'var(--kt-green-primary)',
+    fontFamily: 'inherit',
+};
+
+export const EventMeta = {
+    fontSize: '14px',
+    color: 'var(--text-secondary)',
+    marginTop: 'var(--space-1)',
+    fontFamily: 'inherit',
+};
+
 // --- MOVED FROM ACTIVITYDASHBOARD STYLES ---
+
+export const SearchBar = {
+    width: '100%',
+    maxWidth: '500px',
+    padding: '12px 20px',
+    margin: 'var(--space-6) 0',
+    border: '2px solid var(--border-color)',
+    borderRadius: 'var(--radius-full)',
+    fontSize: '1rem',
+    backgroundColor: 'var(--input-bg)',
+    color: 'var(--text-color)',
+    outline: 'none',
+    transition: 'all var(--timing-standard)',
+    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)',
+};
 
 export const CardContainer = {
     display: 'flex',
     flexDirection: 'column',
-    textAlign: 'center',
-    minWidth: '290px',
+    textAlign: 'left',
     width: '100%',
-    height: 'auto',
-    minHeight: '120px',
-    borderRadius: '20px',
-    backgroundColor: '#faf9f6',
-    padding: '20px 5vw',
-    marginTop: '20px',
-    boxShadow: 'gray 0px 10px 10px -8px',
-    border: '0.5px solid #000000',
-    boxSizing: 'border-box'
+    maxWidth: '600px',
+    borderRadius: 'var(--radius-lg)',
+    backgroundColor: 'var(--card-bg)',
+    padding: 'var(--space-6) var(--space-8)',
+    boxShadow: 'var(--shadow-md)',
+    border: '1px solid var(--border-color)',
+    boxSizing: 'border-box',
+    animation: 'animate-in var(--timing-smooth) forwards',
+    transition: 'transform var(--timing-standard)',
 };
 
 export const TextStyle = {

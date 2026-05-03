@@ -1,9 +1,11 @@
 export const DefaultStyle = {
     display: 'flex',
     flexDirection: 'row',
-    fontFamily: 'Alata',
+    fontFamily: 'inherit',
     alignItems: 'flex-start',
     textAlign: 'center',
+    backgroundColor: 'var(--bg-color)',
+    minHeight: '100vh',
 };
 
 export const RightSide = {  
@@ -17,48 +19,78 @@ export const Container = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    minWidth: '290px',
-    width: '100%',
-    borderRadius: '30px',
-    backgroundColor: '#faf9f6',
-    padding: '20px 5vw',
-    margin: '5% 20%',
-    boxShadow: 'gray 0px 10px 10px -8px',
-    border: '0.5px solid #000000',
+    minWidth: '320px',
+    width: '95%',
+    maxWidth: '1000px',
+    borderRadius: 'var(--radius-xl)',
+    backgroundColor: 'var(--card-bg)',
+    padding: 'var(--space-10) var(--space-8)',
+    margin: 'var(--space-10) auto',
+    boxShadow: 'var(--shadow-premium)',
+    border: '1px solid var(--border-color)',
+    boxSizing: 'border-box',
+    animation: 'animate-in var(--timing-smooth) forwards',
 };
 
 export const SearchBar = {
-    width: '50%',
-    padding: '10px',
+    width: '100%',
+    maxWidth: '500px',
+    padding: '10px 16px',
     margin: '20px 0',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-    fontSize: '16px'
+    border: '1px solid var(--input-border)',
+    borderRadius: 'var(--radius-md)',
+    fontSize: '16px',
+    backgroundColor: 'var(--input-bg)',
+    color: 'var(--text-color)',
+    outline: 'none',
+    transition: 'border-color 0.2s',
 };
 
 export const Header = {
-    fontSize: 'xx-large',
-    display: 'flex',
-    flexDirection: 'row',
-    alignContent: 'center',
-    justifyContent: 'center',
+    fontSize: '2.5rem',
+    fontWeight: '800',
+    color: 'var(--kt-green-primary)',
+    marginBottom: 'var(--space-2)',
+    fontFamily: 'Aboreto',
 };
 
-export const ButtonDivStyle = {
-    fontFamily: 'Alata',
+export const ActionRow = {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 'var(--space-4)',
+    margin: 'var(--space-4) 0',
+};
+
+export const SortButton = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 'var(--space-2)',
+    padding: 'var(--space-2) var(--space-4)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border-color)',
+    backgroundColor: 'var(--card-bg)',
+    color: 'var(--text-secondary)',
+    cursor: 'pointer',
+    fontSize: '14px',
+    transition: 'all var(--timing-standard)',
 };
 
 export const PlusButton = {
-    width: '40px',
-    height: '40px',
-    margin: '10px',
+    width: '60px',
+    height: '60px',
+    borderRadius: 'var(--radius-full)',
+    backgroundColor: 'var(--kt-green-primary)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     cursor: 'pointer',
-    position: 'absolute',
-    right: '0px',
-    bottom: '60px'
+    position: 'fixed',
+    right: '40px',
+    bottom: '40px',
+    boxShadow: 'var(--shadow-premium)',
+    transition: 'all var(--timing-standard)',
+    zIndex: '100',
 };
 
 export const ListStyle = {

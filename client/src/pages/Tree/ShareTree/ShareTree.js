@@ -4,12 +4,17 @@ import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { useCurrentUser } from '../../../CurrentUserProvider';
 import { SERVER_URL } from '../../../config/urls';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
+import { AiOutlineCheckCircle } from 'react-icons/ai';
 
 function ShareTree() {
     const [searchTerm, setSearchTerm] = useState("");
     const [inviteEmail, setInviteEmail] = useState("");
     const [emailError, setEmailError] = useState("");
     const [memberError, setMemberError] = useState("");
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState("");
     
     // Use refs to store fetched data (fetch once, use many times)
     const allMembersRef = useRef([]);
@@ -61,19 +66,19 @@ function ShareTree() {
         .then(async (response) => {
             if (response.ok) {
                 let responseData = await response.json();
-                console.log(responseData);
-                alert(responseData.message);
-                window.location.href = '/';
+                setModalMessage(responseData.message || "Shared tree successfully!");
+                setShowSuccessModal(true);
             }
             else {
                 let errorData = await response.json();
-                console.log('Error:', errorData);
-                alert('Error sharing tree: ' + (errorData.error || 'Unknown error'));
+                setModalMessage('Error sharing tree: ' + (errorData.error || 'Unknown error'));
+                setShowSuccessModal(true);
             }
         })
         .catch(error => {
             console.error('Fetch error:', error);
-            alert('Error sharing tree: ' + error.message);
+            setModalMessage('Error sharing tree: ' + error.message);
+            setShowSuccessModal(true);
         });
     }
 
@@ -175,83 +180,151 @@ function ShareTree() {
         <div style={styles.DefaultStyle}>
             <div style={{width: '150px'}}></div>
             <div style={styles.RightSide}>
-            <div style={styles.ContainerStyle}>
+            <div className="animate-in" style={styles.ContainerStyle}>
                 {/* title */}
-                <h1 style={{ margin: '0px' }}>Share Tree</h1>
-                <hr style={{ width: '50%', border: '1px solid #000', margin: '1px 0' }} />
+                <h1 style={{ margin: '0px', color: 'var(--text-color)' }}>Share Tree</h1>
+                <hr style={{ width: '50px', border: 'none', height: '2px', backgroundColor: 'var(--kt-green-primary)', margin: 'var(--space-2) 0 var(--space-6) 0' }} />
 
                 {/* form */}
                 <form onSubmit={handleSubmit(data => onSubmitForm(data))} style={styles.FormStyle}>
                     <ul style={styles.ListStyle}>
                         <li style={styles.ItemStyle}>
-                        <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                            <label style={styles.LabelStyle}>Search Family</label>
                             <input
                                 type="text"
                                 placeholder="Search for a family member..."
-                                style={{ width: '100%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', fontFamily: 'Alata' }}
+                                style={styles.InputStyle}
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                             />
-                        </div>
 
-                        {/* search results for active family members (users) */}
-                        <div style={styles.AddOptionsStyle}>
-                        {searchResults?.length > 0 ? (
-                            searchResults.map(result => (
-                            <div key={result.memberuserid} style={styles.ListingStyle}>
-                                <label>
-                                <input
-                                    type="radio"
-                                    name="selectedMember"
-                                    value={result.memberuserid}
-                                    {...register("selectedMember")}
-    
-                                />
-                                <Link to={`/account/${result?.memberuserid}`} style={{ marginLeft: '10px' }}>
-                                    {result.firstname} {result.lastname}
-                                </Link>
-                                </label>
-                            </div>
-                            ))
-                        ) : searchTerm !== "" ? (
-                            <div style={styles.ListingStyle}>
-                                <label style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>
-                                    User not found. Invite via email:
+                            {/* search results for active family members (users) */}
+                            <div style={styles.AddOptionsStyle}>
+                            {searchResults?.length > 0 ? (
+                                searchResults.map(result => (
+                                <div key={result.memberuserid} style={styles.ListingStyle} className="kt-card-interactive">
+                                    <label style={{ display: 'flex', alignItems: 'center', width: '100%', cursor: 'pointer' }}>
+                                        <input
+                                            type="radio"
+                                            name="selectedMember"
+                                            style={{ cursor: 'pointer', accentColor: 'var(--kt-green-primary)' }}
+                                            value={result.memberuserid}
+                                            {...register("selectedMember")}
+                                        />
+                                        <Link 
+                                            to={`/account/${result?.memberuserid}`} 
+                                            style={{ marginLeft: '12px', color: 'var(--text-color)', textDecoration: 'none', fontWeight: '500' }}
+                                        >
+                                            {result.firstname} {result.lastname}
+                                        </Link>
+                                    </label>
+                                </div>
+                                ))
+                            ) : searchTerm !== "" ? (
+                                <div style={{ ...styles.ListingStyle, flexDirection: 'column', alignItems: 'flex-start' }}>
+                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>
+                                        User not found. Invite via email:
+                                    </span>
                                     <input
                                         type="email"
                                         placeholder="Enter email address"
                                         style={{ 
-                                            width: '95%', 
-                                            padding: '10px', 
-                                            borderRadius: '5px', 
-                                            border: emailError ? '1px solid red' : '1px solid #ccc', 
-                                            fontFamily: 'Alata', 
-                                            marginTop: '5px' 
+                                            ...styles.InputStyle,
+                                            borderColor: emailError ? 'var(--kt-danger)' : 'var(--input-border)',
+                                            backgroundColor: 'var(--card-bg)'
                                         }}
                                         value={inviteEmail}
                                         onChange={handleInviteEmailChange}
                                     />
                                     {emailError && (
-                                        <div style={{ color: 'red', fontSize: '12px', marginTop: '5px' }}>
+                                        <div style={{ color: 'var(--kt-danger)', fontSize: '12px', marginTop: '4px' }}>
                                             {emailError}
                                         </div>
                                     )}
-                                </label>
+                                </div>
+                            ) : (
+                                <div style={{ textAlign: 'center', padding: 'var(--space-4)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                    {searchTerm === "" ? "Start typing to find a family member..." : ""}
+                                </div>
+                            )}
                             </div>
-                        ) : null}
-                        </div>
                         </li>
+                        
                         <li style={styles.ItemStyle}>
-                            <label>
+                            <label style={styles.LabelStyle}>
                                 Comments:
                             </label>
-                            <textarea {...register("comments")} type="text" style={styles.TextAreaStyle} />
+                            <textarea 
+                                {...register("comments")} 
+                                style={styles.TextAreaStyle} 
+                                placeholder="Add a note to your invitation..."
+                            />
                         </li>
                     </ul>
-                    <button type="submit" style={styles.ButtonStyle}>Share</button>
+                    <div style={{ marginTop: 'var(--space-8)', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <button type="submit" className="kt-button kt-button-primary" style={{ padding: '12px 40px' }}>
+                            Share Tree
+                        </button>
+                    </div>
                 </form>
             </div>
             </div>
+
+            {/* Success/Error Modal */}
+            <Popup
+                open={showSuccessModal}
+                onClose={() => {
+                    setShowSuccessModal(false);
+                    if (!modalMessage.includes('Error')) window.location.href = '/';
+                }}
+                modal
+                nested
+                contentStyle={{ 
+                    borderRadius: 'var(--radius-lg)', 
+                    padding: 'var(--space-8)', 
+                    border: '1px solid var(--border-color)', 
+                    boxShadow: 'var(--shadow-premium)',
+                    width: '400px',
+                    textAlign: 'center',
+                    backgroundColor: 'var(--card-bg)'
+                }}
+            >
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)' }}>
+                    <div style={{ 
+                        backgroundColor: modalMessage.includes('Error') ? 'rgba(180, 35, 24, 0.1)' : 'var(--kt-green-soft)', 
+                        borderRadius: 'var(--radius-full)', 
+                        width: '64px', 
+                        height: '64px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center'
+                    }}>
+                        {modalMessage.includes('Error') ? (
+                            <span style={{ fontSize: '32px', color: 'var(--kt-danger)' }}>⚠</span>
+                        ) : (
+                            <AiOutlineCheckCircle size={40} color="var(--kt-green-primary)" />
+                        )}
+                    </div>
+                    
+                    <h2 style={{ margin: 0, color: 'var(--text-color)', fontSize: '1.5rem' }}>
+                        {modalMessage.includes('Error') ? 'Oops!' : 'Success!'}
+                    </h2>
+                    <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                        {modalMessage}
+                    </p>
+                    
+                    <button 
+                        className="kt-button kt-button-primary"
+                        style={{ marginTop: 'var(--space-4)', width: '100%' }}
+                        onClick={() => {
+                            setShowSuccessModal(false);
+                            if (!modalMessage.includes('Error')) window.location.href = '/';
+                        }}
+                    >
+                        {modalMessage.includes('Error') ? 'Try Again' : 'Done'}
+                    </button>
+                </div>
+            </Popup>
         </div>
     )
 }
