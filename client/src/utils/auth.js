@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient';
 import { buildSyncPayload } from './metadataHelpers';
+import { SERVER_URL } from '../config/urls';
 
 // These functions are used to handle the authentication of the user, but only the pure login, logout, etc functionality. 
 // It should not include frontend logic like redirects.
@@ -33,7 +34,7 @@ export async function registerUser(email, password, metadata = {}) {
 
     const syncPayload = buildSyncPayload(user.id, user.email, metadata);
     
-    const syncResponse = await fetch('http://localhost:5000/api/auth/sync', {
+    const syncResponse = await fetch(`${SERVER_URL}/api/auth/sync`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(syncPayload)

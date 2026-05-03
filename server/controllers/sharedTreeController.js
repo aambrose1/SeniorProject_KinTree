@@ -3,11 +3,12 @@ const relationship = require('../models/relationshipModel');
 const sharedTrees = require('../models/sharedTreeModel');
 const users = require('../models/userModel'); 
 const crypto = require('crypto');
+const { Resend } = require('resend');
 
 
 const getSharedTreeById = async (req, res) => {
     try{
-        const { id} = req.params;
+        const {id} = req.params;
         const trees = await sharedTrees.getSharedTreeById(id);
         res.status(200).json(trees);
     }
@@ -30,11 +31,9 @@ const getSharedTreeByToken = async (req, res) => {
             });   
         }
 
-        const members = await treeMember.getMemberByUser(sharedTree.senderID);
-        res.status(200).json({
-            shareTree,
-            TreeMembers: members
-        });
+        res.status(200).json(
+            sharedTree,
+        );
     }
     catch(error){
         console.error(error);
@@ -60,16 +59,16 @@ const getSharedTreeBySender = async (req, res) => {
     }
 }
 
-const getSharedTreebyReciever = async (req, res) => {
+const getSharedTreebyReceiver = async (req, res) => {
     try{
         const { id } = req.params;
-        const trees = await sharedTrees.getSharedTreebyReciever(id);
+        const trees = await sharedTrees.getSharedTreebyReceiver(id);
         res.status(200).json(trees);
     }
     catch(error){
         console.error(error);
         res.status(500).json({
-            error: 'Error fetching shared tree by reciever'
+            error: 'Error fetching shared tree by receiver'
         });
         
     }
@@ -77,70 +76,76 @@ const getSharedTreebyReciever = async (req, res) => {
 
 const shareTree = async (req,res) => {
     try{
-        const {senderID, recieverID, perms, parentalSide, recieverEmail, treeInfo} = req.body;
+        const {senderID, receiverID, receiverEmail, perms, parentalSide, treeInfo, comment} = req.body;
 
         if (!["maternal", "paternal", "both"].includes(parentalSide)){
             return res.status(400).json({
                 error: "Invalid parental side. Use maternal, paternal, or, both"
             });
         }
-        const token = crypto.randomBytes(16).toString('hex');
-        // const receiver = await users.findByEmail(recieverEmail)
-        // const relationships = await relationship.filterBySide(senderID,parentalSide);
-
-        // if(relationships.length === 0 ){
-        //     return res.status(400).json({
-        //         message: `No members found for the ${parentalSide} side.`
-        //     });
-
-        // }
-        // const treeMembers = await Promise.all(
-        //     relationships.map(async (relationship) => {
-        //         // For each relationship, fetch the details of the tree members (person1 and person2)
-        //         const person1Details = await treeMember.getMemberById(relationship.person1_id);
-        //         const person2Details = await treeMember.getMemberById(relationship.person2_id);
         
+        const token = crypto.randomBytes(32).toString('hex');
         
-        //         // Return the relationship along with both person details
-        //         return {
-        //             ...relationship,
-        //             person1Details,
-        //             person2Details
-        //         };
-        //     })
-        // );
+        // Create the shared tree entry
+        const newSharedTree = await sharedTrees.addSharedTree({
+            senderID,
+            receiverID: receiverID || null,
+            receiverEmail: receiverEmail || null,
+            perms,
+            parentalSide,
+            treeInfo,
+            comment,
+            token,
+            status: 'pending'
+        });
         
-
-        // if(receiver) {
-        //     // const [newSharedTree] = await sharedTrees.addSharedTree({
-        //     //     senderID,
-        //     //     recieverID: receiver.id,
-        //     //     perms,
-        //     //     parentalSide,
-        //     //     treeInfo,
-        //     //     // token
-        //     // });
-
-        //     // return res.status(201).json({
-        //     //     message: "Shared tree added",
-        //     //     token: newSharedTree.token
-        //     // })
-        // }
-        if(1){
-            const [newSharedTree] = await sharedTrees.addSharedTree({
-                senderID,
-                recieverID,
-                perms,
-                parentalSide,
-                treeInfo,
-                // token
-            });
-            return res.status(201).json({
-                message: "Shared tree added. Reciever will be prompted to register/log in if needed.",
-                token: newSharedTree.token
-            })
-
+        // If it's an email invitation (no receiverID), send invitation email
+        if (!receiverID && receiverEmail) {
+            try {
+                const resend = new Resend(process.env.RESEND_API_KEY);
+                const senderUser = await users.findById(senderID);
+                const senderName = senderUser ? `${senderUser.firstname || senderUser.firstName || ''} ${senderUser.lastname || senderUser.lastName || ''}`.trim() : 'A family member';
+                
+                const invitationLink = `${process.env.CLIENT_URL || 'http://localhost:3000'}/login?inviteToken=${token}`;
+                
+                const emailSubject = `${senderName} invited you to view their family tree`;
+                const emailHtml = `
+                    <h2>Family Tree Invitation</h2>
+                    <p>${senderName} has invited you to view their family tree on KinTree.</p>
+                    ${comment ? `<p><strong>Message from ${senderName}:</strong> ${comment}</p>` : ''}
+                    <p>Click the link below to accept the invitation and create your account:</p>
+                    <a href="${invitationLink}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Accept Invitation</a>
+                    <p>Or copy and paste this link into your browser:</p>
+                    <p>${invitationLink}</p>
+                    <p>This invitation link is unique to you and can only be used once.</p>
+                `;
+                
+                await resend.emails.send({
+                    from: 'Kintree <invites@' + process.env.EMAIL_FROM + '>',
+                    to: [receiverEmail],
+                    subject: emailSubject,
+                    html: emailHtml
+                });
+                
+                return res.status(201).json({
+                    message: "Invitation sent successfully! The recipient will receive an email with instructions.",
+                    object: newSharedTree
+                });
+            } catch (emailError) {
+                console.error('Error sending invitation email:', emailError);
+                // Still return success since the shared tree was created
+                return res.status(201).json({
+                    message: "Shared tree created but failed to send email invitation.",
+                    object: newSharedTree,
+                    emailError: emailError.message
+                });
+            }
         }
+        
+        return res.status(201).json({
+            message: "Tree shared successfully.",
+            object: newSharedTree
+        });
     }
     catch(error){
         console.error(error);
@@ -225,9 +230,9 @@ const mergeMembers = async (req, res) => {
 
 const assignNewMemberRelationship = async (req, res) => {
     try{
-        const { recieverID, memberId, relationshipType} = req.body;
-        await treeMember.assignNewMemberRelationship(recieverID,memberId,relationshipType);
-        res.json({message: 'Relationshi[ assigning successful.'})
+        const { receiverID, memberId, relationshipType} = req.body;
+        await treeMember.assignNewMemberRelationship(receiverID,memberId,relationshipType);
+        res.json({message: 'Relationship assigning successful.'})
 
     }
     catch(error){
@@ -239,5 +244,81 @@ const assignNewMemberRelationship = async (req, res) => {
 
 }
 
+const deleteSharedTree = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedTree = await sharedTrees.deleteSharedTree(id);
+        res.status(200).json({
+            message: 'Shared tree deleted successfully',
+            deletedTree
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            error: 'Error deleting shared tree'
+        });
+    }
+};
 
-module.exports = {getSharedTreeById, getSharedTreeByToken, getSharedTreeBySender, getSharedTreebyReciever,shareTree, assignNewMemberRelationship, mergeMembers }
+// Process pending invitations when a user registers
+const processPendingInvitations = async (req, res) => {
+    try {
+        const { email, userId } = req.body;
+        
+        if (!email || !userId) {
+            return res.status(400).json({
+                error: 'Email and userId are required'
+            });
+        }
+        
+        // Find all pending invitations for this email
+        const pendingInvitations = await sharedTrees.getSharedTreeByEmail(email);
+        
+        if (!pendingInvitations || pendingInvitations.length === 0) {
+            return res.status(200).json({
+                message: 'No pending invitations found',
+                count: 0
+            });
+        }
+        
+        // Update each invitation with the new user ID
+        const updatedInvitations = [];
+        for (const invitation of pendingInvitations) {
+            const updated = await sharedTrees.updateSharedTreeReceiver(
+                invitation.sharedtreeid,
+                userId
+            );
+            updatedInvitations.push(updated);
+        }
+        
+        return res.status(200).json({
+            message: `Successfully processed ${updatedInvitations.length} pending invitation(s)`,
+            count: updatedInvitations.length,
+            invitations: updatedInvitations
+        });
+    } catch (error) {
+        console.error('Error processing pending invitations:', error);
+        res.status(500).json({
+            error: 'Error processing pending invitations'
+        });
+    }
+};
+
+const updateSharedTreeStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['accepted', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'Invalid status. Use accepted or rejected.' });
+        }
+
+        const updated = await sharedTrees.updateSharedTreeStatus(id, status);
+        res.status(200).json({ message: `Tree ${status} successfully`, object: updated });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error updating shared tree status' });
+    }
+};
+
+module.exports = {getSharedTreeById, getSharedTreeByToken, getSharedTreeBySender, getSharedTreebyReceiver, shareTree, assignNewMemberRelationship, mergeMembers, deleteSharedTree, processPendingInvitations, updateSharedTreeStatus }
