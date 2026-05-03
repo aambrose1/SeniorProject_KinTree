@@ -2,10 +2,6 @@
 const express = require('express');
 const router = express.Router();
 
-
-const { register, login, deleteByUser, findByEmail, findById, getAllUsers } = require('../controllers/authController'); // Assuming you have a controller for your registration logic
-
-const { register, login, deleteByUser, findByEmail, findById, getAllUsers, } = require('../controllers/authController'); // Assuming you have a controller for your registration logic
 const { deleteByUser, findByEmail, findById, getAllUsers, syncAuthUser } = require('../controllers/authController'); 
 
 const { register, login, editByUser, deleteByUser, findByEmail, findById, getAllUsers, } = require('../controllers/authController'); // Assuming you have a controller for your registration logic
