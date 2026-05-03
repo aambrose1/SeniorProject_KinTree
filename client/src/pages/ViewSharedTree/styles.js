@@ -48,22 +48,20 @@ export const BottomLeftArrowStyle = {
 
 export const HeaderStyle = {
   display: 'flex',
-  width: '20%', 
-  marginLeft: '9%',
-  marginRight: '10%',
-  marginBottom: 'var(--space-5)',
   flexDirection: 'column',
   alignItems: 'center',
-  zIndex: '-1'
+  marginBottom: 'var(--space-8)',
+  zIndex: '1'
 }
 
 export const FamilyTreeContainerStyle = { 
-  width: '80%', 
-  height: '90vh', 
-  borderStyle: 'double', 
-  margin: 'auto',
+  width: '100%', 
+  height: '80vh', 
+  margin: '0 auto',
   borderRadius: 'var(--radius-xl)',
   backgroundColor: 'var(--card-bg)',
   boxShadow: 'var(--shadow-lg)',
-  borderColor: 'var(--border-color)'
+  border: '1px solid var(--border-color)',
+  position: 'relative',
+  overflow: 'hidden'
 }

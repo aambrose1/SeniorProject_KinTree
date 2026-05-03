@@ -131,6 +131,44 @@ body {
   box-shadow: 0 4px 8px rgba(58, 90, 64, 0.3);
 }
 
+.kt-button-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.kt-button-ghost:hover {
+  background-color: var(--kt-green-soft);
+  color: var(--kt-green-primary);
+}
+
+/* Semantic Ghost Variants */
+.kt-button-ghost-success {
+  color: var(--kt-green-primary);
+}
+.kt-button-ghost-success:hover {
+  background-color: var(--kt-green-soft);
+  color: var(--kt-green-dark);
+}
+
+.kt-button-ghost-danger {
+  color: var(--kt-danger);
+}
+.kt-button-ghost-danger:hover {
+  background-color: rgba(180, 35, 24, 0.05);
+  color: var(--kt-danger);
+}
+
+.kt-button-danger {
+  background-color: transparent;
+  color: var(--kt-danger);
+}
+
+.kt-button-danger:hover {
+  background-color: rgba(180, 35, 24, 0.05);
+  color: var(--kt-danger);
+  transform: scale(1.1);
+}
+
 .kt-card {
   background-color: var(--card-bg);
   border-radius: var(--radius-lg);

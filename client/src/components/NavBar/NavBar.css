@@ -59,13 +59,16 @@
     font-size: 1rem;
     font-weight: 500;
     transition: all var(--timing-standard);
-    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(58, 90, 64, 0.05);
 }
 
 .nav-item:hover {
-    background-color: var(--kt-green-soft);
+    background-color: var(--kt-green-subtle);
+    border-color: var(--kt-green-subtle);
     color: var(--kt-green-primary);
     transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
 }
 
 .nav-item-active {
@@ -184,8 +187,14 @@
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.4);
 }
 
+.dark-mode .nav-item {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
 .dark-mode .nav-item:hover {
-    background-color: var(--kt-green-subtle);
+    background-color: rgba(58, 90, 64, 0.2);
+    border-color: rgba(58, 90, 64, 0.3);
 }
 
 .dark-mode .nav-item-active {

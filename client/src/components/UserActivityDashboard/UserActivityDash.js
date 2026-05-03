@@ -149,7 +149,6 @@ function Dashboard() {
           <input 
             style={styles.SearchBar} 
             type="text" 
-            placeholder="Search events..." 
             placeholder="Search by title or date..." 
             value={searchItem} 
             onChange={(e) => setSearchItem(e.target.value)} 
@@ -214,6 +213,7 @@ function Dashboard() {
           onMemoryCreated={handleMemoryCreated} 
           profileID={currentUserID} 
         />
+        </div>
       </div>
     </div>
   );

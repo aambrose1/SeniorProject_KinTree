@@ -97,20 +97,16 @@ function ViewSharedTree() {
     return (
         <div style={styles.DefaultStyle}>
             <NavBar />
-            <div style={styles.MainContainerStyle} className="main-container">
+            <div style={styles.MainContainerStyle} className="main-container animate-in">
                 {/* header content */}
                 <div style={styles.HeaderStyle}>
                     {/* titles */}
-                    <div>
-                        <h1 style={{marginBottom: "0px"}}>{username.split(" ")[0]}'s Tree</h1>
-                        <hr  style={{
-                            color: '#000000',
-                            backgroundColor: '#000000',
-                            height: .1,
-                            width: '200px',
-                            borderColor : '#000000'
-                        }}/>
-                        <h2 style={{fontFamily: "Aboreto", marginTop: "0px"}}>The {username.split(" ")[1]} Family</h2> 
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-1)' }}>
+                        <h1 style={{ margin: 0, color: 'var(--text-color)' }}>{username.split(" ")[0]}'s Tree</h1>
+                        <hr style={{ width: '50px', border: 'none', height: '2px', backgroundColor: 'var(--kt-green-primary)', margin: 'var(--space-1) 0' }} />
+                        <h2 style={{ fontFamily: "Aboreto", margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', letterSpacing: '1px' }}>
+                            The {username.split(" ")[1]} Family
+                        </h2> 
                     </div>
                 </div>
                 
