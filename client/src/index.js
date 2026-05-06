@@ -23,6 +23,7 @@ import Chat from './pages/Chat/Chat';
 import ViewSharedTree from './pages/ViewSharedTree/ViewSharedTree';
 import CreateAccount from './pages/CreateAccount/CreateAccount';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
@@ -175,3 +176,13 @@ root.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+// Register service worker for PWA support
+serviceWorkerRegistration.register({
+  onSuccess: (registration) => {
+    console.log('Service Worker registered successfully');
+  },
+  onUpdate: (registration) => {
+    console.log('Service Worker update available');
+  },
+});
