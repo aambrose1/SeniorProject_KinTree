@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleUpdatePassword } from "../../utils/authHandlers";
+import { delay } from "../../utils/delay";
 import * as styles from '../Login/styles';
 import logo from '../../assets/kintreelogo-adobe.png';
 
@@ -46,7 +47,8 @@ export default function UpdatePassword() {
     try {
       await handleUpdatePassword(password);
       setMessage("Password updated. Redirecting to login...");
-      setTimeout(() => navigate('/login'), 1200);
+      await delay(1200);
+      navigate('/login');
     } catch (error) {
       setPasswordError(error.message || "Failed to update password");
     }
