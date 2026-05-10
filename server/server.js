@@ -16,6 +16,8 @@ const memoryRoutes = require('./routes/memoryRoutes');
 
 const app = express();
 const port = process.env.PORT || 5000;
+const isProduction = process.env.NODE_ENV === 'production';
+const clientBuildPath = path.join(__dirname, '../client/build');
 
 app.use(express.json());
 app.use(cors());
@@ -28,19 +30,13 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 // Only serve built frontend in production
-if (process.env.NODE_ENV === 'production') {
-  const clientBuildPath = path.join(__dirname, '../client/build');
+if (isProduction) {
   if (!fs.existsSync(clientBuildPath)) {
     console.error('ERROR: Client build directory not found at', clientBuildPath);
     console.error('Please run: `npm run build` in the /client/ directory. Then try again.');
     process.exit(1);
   }
   app.use(express.static(clientBuildPath));
-  
-  // Lets React Router handle all non-API routes
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  });
 }
 
 // Status check  
@@ -55,6 +51,13 @@ app.use('/api/backup', backupRoutes);
 app.use('/api/tree-info', treeInfoRoutes);
 app.use('/api/events', eventRoutes); 
 app.use('/api/memories', memoryRoutes);
+
+// Let React Router handle all non-API routes
+if (isProduction) {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
