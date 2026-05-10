@@ -4,6 +4,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config();
 const cors = require('cors');
+const fs = require('fs');
 const authRoutes = require('./routes/authRoutes');
 const treeMemberRoutes = require('./routes/treeMemberRoute');
 const relationshipRoutes = require('./routes/relationshipRoutes');
@@ -13,22 +14,39 @@ const treeInfoRoutes = require('./routes/treeInfoRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const memoryRoutes = require('./routes/memoryRoutes');
 
+const app = express();
+const port = process.env.PORT || 5000;
+
+app.use(express.json());
+app.use(cors());
+
+// Load environment variables from .env.test in test environment, otherwise from .env
 if (process.env.NODE_ENV === 'test') {
   dotenv.config({ path: '.env.test' });
 } else {
   dotenv.config(); 
 }
 
-const app = express();
-const port = process.env.PORT || 5000;
-const clientBuildPath = path.join(__dirname, '../client/build');
+// Only serve built frontend in production
+if (process.env.NODE_ENV === 'production') {
+  const clientBuildPath = path.join(__dirname, '../client/build');
+  if (!fs.existsSync(clientBuildPath)) {
+    console.error('ERROR: Client build directory not found at', clientBuildPath);
+    console.error('Please run: `npm run build` in the /client/ directory. Then try again.');
+    process.exit(1);
+  }
+  app.use(express.static(clientBuildPath));
+  
+  // Lets React Router handle all non-API routes
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
 
-app.use(express.json());
-app.use(cors());
-
-// Serve the built frontend from the backend so the app can run through one tunnel.
-app.use(express.static(clientBuildPath));
-
+// Status check  
+app.get('/', (req, res) => {
+  res.status(200).json();
+});
 app.use('/api/share-trees', sharedTreeRoutes)
 app.use('/api/family-members', treeMemberRoutes);
 app.use('/api/relationships', relationshipRoutes);
@@ -37,11 +55,6 @@ app.use('/api/backup', backupRoutes);
 app.use('/api/tree-info', treeInfoRoutes);
 app.use('/api/events', eventRoutes); 
 app.use('/api/memories', memoryRoutes);
-
-// Let React Router handle all non-API routes.
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientBuildPath, 'index.html'));
-});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
