@@ -9,7 +9,7 @@ const MemoryCard = ({ memory, onDeleted, onUpdated }) => {
     if (!window.confirm("Are you sure you want to delete this memory?")) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/memories/${memory.id}`, {
+      const response = await fetch(`/api/memories/${memory.id}`, {
         method: 'DELETE',
       });
 

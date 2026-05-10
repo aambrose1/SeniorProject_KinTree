@@ -142,7 +142,7 @@ export const familyTreeService = {
      * @returns 
      */
     async deleteFamilyMember(memberId) {
-        const response = await fetch(`http://localhost:5000/api/family-members/${memberId}`, {
+        const response = await fetch(`/api/family-members/${memberId}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -234,7 +234,7 @@ export const familyTreeService = {
      * @returns JSON Array of all relationships for the user's tree
      */
     async getRelationshipsByUser(userId) {
-        const response = await fetch(`http://localhost:5000/api/relationships/user/${userId}`, {
+        const response = await fetch(`/api/relationships/user/${userId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
@@ -250,7 +250,7 @@ export const familyTreeService = {
      * @param {string} userId 
      */
     async clearFamilyTree(userId) {
-        const response = await fetch(`http://localhost:5000/api/family-members/clear/${userId}`, {
+        const response = await fetch(`/api/family-members/clear/${userId}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
         });

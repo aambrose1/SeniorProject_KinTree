@@ -9,7 +9,6 @@ export const FieldStyle = {
     backgroundColor: 'var(--surface-alt)',
     color: 'var(--text-color)',
     padding: 'var(--space-2) var(--space-4)',
-    marginLeft: 'var(--space-2)',
     outline: 'none',
     fontFamily: 'inherit',
     fontSize: '0.95rem',
@@ -35,8 +34,10 @@ export const ListStyle = {
     display: 'flex',
     flexDirection: 'column',
     textAlign: 'left',
-    marginRight: '15%',
+    margin: '0',
+    paddingLeft: '0',
     width: '100%',
+    boxSizing: 'border-box',
 };
 
 export const ButtonDivStyle = {
@@ -82,6 +83,7 @@ export const FormStyle = {
     paddingTop: '0px',
     minWidth: '360px',
     width: '100%',
+    boxSizing: 'border-box',
 }
 
 export const ItemStyle = {
@@ -96,11 +98,12 @@ export const DateFieldStyle = {
     border: '1px solid var(--input-border)',
     backgroundColor: 'var(--input-bg)',
     color: 'var(--text-color)',
-    marginLeft: 'var(--space-2)',
-    width: '150px',
+    marginLeft: '0',
+    width: '100%',
     padding: 'var(--space-1) var(--space-2)',
     fontFamily: 'inherit',
     outline: 'none',
+    boxSizing: 'border-box',
 };
 
 
@@ -114,6 +117,8 @@ export const MainContainerStyle = {
     minHeight: '150px',
     justifyContent: 'space-between',
     backgroundColor: 'var(--card-bg)',
+    boxSizing: 'border-box',
+    width: '100%',
 }
 
 export const AddOptionsStyle = {
@@ -137,4 +142,4 @@ export const ListingStyle = {
     marginBottom: 'var(--space-2)',
     borderRadius: 'var(--radius-sm)',
     backgroundColor: 'var(--surface-alt)',
-}
+}

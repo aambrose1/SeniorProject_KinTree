@@ -5,6 +5,7 @@ import NavBar from '../../components/NavBar/NavBar';
 import { useCurrentUser } from '../../CurrentUserProvider';
 import { supabase } from '../../utils/supabaseClient';
 import { handleLogout } from '../../utils/authHandlers';
+import { delay } from '../../utils/delay';
 import { SERVER_URL } from '../../config/urls';
 
 function Account() {
@@ -650,9 +651,8 @@ function Account() {
             if (error) throw error;
             setEmailVerificationStatus('Verification email sent! Please check your inbox and click the confirmation link.');
             // Refresh verification status after a delay
-            setTimeout(() => {
-                checkEmailVerification();
-            }, 2000);
+            await delay(2000);
+            await checkEmailVerification();
         } catch (error) {
             console.error('Resend verification email error:', error);
             setEmailVerificationStatus(error.message || 'Failed to send verification email.');

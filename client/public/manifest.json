@@ -1,15 +1,32 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "KinTree",
+  "name": "KinTree - Family Tree Application",
+  "description": "Preserve and share your family history with KinTree",
   "icons": [
     {
       "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/x-icon",
+      "purpose": "any"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#6200ee",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "categories": ["family", "social", "productivity"],
+  "screenshots": [
+    {
+      "src": "favicon.ico",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    }
+  ]
 }
