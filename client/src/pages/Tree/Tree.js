@@ -10,6 +10,7 @@ import { useLocation, Outlet } from 'react-router-dom';
 import { useCurrentUser, supabaseUser } from '../../CurrentUserProvider'; // import the context
 import { familyTreeService } from '../../services/familyTreeService';
 import { removeNodeFromTree, rebuildTreeFromDatabase } from '../../utils/relationUtil';
+import { delay } from '../../utils/delay';
 import * as d3 from 'd3';
 import { ReactComponent as ImportIcon } from '../../assets/import.svg';
 import Popup from 'reactjs-popup';
@@ -63,15 +64,14 @@ function FamilyTree({ refreshKey }) {
             await familyTreeService.updateTreeInfo(currentAccountID, updatedTreeData);
 
             setErrorMessage(`Successfully removed ${firstName} ${lastName}`);
-            setTimeout(() => {
-                setErrorMessage('');
-                // If onTreeUpdate is provided (from props), use it to refresh instead of reload
-                if (window.refreshTree) {
-                    window.refreshTree();
-                } else {
-                    window.location.reload();
-                }
-            }, 1000);
+            await delay(1000);
+            setErrorMessage('');
+            // If onTreeUpdate is provided (from props), use it to refresh instead of reload
+            if (window.refreshTree) {
+                window.refreshTree();
+            } else {
+                window.location.reload();
+            }
         } catch (error) {
             console.error('[DETAILED DEBUG] Deletion Error:', error);
             setErrorMessage(`Deletion Failed: ${error.message}`);

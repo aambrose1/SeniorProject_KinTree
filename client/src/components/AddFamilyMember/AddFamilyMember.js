@@ -277,7 +277,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       console.log('Relationships to create (Existing):', relsToCreate);
 
       for (const rel of relsToCreate) {
-        const relRes = await fetch(`http://localhost:5000/api/relationships/`, {
+        const relRes = await fetch(`/api/relationships/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -408,7 +408,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
       console.log('Relationships to create (Manual):', relsToCreate);
 
       for (const rel of relsToCreate) {
-        const relRes = await fetch(`http://localhost:5000/api/relationships/`, {
+        const relRes = await fetch(`/api/relationships/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

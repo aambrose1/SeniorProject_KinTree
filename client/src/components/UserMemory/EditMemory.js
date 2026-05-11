@@ -14,7 +14,7 @@ function EditMemoryPopup({ memory, onMemoryUpdated }) {
 
   const onSubmit = async (data, close) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/memories/${memory.id}`, {
+      const response = await fetch(`/api/memories/${memory.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
