@@ -16,7 +16,7 @@ function Help() {
                         <li style={styles.Question}>How can I edit my family member's relationship type?</li><br/>
                         <li style={styles.Text}>To manage a family member's relationship type, navigate to the family member's account page. To find their account page, search for the family member on the <i>Family</i> page, then click `View`. From the family member's account page, simply click `Manage Relationship Type` to change their relationship to you.</li><br/>
                         <li style={styles.Question}>Where can I learn more about KinTree?</li><br/>
-                        <li style={styles.Text}>KinTree is an open source application. To learn more about the KinTree platform, you can read our documentation at <a href="https://github.com/OwenAdams2023/SeniorProject_KinTree" target="_blank">https://github.com/OwenAdams2023/SeniorProject_KinTree</a>.</li><br/>
+                        <li style={styles.Text}>KinTree is an open source application. To learn more about the KinTree platform, you can read our documentation at <a href="https://github.com/aambrose1/SeniorProject_KinTree/wiki" target="_blank">https://github.com/aambrose1/SeniorProject_KinTree/wiki</a>.</li><br/>
                     </ul>
                     
                     {/* line */}
