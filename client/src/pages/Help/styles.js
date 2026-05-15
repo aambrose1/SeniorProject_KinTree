@@ -4,6 +4,10 @@ export const DefaultStyle = {
     display: 'flex',
     backgroundColor: 'var(--bg-color)',
     minHeight: '100vh',
+    paddingLeft: 'var(--nav-side-spacer)',
+    width: '100%',
+    boxSizing: 'border-box',
+    overflowX: 'hidden',
     color: 'var(--text-color)',
 }
 
@@ -21,6 +25,12 @@ export const ContainerStyle = {
     padding: 'var(--space-8)',
     border: '1px solid var(--border-color)',
     boxSizing: 'border-box',
+    paddingRight: 'var(--space-6)',
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+    WebkitHyphens: 'auto',
+    hyphens: 'auto',
+    minWidth: 0,
 }
 
 export const RightSide = {

@@ -494,7 +494,7 @@ function AddFamilyMemberPopup({ trigger, userid }) {
   return (
     <Popup trigger={trigger} onClose={closeModal} modal>
       {close => (
-        <div style={styles.DefaultStyle}>
+        <div style={styles.DefaultStyle} className="add-family-member-popup">
 
           {/* default content */}
 

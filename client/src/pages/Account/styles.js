@@ -535,4 +535,4 @@ export const ModalActions = {
     gap: 'var(--space-3)',
     justifyContent: 'flex-end',
     marginTop: 'var(--space-2)'
-};
+};

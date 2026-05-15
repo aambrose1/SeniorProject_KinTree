@@ -37,7 +37,7 @@ export const MainContainerStyle = {
     flexDirection: 'column',
     padding: 'var(--space-8)',
     backgroundColor: 'var(--bg-color)',
-    marginLeft: '220px', // width of navbar
+    marginLeft: 'var(--nav-sidebar-width, 220px)',
     boxSizing: 'border-box',
 }
 

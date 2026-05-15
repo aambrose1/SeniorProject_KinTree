@@ -3,6 +3,14 @@ export const DefaultStyle = {
   textAlign: 'left',
   backgroundColor: 'var(--bg-color)',
   minHeight: '100vh',
+  paddingLeft: 'var(--nav-side-spacer)',
+  width: '100%',
+  boxSizing: 'border-box',
+  overflowX: 'hidden',
+  overflowWrap: 'break-word',
+  wordBreak: 'break-word',
+  WebkitHyphens: 'auto',
+  hyphens: 'auto',
   color: 'var(--text-color)',
 }
 
@@ -12,13 +20,20 @@ export const RightSide = {
   flexDirection: 'column',
   width: '100%',
   alignItems: 'center',
+  minWidth: 0,
 }
 
 export const SettingsContainer = {
   width: '100%',
   maxWidth: '800px',
+  minWidth: 0,
   margin: '0 auto',
   padding: 'var(--space-8)',
+  paddingRight: 'var(--space-6)',
+  overflowWrap: 'break-word',
+  wordBreak: 'break-word',
+  WebkitHyphens: 'auto',
+  hyphens: 'auto',
   background: 'var(--card-bg)',
   borderRadius: 'var(--radius-lg)',
   boxShadow: 'var(--shadow-lg)',

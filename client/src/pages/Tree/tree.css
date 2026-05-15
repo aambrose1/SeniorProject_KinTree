@@ -1,6 +1,23 @@
   .main-container {
-    @media screen and (max-width: 768px) {
-      flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    .main-container {
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: 100vw !important;
+      padding: var(--space-4) !important;
+      padding-bottom: calc(var(--nav-mobile-height) + var(--space-4)) !important;
+      box-sizing: border-box;
+    }
+
+    .main-container.animate-in {
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: 100vw !important;
     }
   }
   .f3 {

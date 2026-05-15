@@ -164,7 +164,7 @@ function Family() {
         <div style={styles.DefaultStyle}>
             <NavBar />
             {/* main container */}
-            <div style={{width: '150px'}}></div>
+            <div style={{width: 'var(--nav-side-spacer)'}}></div>
             <div style={styles.ContainerStyle}>
                 {/* header */}
                 <h1 style={{ marginBottom: '0px'}}>The {supabaseUser?.user_metadata?.last_name} Family</h1>

@@ -1,7 +1,17 @@
 import React from 'react';
 import { useState } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
-import { AiOutlineSetting, AiOutlineQuestion } from 'react-icons/ai'; //this is for the settings icon and help icon
+import {
+    AiOutlineSetting,
+    AiOutlineQuestion,
+    AiOutlineHome,
+    AiOutlineUser,
+    AiOutlineTeam,
+    AiOutlineBranches,
+    AiOutlineMessage,
+    AiOutlineShareAlt,
+    AiOutlineEye,
+} from 'react-icons/ai';
 import './NavBar.css';
 import { useCurrentUser } from '../../CurrentUserProvider'; // import the context
 import logo from '../../assets/kintreelogo-adobe.png';
@@ -25,26 +35,35 @@ function NavBar() {
             <ul className="nav-options-list">
                 <li>
                     <NavLink to="/account" 
+                        aria-label="Account"
+                        title="Account"
                         className={({isActive}) => {
                             const isOwnAccount = !id || Number(id) === Number(currentAccountID);
                             return isActive && isOwnAccount ? "nav-item nav-item-active" : "nav-item";
                         }} 
                         onClick={() => setShowNestedNav(false)}> 
-                        Account 
+                        <AiOutlineUser className="nav-item-icon" aria-hidden="true" />
+                        <span className="nav-item-label">Account</span>
                     </NavLink>
                 </li>
                 <li>
                     <NavLink to="/" 
+                        aria-label="Home"
+                        title="Home"
                         className={({isActive}) => isActive ? "nav-item nav-item-active" : "nav-item"} 
                         onClick={() => setShowNestedNav(false)}> 
-                        Home 
+                        <AiOutlineHome className="nav-item-icon" aria-hidden="true" />
+                        <span className="nav-item-label">Home</span>
                     </NavLink>
                 </li>
                 <li>
                     <NavLink to="/family" 
+                        aria-label="Family"
+                        title="Family"
                         className={({isActive}) => isActive ? "nav-item nav-item-active" : "nav-item"}  
                         onClick={() => setShowNestedNav(false)}> 
-                        Family 
+                        <AiOutlineTeam className="nav-item-icon" aria-hidden="true" />
+                        <span className="nav-item-label">Family</span>
                     </NavLink>
                 </li>
                 <li 
@@ -54,25 +73,34 @@ function NavBar() {
                 >
                     <NavLink 
                         to="/tree" 
+                        aria-label="Tree"
+                        title="Tree"
                         className={({isActive}) => isActive ? "nav-item nav-item-active" : "nav-item"}
                         onClick={() => setShowNestedNav(true)}
                     >
-                        Tree
+                        <AiOutlineBranches className="nav-item-icon" aria-hidden="true" />
+                        <span className="nav-item-label">Tree</span>
                     </NavLink>
                     {showNestedNav && (
                         <div className="nested-navbar">
                             <div className="nested-inner">
                                 <NavLink 
                                     to="/tree/sharetree" 
+                                    aria-label="Share Tree"
+                                    title="Share Tree"
                                     className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} 
                                 >
-                                    Share Tree
+                                    <AiOutlineShareAlt className="nav-item-nested-icon" aria-hidden="true" />
+                                    <span className="nav-item-nested-label">Share Tree</span>
                                 </NavLink>
                                 <NavLink 
                                     to="/tree/viewsharedtrees" 
+                                    aria-label="View Shared Trees"
+                                    title="View Shared Trees"
                                     className={({isActive}) => isActive ? "nav-item-nested-active" : "nav-item-nested"} 
                                 >
-                                    View Shared Trees
+                                    <AiOutlineEye className="nav-item-nested-icon" aria-hidden="true" />
+                                    <span className="nav-item-nested-label">View Shared Trees</span>
                                 </NavLink>
                             </div>
                         </div>
@@ -80,18 +108,21 @@ function NavBar() {
                 </li>
                 <li>
                     <NavLink to="/chat" 
+                        aria-label="Chat"
+                        title="Chat"
                         className={({isActive}) => isActive ? "nav-item nav-item-active" : "nav-item"} 
                         onClick={() => setShowNestedNav(false)}> 
-                        Chat  
+                        <AiOutlineMessage className="nav-item-icon" aria-hidden="true" />
+                        <span className="nav-item-label">Chat</span>
                     </NavLink>
                 </li>
             </ul>
 
             <div className="settings-and-help">
-                <NavLink to="/websitesettings" >
+                <NavLink to="/websitesettings" aria-label="Settings" title="Settings">
                     <AiOutlineSetting className="settings-icon" />
                 </NavLink>
-                <NavLink to="/help">
+                <NavLink to="/help" aria-label="Help" title="Help">
                     <AiOutlineQuestion className="help-icon" />
                 </NavLink>
             </div>

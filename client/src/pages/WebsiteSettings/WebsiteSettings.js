@@ -9,7 +9,6 @@ function WebsiteSettings() {
     <div style={styles.DefaultStyle}>
       <NavBar />
       <div style={styles.RightSide}>
-        <div style={{ width: '150px' }}></div>
         <div style={styles.SettingsContainer}>
           <h1 style={styles.Title}>Settings</h1>
           <hr

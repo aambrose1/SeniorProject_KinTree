@@ -742,9 +742,8 @@ function Account() {
     return (
         <div style={styles.DefaultStyle}>
             <NavBar />
-            <div style={{ width: '150px' }}></div>
             <div style={styles.RightSide}>
-
+            <div style={{ width: 'var(--nav-side-spacer)' }}></div>
                 <div style={styles.ContainerStyle}>
                     {/* User Information Section */}
                     <div style={{ padding: '20px 0', width: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>

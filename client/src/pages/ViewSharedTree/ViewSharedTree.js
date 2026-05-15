@@ -5,6 +5,7 @@ import f3 from 'family-chart';
 import NavBar from '../../components/NavBar/NavBar';
 import { Outlet } from 'react-router-dom';
 import { SERVER_URL } from '../../config/urls';
+import '../Tree/tree.css';
 
 function FamilyTree({ treeData }) {
     const contRef = useRef();

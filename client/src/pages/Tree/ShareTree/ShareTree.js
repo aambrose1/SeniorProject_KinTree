@@ -178,7 +178,7 @@ function ShareTree() {
 
     return (
         <div style={styles.DefaultStyle}>
-            <div style={{width: '150px'}}></div>
+            <div style={{width: 'var(--nav-side-spacer)'}}></div>
             <div style={styles.RightSide}>
             <div className="animate-in" style={styles.ContainerStyle}>
                 {/* title */}

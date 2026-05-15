@@ -1,6 +1,38 @@
 .popup-content {
-    width: auto;
+    width: min(760px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    min-height: 0;
     border-radius: 30px;
     min-width: 0px;
-    align-items: center;
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    /* ensure content doesn't get hidden behind bottom nav on mobile */
+    padding-bottom: calc(var(--nav-mobile-height, 88px) + var(--space-4));
+}
+
+.add-family-member-popup {
+    width: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding-bottom: calc(var(--nav-mobile-height, 88px) + var(--space-4));
+}
+
+@media screen and (max-width: 768px) {
+    .popup-content {
+        width: calc(100vw - 16px);
+        max-height: calc(100vh - 16px);
+        border-radius: 20px;
+    }
+
+    .add-family-member-popup {
+        /* add extra safe spacing on mobile to account for bottom navbar and safe-area inset */
+        padding-bottom: calc(var(--nav-mobile-height, 88px) + var(--space-5) + env(safe-area-inset-bottom));
+    }
 }

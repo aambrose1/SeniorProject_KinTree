@@ -7,7 +7,6 @@ function Help() {
         <div style={styles.DefaultStyle}>
             <NavBar />
             <div style={styles.RightSide}>
-                <div style={{width: '150px'}}></div>
                 <div style={styles.ContainerStyle}>
                     <h1 style={styles.Title}>Frequently Asked Questions</h1>
                     <ul style={styles.List}>

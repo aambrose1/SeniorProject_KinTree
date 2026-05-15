@@ -4,3 +4,11 @@
     color: black;
     padding-left: 300px;
 }
+
+@media screen and (max-width: 768px) {
+    .family-page {
+        padding-left: 0;
+        padding-bottom: 96px;
+        flex-direction: column;
+    }
+}

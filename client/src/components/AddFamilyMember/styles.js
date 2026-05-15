@@ -81,7 +81,7 @@ export const GrayButtonStyle = {
 export const FormStyle = {
     padding: 'var(--space-4)',
     paddingTop: '0px',
-    minWidth: '360px',
+    minWidth: 'min(360px, 100%)',
     width: '100%',
     boxSizing: 'border-box',
 }
@@ -113,9 +113,9 @@ export const MainContainerStyle = {
     padding: 'var(--space-6)',
     paddingTop: '0px',
     alignItems: 'center',
-    minWidth: '360px',
+    minWidth: 'min(360px, 100%)',
     minHeight: '150px',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     backgroundColor: 'var(--card-bg)',
     boxSizing: 'border-box',
     width: '100%',

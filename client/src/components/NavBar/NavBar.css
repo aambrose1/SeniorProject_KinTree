@@ -1,6 +1,12 @@
+:root {
+    --nav-sidebar-width: 220px;
+    --nav-mobile-height: 88px;
+    --nav-side-spacer: 150px;
+}
+
 .navbar {
     height: 100vh;
-    width: 220px;
+    width: var(--nav-sidebar-width);
     background-color: var(--surface-alt);
     text-decoration: none;
     display: flex;
@@ -52,6 +58,8 @@
 .nav-item {
     display: flex;
     align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-6);
     color: var(--text-secondary);
@@ -61,6 +69,17 @@
     transition: all var(--timing-standard);
     background-color: rgba(255, 255, 255, 0.5);
     border: 1px solid rgba(58, 90, 64, 0.05);
+}
+
+.nav-item-icon {
+    display: block;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+}
+
+.nav-item-label {
+    display: inline;
 }
 
 .nav-item:hover {
@@ -127,13 +146,26 @@
 }
 
 .nav-item-nested {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     border-radius: var(--radius-sm);
     padding: var(--space-2) var(--space-4);
     color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.9rem;
     transition: all var(--timing-standard);
+}
+
+.nav-item-nested-icon {
+    display: block;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.nav-item-nested-label {
+    display: inline;
 }
 
 .nav-item-nested:hover {
@@ -175,9 +207,149 @@
     transform: scale(1.1) rotate(30deg);
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 @media screen and (max-width: 768px) {
+    :root {
+        --nav-side-spacer: 0px;
+    }
+
     .navbar {
+        width: 100%;
+        height: var(--nav-mobile-height);
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        padding: var(--space-2) var(--space-4);
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+        padding-bottom: var(--nav-mobile-height);
+    }
+
+    .nav-header {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-2);
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .nav-logo-img {
+        width: 44px;
+    }
+
+    .nav-logo-text {
         display: none;
+    }
+
+    .nav-options-list {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        min-width: 0;
+        gap: var(--space-1);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-item {
+        font-size: 0.9rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-width: 44px;
+        min-height: 44px;
+        padding: var(--space-2);
+    }
+
+    .nav-item-label {
+        display: none;
+    }
+
+    .nav-item-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .nav-item,
+    .nav-item-nested {
+        justify-content: center;
+    }
+
+    .nav-item-nested {
+        padding: var(--space-2);
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .nav-item-nested-icon {
+        display: block;
+    }
+
+    .nav-item-nested-label {
+        display: none;
+    }
+
+    .nav-item:hover {
+        transform: none;
+    }
+
+    .nav-item-container {
+        position: relative;
+    }
+
+    .nested-navbar {
+        position: fixed;
+        left: 50%;
+        right: auto;
+        top: auto;
+        bottom: calc(var(--nav-mobile-height) + var(--space-3));
+        transform: translateX(-50%);
+        margin-left: 0;
+        width: max-content;
+        max-width: min(220px, calc(100vw - 16px));
+    }
+
+    .nested-navbar::before {
+        left: 0;
+        right: 0;
+        top: auto;
+        bottom: -16px;
+        width: auto;
+        height: 16px;
+    }
+
+    .settings-and-help {
+        margin-top: 0;
+        border-top: none;
+        padding: 0;
+        gap: var(--space-4);
+        flex-shrink: 0;
+    }
+
+    .settings-icon,
+    .help-icon {
+        height: 24px;
+        width: 24px;
     }
 }
 
