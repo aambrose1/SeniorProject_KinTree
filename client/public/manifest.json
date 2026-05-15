@@ -4,9 +4,15 @@
   "description": "Preserve and share your family history with KinTree",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon",
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
       "purpose": "any"
     }
   ],
@@ -19,14 +25,15 @@
   "categories": ["family", "social", "productivity"],
   "screenshots": [
     {
-      "src": "favicon.ico",
-      "sizes": "540x720",
-      "form_factor": "narrow"
+      "src": "/screenshot-desktop.png",
+      "sizes": "1617x957",
+      "type": "image/png",
+      "form_factor": "wide"
     },
     {
-      "src": "favicon.ico",
-      "sizes": "1280x720",
-      "form_factor": "wide"
+      "src": "/screenshot-mobile.png",
+      "sizes": "407x886",
+      "type": "image/png"
     }
   ]
 }
