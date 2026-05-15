@@ -6,6 +6,8 @@ KinTree is an application that allows users to connect with family members and b
 
 The current KinTree project team as of Fall 2025 includes Andrea Ambrose, Matthew Loyed, Xiang Chen, and Charles Lenson. The primary stakeholder for this project is Dr. Charan Gudla.
 
+![KinTree](docs/image.png)
+
 # Install
 
 ### Prerequisites

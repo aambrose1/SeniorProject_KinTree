@@ -19,6 +19,13 @@ const port = process.env.PORT || 5000;
 const isProduction = process.env.NODE_ENV === 'production';
 const clientBuildPath = path.join(__dirname, '../client/build');
 
+// Suppress noisy console output in production (keep error/warn)
+if (isProduction) {
+  console.log = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+}
+
 app.use(express.json());
 app.use(cors());
 

@@ -25,6 +25,14 @@ import CreateAccount from './pages/CreateAccount/CreateAccount';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
+// Quick production-only console suppression: no-op noisy logs in production builds
+if (process.env.NODE_ENV === 'production') {
+  // keep console.error and console.warn for visibility
+  console.log = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+}
+
 // creates pages for different paths - buttons should be links to the paths and then the components will populate
 const router = createBrowserRouter([
   {
